@@ -1,0 +1,123 @@
+<div id="inventario-container" class="flex flex-col gap-3 mt-4"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function() {
+    try {
+        const response = await fetch("https://estoque.taiksu.com.br/api/inventario/<%= unidade_id %>");
+        const unidadeId = <%= unidade_id %>;
+        const indicadorAlerta = document.getElementById("indicador-alerta");
+        const iconeAlerta = document.getElementById("icone-alerta");
+
+        if (!response.ok) {
+            alert("Não foi possível carregar o inventário.");
+            return;
+        }
+
+        const inventario = await response.json();
+        const container = document.getElementById("inventario-container");
+        const valorTotalEstoque = document.getElementById("valor-total-estoque");
+
+        valorTotalEstoque.innerText = inventario.valor_total_estoque.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // 🔹 Agrupa por categoria
+        const categorias = {};
+
+        inventario.inventario.forEach(item => {
+            if (!categorias[item.categoria]) {
+                categorias[item.categoria] = [];
+            }
+            categorias[item.categoria].push(item);
+        });
+
+        // 🔹 Renderiza Inventário
+        Object.keys(categorias).forEach(categoria => {
+
+            const categoriaDiv = document.createElement("div");
+            categoriaDiv.className = "flex flex-col gap-3 categoria-insumos my-2";
+
+            categoriaDiv.innerHTML = `
+                    <h2 class=" text-sm text-gray-500">${categoria}</h2>
+                    <div class=" flex flex-col gap-3">
+                    ${categorias[categoria].map(insumo => {
+
+                        let quantidade = insumo.quantidade || 0;
+                        const quantidadeOriginal = quantidade;
+                        const tipo = insumo.unidade_medida;
+
+                        if (tipo === 'kg') {
+                            quantidade = Number(quantidade)
+                                .toFixed(3)
+                                .replace('.', ',');
+                        } else {
+                            quantidade = parseInt(quantidade);
+                        }
+
+                        return `
+                            <a href="/inventario/${insumo.id}" 
+                               class="group insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
+
+                                <div class="flex flex-row items-center gap-2">
+                                    <img class="md:h-12 md:w-12 h-10 w-10 rounded-md bg-white group-hover:scale-105 transition-all duration-400" 
+                                         src="https://insumos.taiksu.com.br/${insumo.foto_url}">
+                                    
+                                    <div class="flex flex-col gap-0">
+                                        <h3 class="insumo-nome md:text-md text-sm text-gray-600 font-medium">
+                                            ${insumo.nome}
+                                        </h3>
+                                        <p class="md:text-sm text-xs text-gray-400">
+                                            ${insumo.valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' } || '0')}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div id="quantidade-${insumo.id}" data-valor="${quantidadeOriginal}" class="group-hover:scale-110 transition-all duration-300 quantidade md:block text-md font-semibold text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
+                                        ${quantidade} <span class="text-sm font-medium text-gray-500">${tipo}</span>
+                                </div>
+
+                            </a>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            container.appendChild(categoriaDiv);
+        });
+
+
+        // 🔹 Pega a quantidade de cada insumo
+        const quantidades = document.querySelectorAll('.quantidade');
+        
+        const listaMinima = await fetch('/api/inventario/lista-minima', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                unidade_id: unidadeId
+            })
+        });
+        const quantidadesMinimas = await listaMinima.json();
+
+        // Compara a quantidade de cada insumo com a quantidade mínima
+        quantidades.forEach(elemento => {
+        const insumoId = Number(elemento.id.split('-')[1]);
+        const quantidadeAtual = Number(elemento.dataset.valor);
+
+        const minimo = quantidadesMinimas.find(item => item.insumo_id === insumoId);
+
+        if (minimo !== undefined && quantidadeAtual <= minimo.quantidade && minimo.quantidade != 0) {
+            elemento.classList.remove('bg-gray-100', 'text-gray-600');
+            elemento.classList.add('bg-red-100', 'text-red-600');
+
+            indicadorAlerta.classList.remove('bg-white', 'text-green-700', 'border-gray-200');
+            indicadorAlerta.classList.add('bg-red-600', 'text-white', 'border-red-700');
+            indicadorAlerta.textContent = "Itens com baixo estoque";
+            indicadorAlerta.href = "/baixo-estoque";
+        }
+        });
+
+    } catch (error) {
+        console.error("Erro ao carregar inventário:", error);
+    }
+});
+</script>
+

@@ -1,0 +1,56 @@
+<div class="flex flex-row items-center justify-between">
+    <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Estoque'}) %>
+    <%- include('../components/buttons/minus', { icone: 'plus', link: '/comprar', id: 'btn-comprar', label: 'Novo pedido', tipo: 'hero'}) %>
+</div>
+
+<%- include('../components/searchBox', { placeholder: 'Buscar pedido'}) %>
+
+<div id="lista-pedidos" class="flex flex-col gap-3 mt-5">
+    <%- include('../components/loader', { info: 'Carregando pedidos'}) %>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const lista_pedidos = document.getElementById('lista-pedidos');
+        const loader = document.getElementById('loader');
+
+        function createPedidoCard(pedido) {
+            const card = document.createElement('div');
+            card.classList.add('pedido-card');
+            card.innerHTML = `
+                <a href="/pedidos/${pedido.id}" fornecedor-nome="${pedido.nome}" class="hover:shadow-lg transition-all duration-300 pedido-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl py-4 px-5">
+                    
+                    <div class="flex flex-row gap-4 items-center">
+                        <img class="h-11 w-11 rounded-full" src="https://insumos.taiksu.com.br/images/fornecedores/${pedido.foto_url}" alt="Pedido">
+                        <div class="flex flex-col gap-0 items-start">
+                            <h2 class="text-gray-600 font-semibold">${pedido.nome}</h2>
+                            <div class="text-xs text-gray-500 capitalize">${pedido.status}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-row gap-3 items-center">
+                        <h2 class="text-green-700 font-semibold">${Number(pedido.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h2>
+                        <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="h-5 w-5" alt="Abrir pedido">
+                    </div>
+                </a>
+            `;
+            return card;
+        }
+
+        const dias = fetch('https://pedidos.taiksu.com.br/api/pedidos/<%= unidade_id %>')
+            .then(response => response.json())
+            .then(data => {
+                Object.keys(data).forEach(dia => {
+                    loader.style.display = 'none';
+                    const dia_container = document.createElement('div');
+                    dia_container.classList.add('flex', 'flex-col', 'gap-3');
+                    dia_container.innerHTML = `<h4 class="text-gray-500 text-xs">${dia}</h4>`;
+                    data[dia].forEach(pedido => {
+                        dia_container.appendChild(createPedidoCard(pedido));
+                    });
+                    lista_pedidos.appendChild(dia_container);
+                });
+            });
+
+    });
+</script>

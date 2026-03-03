@@ -1,0 +1,23 @@
+<div class="flex flex-row items-center justify-between">
+<%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Inventário'}) %>
+<%- include('../partials/configInsumo') %>
+</div>
+
+
+<div class="mt-4 w-full flex flex-row justify-between items-center gap-4 border border-gray-200 rounded-xl p-6 bg-white">
+    <div class="flex flex-row gap-4 items-center">
+        <img src="https://insumos.taiksu.com.br<%= insumo.foto_url %>" class="w-16 h-16 rounded-lg border border-gray-100">
+        <div class="flex flex-col">
+            <h1 class="text-xl font-semibold text-gray-600"><%= insumo.nome %></h1>
+            <span class="text-gray-500"><%= valorTotal %></span>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/lotes', { lotes: lotes }) %>
+
+
+<a href="https://ajuda.taiksu.com.br/artigos/fc913aba-9431-499e-bb5e-3667bc5cb7cb" target="_blank" class="mt-8 w-full flex flex-row items-center gap-3">
+  <img src="/images/icones/alert.png" class="w-7 h-7">
+  <p class="text-xs text-gray-500">Alterações em lotes impactam apenas movimentações futuras.<br> O histórico e o CMV já registrados não são recalculados.</p>
+</a>

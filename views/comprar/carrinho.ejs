@@ -1,0 +1,198 @@
+<%- include('../components/toast', { id: 'toast', texto: 'Insumo removido do carrinho!', sucess: true }) %>
+<%- include('../components/toast', { id: 'toastfalha', texto: 'Falha ao enviar pedido, tente novamente!', sucess: false }) %>
+<%- include('../components/toast', { id: 'toastcerto', texto: 'Carrinho enviado com sucesso!<br><span class="text-sm text-gray-500">Em breve você poderá acompanhar o pedido no histórico.</span><br><br><div class="w-full flex flex-row items-center justify-center gap-3"><a href="/" class="text-gray-600 text-md px-5 py-1 bg-gray-200 hover:bg-gray-300 rounded-full">Inventário</a><a href="/pedidos" class="text-white text-md px-5 py-1 bg-green-600 hover:bg-green-700 rounded-full">Ver pedidos</a></div>', sucess: true }) %>
+
+<div class="flex flex-row items-center justify-between">
+    <%- include('../components/breadcrumb', { link: '/comprar', paginaAnterior: 'Comprar'}) %>
+</div>
+
+<div id="lista-itens" class="flex flex-col gap-3 mt-4">
+    <%- include('../components/loader', { info: 'Carregando carrinho' }) %>
+</div>
+
+<div id="container-botoes" class="flex flex-col gap-4">
+    <div class="flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-6 mt-8">
+        <h2 class="text-lg text-gray-600 font-semibold">Total</h2>
+        <h2 id="total-carrinho" class="text-lg font-semibold text-gray-500">R$ 0,00</h2>
+    </div>
+
+    <button id="enviar-pedido" class="w-full cursor-pointer bg-green-600 text-white py-3 rounded-full hover:bg-green-700 transition-colors duration-300">
+        Enviar pedido
+    </button>
+</div>
+
+<p class="text-xs text-gray-500 mt-5">Um carrinho com vários fornecedores vira um pedido individual por fornecedor.<br>
+     Você pode adicionar itens aqui e finalizar quando quiser, tudo fica salvo automaticamente.</p>
+
+<script>
+    let calcularTotal;
+    
+    document.addEventListener('DOMContentLoaded', async function() {
+        const unidade_id = <%= unidade_id %>;
+        const lista_itens = document.getElementById('lista-itens');
+        const loader = document.getElementById('loader');
+        const toast = document.getElementById('toast');
+        const toastfalha = document.getElementById('toastfalha');
+        const toastcerto = document.getElementById('toastcerto');
+        const total_carrinho = document.getElementById('total-carrinho');
+        const container_botoes = document.getElementById('container-botoes');
+
+        const response = await fetch(`https://carrinho.taiksu.com.br/api/carrinho/${unidade_id}`);
+        const data = await response.json();
+        console.log(data);
+
+        if (response.ok && data.quantidade_itens > 0) {
+            loader.style.display = 'none';
+            data.lista_itens.forEach(item => {
+                lista_itens.innerHTML += `
+                    <div id="insumo-card-${item.id}" class="group insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 transition-all duration-400">
+                        <div class="flex flex-row items-center gap-2">
+                            <img src="${item.foto_url}" class="md:h-14 md:w-14 h-10 w-10 rounded-md bg-white border border-gray-50">
+                            <div class="flex flex-col gap-0 mt-1">
+                                <h2 data-fornecedor-id="${item.fornecedor_id}" class="text-xs text-gray-400">${item.fornecedor}</h2>
+                                <h2 data-insumo-id="${item.insumo_id}" class=" text-gray-700 font-semibold">${item.nome}</h2>
+                                <h2 id="valor-total-${item.id}" class="text-xs text-gray-500 font-medium">${item.valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h2>
+                            </div>
+                        </div>
+                        <div class="flex flex-row items-center gap-4 justify-between">
+                            <img onclick="alterarQuantidade('${item.id}', 'diminuir')" class="h-6 w-6 cursor-pointer hover:scale-105 transition-all duration-200" src="/images/icones/minus.png">
+                            <h2 id="quantidade-carrinho-${item.id}" class="w-18 text-center bg-gray-100 rounded-lg p-2 text-sm text-gray-600">${Number(item.quantidade)}</h2>
+                            <img onclick="alterarQuantidade('${item.id}', 'aumentar')" class="h-6 w-6 cursor-pointer hover:scale-105 transition-all duration-200" src="/images/icones/plus.png">
+                        </div>
+                    </div>
+                `;
+            }); 
+
+        } else {
+            lista_itens.innerHTML = `
+                <div class="p-24 bg-white rounded-xl border border-gray-200 flex flex-col items-center justify-center gap-2">
+                    <img src="/images/icones/vazio.png" class="h-14 w-14">
+                    <h2 class="text-lg text-gray-500 font-semibold">Carrinho vazio</h2>
+                    <a href="/comprar" class="text-white bg-green-600 px-5 shadow-lg hover:shadow-none py-1 rounded-full hover:bg-green-700 transition-all mt-5 duration-300">Adicionar insumos</a>
+                </div>
+            `;
+            container_botoes.style.display = 'none';
+
+        }
+
+        // Calcula total somando todos os valores totais dos insumos
+        calcularTotal = function() {
+            const valores_totais = document.querySelectorAll('[id^="valor-total-"]');
+            let total = 0;
+            valores_totais.forEach(valor_total => {
+                total += Number(valor_total.textContent.replace('R$', '').replace(' ', '').replace(',', '.'));
+                console.log(total);
+            });
+            total_carrinho.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+        calcularTotal()
+    });
+
+    // Envia o carrinho para o backend
+    const enviar_pedido = document.getElementById('enviar-pedido');
+    enviar_pedido.addEventListener('click', async function() {
+        const response = await fetch(`https://carrinho.taiksu.com.br/api/close`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                unidade_id: <%= unidade_id %>,
+                responsavel_id: <%= user_id %>
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success === true) {
+            toastcerto.classList.remove('hidden');
+            setTimeout(() => {
+                toastcerto.classList.add('hidden');
+                window.location.href = '/';
+            }, 8000);
+            return;
+        } else {
+            toastfalha.classList.remove('hidden');
+            setTimeout(() => {
+                toastfalha.classList.add('hidden');
+            }, 1400);
+            await fetch('https://carrinho.taiksu.com.br/api/error-close', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    unidade_id: <%= unidade_id %>,
+                })
+            });
+        }
+    });
+
+
+
+    // Função para alterar a quantidade de um insumo no carrinho
+    async function alterarQuantidade(id, operacao) {
+
+        const quantidade = document.getElementById(`quantidade-carrinho-${id}`).textContent;
+        const valor_total = document.getElementById(`valor-total-${id}`);
+        let novaQuantidade;
+
+        if(operacao === 'diminuir') {
+            if(quantidade <= 1) {
+                // Apaga insumo do carrinho
+                const response = await fetch(`https://carrinho.taiksu.com.br/api/delete-item`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        item_id: id,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById(`insumo-card-${id}`).remove();
+                    toast.classList.remove('hidden');
+                    setTimeout(() => {
+                        toast.classList.add('hidden');
+                    }, 1000);
+                    return;
+                } else {
+                    alert('Não foi possível remover o insumo do carrinho' + data.error);
+                }
+            }
+            novaQuantidade = Number(quantidade) - 1;
+        } else {
+            novaQuantidade = Number(quantidade) + 1;
+        }
+        
+        document.getElementById(`quantidade-carrinho-${id}`).textContent = novaQuantidade;
+
+        // Impede que a quantidade seja menor que 1
+        if (novaQuantidade < 1) {
+            document.getElementById(`quantidade-carrinho-${id}`).textContent = 1;
+        }
+
+        const response = await fetch(`https://carrinho.taiksu.com.br/api/update-item`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                item_id: id,
+                nova_quantidade: novaQuantidade,
+            }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            valor_total.textContent = data.valor_total;
+            calcularTotal();
+        } else {
+            alert('Não foi possível atualizar a quantidade' + data.error);
+        }
+    }
+</script>

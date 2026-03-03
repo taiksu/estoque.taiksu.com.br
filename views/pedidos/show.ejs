@@ -1,0 +1,267 @@
+<div class="flex flex-row items-center justify-between">
+    <%- include('../components/breadcrumb', { link: '/pedidos', paginaAnterior: 'Pedidos'}) %>
+    <%- include('../components/buttons/minus', { icone: 'replay', link: '#', id: 'abrir-aviso', label: 'Repetir pedido', tipo: 'hero'}) %>
+    <%- include('../components/buttons/minus', { icone: 'cancelar', link: '#', id: 'abrir-aviso-cancelar', label: 'Cancelar pedido', tipo: 'hero'}) %>
+</div>
+
+<%- include('../components/popup/repetir') %>
+<%- include('../components/popup/cancelar', { pedidoId }) %>
+
+<div id="aviso-cancelado" class="hidden flex flex-row items-center gap-3 border border-gray-200 rounded-xl bg-white p-8 mt-4">
+    <img src="/images/icones/falha.png" class="h-12 w-12">
+    <div class="flex flex-col gap-0">
+        <h2 class="text-lg font-semibold text-orange-700">Pedido cancelado</h2>
+        <p class="text-gray-500 text-sm">Este pedido não será mais processado</p>
+    </div>
+</div>
+
+<div id="info-pedido" class="flex flex-col gap-3 mt-5">
+    <%- include('../components/loader', { info: 'Carregando pedido'}) %>
+</div>
+<div class="flex flex-col gap-1 mt-5">
+    <h2 class="text-gray-500 text-xs ml-1">Itens do pedido</h2>
+    <div id="itens-pedido" class="flex flex-col bg-white rounded-xl border border-gray-200"></div>
+</div>
+
+<div class="w-full flex flex-row items-center justify-between bg-white rounded-xl border border-gray-200 mt-5 py-5 px-6">
+  <h1 class="text-gray-600 text-lg font-medium">Total do pedido</h1>
+  <h2 id="valor-total" class="text-green-600 text-lg font-semibold"></h2>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const pedido_id = '<%= pedidoId %>';
+        const info_pedido = document.getElementById('info-pedido');
+        const itens_pedido = document.getElementById('itens-pedido');
+        const loader = document.getElementById('loader');
+        const valor_total = document.getElementById('valor-total');
+        const btn_repetir = document.getElementById('abrir-aviso');
+        const btn_cancelar = document.getElementById('abrir-aviso-cancelar');
+        const aviso_cancelado = document.getElementById('aviso-cancelado');
+        let idFechador;
+        
+        // Funções Renderização
+        async function pedidoInfoRender(pedido, fornecedor) {
+            info_pedido.innerHTML = `
+                <div class="flex flex-row items-center justify-between bg-white rounded-xl border border-gray-200 p-6">
+                    <div class="flex flex-row items-center gap-3">
+                        <div id="fornecedor-id" class="hidden">${fornecedor.id}</div>
+                        <img src="https://insumos.taiksu.com.br/images/fornecedores/${fornecedor.logo_path}" class="h-14 w-14 rounded-full shadow-xl">
+                        <div>
+                            <h2 class="text-gray-600 text-lg font-semibold">${fornecedor.nome}</h2>
+                            <h2 class="text-gray-500 text-sm">${new Date(pedido.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</h2>
+                        </div>
+                    </div>
+                    <div class="flex flex-row items-center gap-2 rounded-full px-3 py-1 bg-gray-100">
+                        <h2 id="user-id" class="hidden">${pedido.user_id}</h2>
+                        <img id="userfoto" src="" class="h-5 w-5 rounded-full">
+                        <h3 id="usernome" class="text-gray-500"></h3>
+                    </div>
+                </div>
+
+                <div id="trajetoria-pedido" class="hidden flex flex-row justify-center items-center gap-4 py-5 px-8 bg-white border border-gray-200 rounded-xl">
+                    <div class="flex flex-col items-center gap-0">
+                        <img src="/images/icones/email.png" class="h-8 w-8">
+                        <h2 class="text-gray-600 text-sm font-semibold">Pedido realizado</h2>
+                        <p class="text-gray-500 text-xs">${new Date(pedido.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' às ')}</p>
+                    </div>
+                    <hr class="w-18 h-1 border-gray-300">
+                    <div class="flex flex-col items-center gap-0">
+                        <img src="/images/icones/confirmou.png" class="h-8 w-8">
+                        <h2 class="text-gray-600 text-sm font-semibold">Pedido confirmado</h2>
+                        <p class="text-gray-500 text-xs">${new Date(pedido.data_aceite).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' às ')}</p>
+                    </div>
+                    <hr class="w-18 h-1 border-gray-300">
+                    <div class="flex flex-col items-center gap-0">
+                        <img src="/images/icones/entregue.png" class="h-8 w-8">
+                        <h2 class="text-gray-600 text-sm font-semibold">Pedido entregue</h2>
+                        <p class="text-gray-500 text-xs">${new Date(pedido.data_entrega).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' às ')}</p>
+                    </div>
+                </div>
+
+                <div id="form-avaliacao" class="flex flex-row items-center justify-between bg-white rounded-xl border border-gray-200 p-6">
+                    <div class="flex flex-col gap-0">
+                        <h2 class="text-gray-700 font-semibold">Avalie sua experiência neste pedido</h2>
+                        <p class="text-gray-500 text-sm">Seu feedback é importante para nós</p>
+                    </div>
+
+                    <div id="estrelas" class="flex flex-row items-center gap-4">
+                        <img id="nota-1" onclick="avaliarPedido(1)" src="/images/icones/estrela.png" class="h-8 w-8 p-1 hover:scale-110 transition-all duration-300 rounded-full hover:bg-green-100 cursor-pointer">
+                        <img id="nota-2" onclick="avaliarPedido(2)" src="/images/icones/estrela.png" class="h-8 w-8 p-1 hover:scale-110 transition-all duration-300 rounded-full hover:bg-green-100 cursor-pointer">
+                        <img id="nota-3" onclick="avaliarPedido(3)" src="/images/icones/estrela.png" class="h-8 w-8 p-1 hover:scale-110 transition-all duration-300 rounded-full hover:bg-green-100 cursor-pointer">
+                        <img id="nota-4" onclick="avaliarPedido(4)" src="/images/icones/estrela.png" class="h-8 w-8 p-1 hover:scale-110 transition-all duration-300 rounded-full hover:bg-green-100 cursor-pointer">
+                        <img id="nota-5" onclick="avaliarPedido(5)" src="/images/icones/estrela.png" class="h-8 w-8 p-1 hover:scale-110 transition-all duration-300 rounded-full hover:bg-green-100 cursor-pointer">
+                    </div>
+                </div>
+            `;
+            loader.style.display = 'none';
+            valor_total.textContent = Number(pedido.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+            if (pedido.status == 'entregue') {
+                document.getElementById('trajetoria-pedido').classList.remove('hidden');
+            }
+
+            // Remove o form de avaliação se o pedido foi avaliado ou está pendente
+            if (pedido.avaliacao || pedido.status == 'pendente' || pedido.status == 'cancelado') {
+                document.querySelector("#form-avaliacao").remove();
+            }
+
+            // Exibe botão repetir se status é visualizado ou entregue e exibe cancelar se status é pendente
+            if (pedido.status == 'visualizado' || pedido.status == 'entregue') {
+                btn_repetir.classList.remove('hidden');
+            } else if (pedido.status == 'pendente') {
+                btn_cancelar.classList.remove('hidden');
+            }
+
+            // Pedido cancelado
+            if (pedido.status == 'cancelado') {
+                aviso_cancelado.classList.remove('hidden');
+                info_pedido.classList.add('hidden');
+            }
+        }
+
+        // Renderiza card do insumo
+        function insumoCard(item) {
+            return `
+                <div class="flex flex-row justify-between items-center px-6 py-4 border-b border-gray-200 last:border-0 px-3">
+                    <div class="flex flex-row items-center gap-3">
+                        <h1 class="bg-green-50 font-semibold rounded-full py-1 px-3 text-sm text-green-600">x ${Number(item.quantidade).toFixed(0)}</h1>
+                        <div>
+                            <h1 class="text-gray-600 font-semibold">${item.nome}</h1>
+                            <h4 class="text-gray-500 text-sm">${Number(item.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h4>
+                        </div>
+                    </div>
+                    <a href="/inventario/${item.insumo_id}">
+                        <img src="https://insumos.taiksu.com.br${item.foto_path}" class="hover:scale-105 transition-all duration-300 h-13 w-13 bg-gray-50 rounded-md">
+                    </a>
+                </div>
+            `;
+        }
+
+        async function insumosRender(itens) {
+            itens.forEach(item => {
+                itens_pedido.innerHTML += insumoCard(item);
+            });
+        }
+
+        const response = await fetch('https://pedidos.taiksu.com.br/api/pedido/'+ pedido_id);
+        const data = await response.json();
+        
+        // Se a resposta do pedido for 200 OK, então renderiza o pedido e remove o loader
+        if (response.ok) {
+            insumosRender(data.pedido.ItensPedidos);
+            pedidoInfoRender(data.pedido, data.fornecedor);
+            idFechador = data.pedido.responsavel_id;
+        }
+
+        // Responsável pelo pedido
+        console.log(idFechador);
+
+        const fotoFechadorEl = document.querySelector("#userfoto");
+        const nomeFechadorEl = document.querySelector("#usernome");
+
+
+        const FOTO_BASE = "https://login.taiksu.com.br/frontend/profiles/";
+        const FOTO_PADRAO = "https://vagas.taiksu.com.br/images/menino.png";
+
+        const usuariosCache = {};
+
+        async function buscarUsuario(id) {
+            if (!id) return null;
+
+            if (usuariosCache[id]) {
+                return usuariosCache[id];
+            }
+
+            try {
+                const response = await fetch(`https://login.taiksu.com.br/api/users/${id}`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error("Erro ao buscar usuário");
+
+                const data = await response.json();
+                usuariosCache[id] = data;
+                return data;
+
+            } catch (err) {
+                console.warn("Falha ao buscar responsável pelo pedido:", id, err);
+                return null;
+            }
+        }
+
+        function preencherUsuario(data, nomeEl, fotoEl) {
+            if (!data) return;
+
+            if (nomeEl) {
+                nomeEl.textContent = data.name.split(' ')[0] || "--";
+            }
+
+            if (fotoEl) {
+                fotoEl.src = data.profile_photo_path
+                    ? FOTO_BASE + data.profile_photo_path
+                    : FOTO_PADRAO;
+            }
+        }
+
+        const dadosFechador = await buscarUsuario(idFechador);
+        preencherUsuario(dadosFechador, nomeFechadorEl, fotoFechadorEl);
+
+        const replayButton = document.querySelector('#replay');
+        const fornecedorId = document.querySelector('#fornecedor-id').textContent;
+        
+        replayButton.addEventListener('click', repetirPedido);
+        
+        async function repetirPedido() {
+            const response = await fetch('https://carrinho.taiksu.com.br/api/repetir', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    pedido_id: "<%= pedidoId %>",
+                    unidade_id: "<%= unidade_id %>",
+                    fornecedor_id: fornecedorId,
+                })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                window.location.href = '/comprar/carrinho';
+            } else {
+                alert(data.error);
+            }
+        }
+    })
+</script>
+
+<script>
+    const pedido_id = "<%= pedidoId %>";
+    const token = "<%= userToken %>";
+    const user_id = "<%= user_id %>";
+    
+    async function avaliarPedido(nota) {
+        const response = await fetch('https://pedidos.taiksu.com.br/api/avaliar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                pedido_id,
+                nota,
+                user_id
+            })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            document.querySelector("#estrelas").innerHTML = `
+                <h2 class="text-green-700">Obrigado pela sua avaliação!</h2>
+            `;
+            setTimeout(() => {
+                document.querySelector("#form-avaliacao").remove();
+            }, 1500);
+        }
+    }
+</script>

@@ -1,0 +1,70 @@
+<%
+let classe = '';
+switch (icone) {
+    case 'replay': 
+        img = '/images/icones/replay.png';
+        color = 'text-green-800';
+        classe = 'hidden';
+    break;
+    case 'cancelar': 
+        img = '/images/icones/falha.png';
+        color = 'text-orange-800';
+        classe = 'hidden';
+    break;
+    case 'alta': 
+        img = '/images/icones/alta.png';
+    break;
+    case 'trash': 
+        img = 'https://tarefas.taiksu.com.br/images/icones/delete.png';
+        color = 'text-red-700';
+    break;
+    case 'plus': 
+        img = 'https://financeiro.taiksu.com.br/images/icones/plus.png';
+        color = 'text-gray-500';
+    break;
+    case 'confirma': 
+        img = '/images/icones/confirma.png';
+        color = 'text-gray-500';
+    break;
+    case 'pesar': 
+        img = '/images/icones/balanca.png';
+        color = 'text-gray-500';
+    break;
+    case 'voltar': 
+        img = '/images/icones/voltar.png';
+        color = 'text-gray-500';
+    break;
+    case 'unidade': 
+        img = 'https://login.taiksu.com.br/frontend/img/unidade.png';
+        color = 'text-gray-500';
+    break;
+    case 'change': 
+        img = '/images/icones/ciclo.png';
+        color = 'text-green-700';
+    break;
+    case 'consumo': 
+        img = '/images/icones/consumos.png';
+        color = 'text-green-700';
+    break;
+    case 'circle': 
+        img = '/images/icones/circle.png';
+        color = 'text-green-700';
+    break;
+    default: 
+        img = '';
+        color = 'text-gray-500';
+    break;
+} 
+
+if (typeof(tipo) != 'undefined' && tipo == 'hero') {
+  var sombra = 'shadow-xl hover:shadow-none transition-all duration-300';
+} else {
+  sombra = '';
+}
+
+%>
+
+<a id="<%= id %>" href="<%= link %>" class="w-full <%= classe %> md:w-auto items-center flex flex-row font-medium justify-center gap-2 <%= color %> <%= sombra %> bg-white rounded-full px-4 py-2 md:py-1 border border-gray-200">
+    <img class="h-5" src="<%= img %>" />
+    <%= label %>
+</a>

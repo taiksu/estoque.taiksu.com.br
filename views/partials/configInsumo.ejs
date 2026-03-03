@@ -1,0 +1,110 @@
+<img id="config-insumo" src="https://login.taiksu.com.br/frontend/img/settings.png" class="h-6 w-6 hover:rotate-180 hover:scale-105 transition-all duration-300 cursor-pointer">
+
+<div id="modal-config-insumo" class="fixed inset-0 bg-white/50 backdrop-blur-sm hidden flex items-center justify-center z-20">
+    <div id="modal-sucesso" class="hidden bg-white p-10 border border-gray-200 rounded-xl w-full max-w-md flex flex-col items-center justify-center">
+        <div class="flex flex-col items-center gap-2"><img src="/images/icones/certo.png" class="h-12 w-12">
+            <h2 class="text-lg font-medium text-center text-gray-600">Quantidade mínima<br> atualizada com sucesso</h2>
+        </div>
+    </div>
+
+
+    <div id="modal-configuracao" class="bg-white border border-gray-200 p-10 rounded-xl w-full max-w-md">
+
+        <div class="flex flex-col gap-0 mb-2">
+            <h2 class="text-lg font-semibold text-gray-600">Quantidade mínima</h2>
+            <p class="text-gray-500 text-sm">Quando o estoque atingir esse valor,<br> o sistema emitirá um alerta.</p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <div class="flex flex-row items-center gap-2 mt-2">
+                <input type="number" id="quantidade-input" class="w-full outline-none border border-gray-200 rounded-lg p-2" placeholder="Quantidade mínima">
+                <span class="text-gray-500"><%= insumo.unidade_medida %></span>
+            </div>
+            <span class="text-gray-500 text-xs ml-1">Defina 0 para desativar o alerta para este insumo.</span>
+        </div>
+
+        <div class="flex flex-row items-center gap-2 mt-8">
+            <button id="fechar-modal" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-600 px-4 py-2 rounded-full cursor-pointer transition-all duration-300">Cancelar</button>
+            <button id="salvar-minima" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full cursor-pointer transition-all duration-300">Salvar</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Elementos do modal DOM
+    const abrirModal = document.getElementById('config-insumo');
+    const fecharModal = document.getElementById('fechar-modal');
+    const modal = document.getElementById('modal-config-insumo');
+    const unidadeMedida = "<%= insumo.unidade_medida %>";
+    const quantidadeInput = document.getElementById('quantidade-input');
+    const salvarMinima = document.getElementById('salvar-minima');
+    const modalSucesso = document.getElementById('modal-sucesso');
+    const modalConfiguracao = document.getElementById('modal-configuracao');
+
+    // Remove ponto e virgula se unidade de medida for unidade
+    quantidadeInput.addEventListener('input', function() {
+        if (unidadeMedida === 'uni') {
+            this.value = this.value.replace('.', '').replace(',', '');
+            this.value = this.value.replace(/\D/g, '').slice(0, 5);
+        }
+    });
+
+    // Abre ao clicar no botão abrir
+    abrirModal.addEventListener('click', function() {
+        modal.classList.remove('hidden');
+    });
+
+    // Fecha ao clicar fora do modal
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+
+    // Fecha ao clicar no botão fechar
+    fecharModal.addEventListener('click', function() {
+        modal.classList.add('hidden');
+    });
+
+    // Escuta tecla enter
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            salvarMinima.click();
+        }
+    });
+
+
+    // Atualiza quantidade mínima na API
+    salvarMinima.addEventListener('click', function() {
+        const quantidade = quantidadeInput.value;
+        const unidade_id = "<%= insumo.unidade_id %>";
+        const insumo_id = "<%= insumo.id %>";
+
+        fetch('/api/inventario/atualizar-minima', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                quantidade,
+                unidade_id,
+                insumo_id
+            })
+        })
+        .then(function(response) {
+            if (response.ok) {
+                modalConfiguracao.classList.add('hidden');
+                modalSucesso.classList.remove('hidden');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            }
+        })
+        .catch(function(error) {
+            alert('Erro ao atualizar quantidade mínima!');
+        });
+    });
+
+
+</script>

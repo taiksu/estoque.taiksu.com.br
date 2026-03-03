@@ -1,0 +1,41 @@
+<%
+let place = 'Pesquisar insumo';
+if (place) {
+    place = placeholder;
+}
+%>
+
+<div class="relative mt-8">
+    <img src="https://login.taiksu.com.br/frontend/img/pesquisa.png" class="w-5 h-5 absolute inset-y-0 left-4 my-auto pointer-events-none">
+    <input type="search" placeholder="<%= place %>" class="w-full bg-white pl-10 p-3 outline-none ring-1 ring-gray-200 focus:ring-green-500 rounded-md hover:ring-green-200 transition-colors duration-300" id="search" onkeyup="if (!window.__cfRLUnblockHandlers) return false; filtraInsumos()">
+</div>
+
+
+<script>
+    function filtraInsumos() {
+        const input = document.getElementById('search');
+        const filter = input.value.toLowerCase();
+        const cards = document.querySelectorAll('.insumo-card');
+
+        cards.forEach(card => {
+            const nome = card.querySelector('.insumo-nome').textContent.toLowerCase();
+            if (nome.includes(filter)) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Oculta categorias vazias
+        const categorias = document.querySelectorAll('.categoria-insumos');
+        categorias.forEach(categoria => {
+            const insumos = categoria.querySelectorAll('.insumo-card');
+            const insumosVisiveis = Array.from(insumos).filter(insumo => insumo.style.display !== 'none');
+            if (insumosVisiveis.length === 0) {
+                categoria.style.display = 'none';
+            } else {
+                categoria.style.display = 'flex';
+            }
+        });
+    }
+</script>

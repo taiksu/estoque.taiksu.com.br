@@ -1,0 +1,29 @@
+<a id="carrinho-container" href="/comprar/carrinho" class="px-4 py-1 rounded-full bg-white border border-gray-200 flex flex-row gap-2 items-center  hover:shadow-none transition-shadow duration-300">
+    <img id="icone-carrinho" class="h-6 w-6" src="/images/icones/comprar.png" alt="">
+    <span id="quantidade-carrinho" class="text-gray-500 font-medium">Carrinho vazio</span>
+</a>
+
+<!--Script pra verificar carrinho no microserviço-->
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        const unidade_id = <%= unidade_id %>;
+        const carrinhoContainer = document.getElementById('carrinho-container');
+        const iconeCarrinho = document.getElementById('icone-carrinho');
+        const quantidadeCarrinho = document.getElementById('quantidade-carrinho');
+
+        const response = await fetch(`https://carrinho.taiksu.com.br/api/carrinho/${unidade_id}`);
+        const data = await response.json();
+        console.log(data);
+
+        if (response.ok) {
+            if(data.quantidade_itens > 0) {
+                quantidadeCarrinho.textContent = data.quantidade_itens + ' itens';
+                iconeCarrinho.src = '/images/icones/carrinho-cheio.png';
+            } else {
+                quantidadeCarrinho.textContent = 'Carrinho vazio';
+            }
+        } else {
+            alert('Não foi possível carregar o carrinho, recarregue a página');
+        }
+    });
+</script>

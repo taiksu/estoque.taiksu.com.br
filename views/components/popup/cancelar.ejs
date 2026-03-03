@@ -1,0 +1,43 @@
+<div id="toast-cancelar" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex items-center justify-center">
+    <div class="w-full max-w-md flex flex-col items-center gap-8 py-20 px-14 bg-white rounded-xl">
+        <img src="/images/icones/falha.png" class="h-12 w-12">
+        <h2 class="text-lg font-medium text-center text-gray-600">O fornecedor ainda não visualizou<br> o pedido, deseja cancelar?</h2>
+        <div class="w-full items-center justify-center flex flex-row items-center gap-2">
+            <button id="fechar-cancelamento" class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-600 px-6 py-2 rounded-full w-full">Fechar</button>
+            <button id="confirmar-cancelar-pedido" class="cursor-pointer bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-full w-full">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('abrir-aviso-cancelar').addEventListener('click', () => {
+        document.getElementById('toast-cancelar').classList.remove('hidden');
+    });
+    document.getElementById('fechar-cancelamento').addEventListener('click', () => {
+        document.getElementById('toast-cancelar').classList.add('hidden');
+    });
+    
+    document.getElementById('confirmar-cancelar-pedido').addEventListener('click', () => {
+        fetch('https://pedidos.taiksu.com.br/api/cancelar/<%= pedidoId %>', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                status: 'cancelado',
+                user_id: <%= user_id %>
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                document.getElementById('toast-cancelar').classList.add('hidden');
+                alert('Pedido cancelado com sucesso!');
+                window.location.href = '/pedidos';
+            }
+        })
+        .catch(error => {
+            alert('Erro ao cancelar pedido!');
+            console.error('Erro ao cancelar pedido:', error);
+        });
+    });
+</script>

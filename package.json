@@ -1,0 +1,27 @@
+{
+  "name": "estoque.taiksu.com.br",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tailwindcss -i ./public/stylesheets/style.css -o ./public/stylesheets/tailwind.css --watch"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.0",
+    "axios": "^1.13.5",
+    "connect-session-sequelize": "^8.0.5",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^17.3.1",
+    "ejs": "~2.6.1",
+    "ejs-layouts": "^0.0.1",
+    "express": "~4.16.1",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.19.0",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "mysql2": "^3.17.4",
+    "sequelize": "^6.37.7",
+    "sequelize-cli": "^6.6.5",
+    "tailwindcss": "^4.2.0"
+  }
+}

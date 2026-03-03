@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title id="title-tag"><%= title %> - Gestão de Estoque</title>
+        <meta name="theme-color" content="#2c8516ff" />
+        <link rel="stylesheet" href="/stylesheets/tailwind.css">
+        <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+        <script src="/javascripts/menu.js" defer></script>
+    </head>
+
+    <%- include('partials/header') %>
+    <body class="max-w-2xl min-h-screen mx-auto mt-28 mb-10 px-8">
+        <%- body %>
+         <%- include('partials/menu') %>
+    </body>
+</html> 

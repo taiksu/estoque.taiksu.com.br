@@ -1,0 +1,50 @@
+<div class="w-full flex flex-col gap-1 mt-5">
+    <div class="flex flex-row items-center justify-between">
+        <h1 class="text-sm text-gray-500">Lotes em estoque</h1>
+        <p class="text-gray-500 text-sm">Mínimo: <% const minimo = quantidadeMinima?.quantidade ?? 0; %><% if(insumo.unidade_medida === 'kg') { %><%= Number(minimo).toFixed(3).replace('.', ',') %> kg <% } else { %><%= Number(minimo).toFixed(0) %> uni <% } %></p>
+    </div>
+
+    <div class="border border-gray-200 rounded-lg p-1 bg-white">
+              <% if (lotes.length === 0) { %>
+                <div class="flex flex-col items-center justify-center p-16">
+                  <img src="/images/icones/vazio.png" class="w-14 h-14 mb-4">
+                  <p class="text-gray-600 text-lg font-semibold text-center">Nenhum lote encontrado</p>
+                  <a href="/comprar" class="text-white bg-green-600 px-5 shadow-xl hover:shadow-none py-1 rounded-full hover:bg-green-700 transition-all mt-4 duration-300">Comprar agora</a>
+                </div>
+              <% } else { %>
+                <% lotes.forEach(lote => { %>
+                <div class="hover:bg-gray-50 px-6 border-b border-gray-200 last:border-none flex flex-row justify-between items-center py-3">
+                  <div class="flex flex-row gap-2 items-center">
+                    <img id="foto-fornecedor-<%= lote.fornecedor_id %>" class="w-12 h-12 rounded-full border border-gray-200" src="#">
+                    <div class="flex flex-col mt-1">
+                        <p id="quantidade-atual-insumo" class="text-gray-600 text-sm font-semibold"><% if(insumo.unidade_medida === 'kg') { %> <%= lote.quantidade.replace('.', ',') %> kg <% } else { %> <%= Number(lote.quantidade).toFixed(0) %> uni <% } %></p>
+                        <p class="text-gray-400 text-sm"><%= lote.data_entrada.toLocaleDateString('pt-BR') %></p>
+                    </div>
+                  </div>
+                  <div class="flex flex-row gap-6 items-center">
+                    <p id="preco-fornecedor-#" class="text-gray-400 font-normal"><%= Number(lote.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></p>
+                    <img id="editar-preco-fornecedor-#" src="https://login.taiksu.com.br/frontend/img/seta.png" class=" h-6 cursor-pointer group-hover:scale-110 transition-all duration-300">
+                  </div>
+                </div>
+                <% }) %>
+        <% } %>
+    </div>
+</div>
+
+    <script>
+      // Popula foto do fornecedor
+      
+      document.addEventListener('DOMContentLoaded', async function() {
+        const fotosFornecedores = document.querySelectorAll('[id^="foto-fornecedor-"]');
+        
+        // Busca fornecedores na API
+        const response = await fetch('https://insumos.taiksu.com.br/fornecedores');
+        const fornecedores = await response.json();
+
+        fotosFornecedores.forEach(fotoFornecedor => {
+          const fornecedorId = fotoFornecedor.id.split('-')[2];
+          const fornecedor = fornecedores.find(fornecedor => fornecedor.id == fornecedorId);
+          fotoFornecedor.src = 'https://insumos.taiksu.com.br/images/fornecedores/' + fornecedor.logo_path;
+        });
+      });
+    </script>

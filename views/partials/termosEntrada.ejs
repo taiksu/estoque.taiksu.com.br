@@ -1,0 +1,26 @@
+<div id="termos-entrada" class="flex flex-col gap-2 bg-white border border-gray-200 rounded-xl p-6 my-4">
+    <h3 class="text-md font-medium text-orange-800">Responsabilidade pelas informações</h3>
+    <p class="text-sm text-gray-500 text-justify">As informações registradas na entrada de insumos são de responsabilidade exclusiva do usuário. 
+        O sistema calcula saldo e CMV com base nesses dados. Divergências de lançamentos incorretos deverão ser ajustadas pelo próprio 
+        usuário no histórico.</p>
+
+    <div class="flex flex-row items-center gap-2 mt-3">
+        <input type="checkbox" id="check-responsavel" class="w-4 h-4">
+        <label for="responsavel" class="text-sm text-gray-500">Declaro que sou responsável pela veracidade das informações registradas.</label>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkResponsavel = document.getElementById('check-responsavel');
+        const finalizarEntrada = document.getElementById('finalizar-entrada');
+
+        checkResponsavel.addEventListener('change', function() {
+            if (this.checked) {
+                finalizarEntrada.classList.remove('hidden');
+            } else {
+                finalizarEntrada.classList.add('hidden');
+            }
+        });
+    });
+</script>

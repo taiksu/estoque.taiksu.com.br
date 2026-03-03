@@ -1,0 +1,20 @@
+<div id="toast-substituir" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex items-center justify-center">
+    <div class="w-full max-w-md flex flex-col items-center gap-8 py-20 px-14 bg-white rounded-xl">
+        <img src="/images/icones/carrinho-cheio.png" class="h-12 w-12">
+        <h2 class="text-lg font-medium text-center text-gray-600">O carrinho atual será substituído<br> por este pedido</h2>
+        <div class="w-full flex flex-row items-center gap-2">
+            <button id="cancelar" class="w-full cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-600 px-6 py-2 rounded-full">Cancelar</button>
+            <button id="replay" class="w-full cursor-pointer bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('abrir-aviso').addEventListener('click', () => {
+        document.getElementById('toast-substituir').classList.remove('hidden');
+    });
+    document.getElementById('cancelar').addEventListener('click', () => {
+        document.getElementById('toast-substituir').classList.add('hidden');
+    });
+
+</script>

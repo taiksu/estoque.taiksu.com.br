@@ -1,0 +1,22 @@
+<% 
+const data = new Date().getHours();
+
+let saudacao;
+
+if (data >= 6 && data < 12) {
+    saudacao = 'Bom dia';
+} else if (data >= 12 && data < 18) {
+    saudacao = 'Boa tarde';
+} else {
+    saudacao = 'Boa noite';
+}
+
+%>
+
+<div class="flex flex-row items-center justify-between mb-5">
+    <div class="flex flex-row items-center gap-4">
+        <img class="md:w-8 md:h-8 w-9 h-9 rounded-full shadow-xl" src="<%= userFoto %>">
+        <h1 class="hidden md:block text-xl font-medium text-gray-600"><%= saudacao %>, <span class="text-green-700 font-semibold"> <%= userNome.split(' ')[0] %> </span></h1>
+    </div>
+    <%- include('../buttons/indicadorAlerta') %>
+</div>

@@ -100,7 +100,6 @@ app.use(
 // Sincroniza session no banco
 store.sync();
 
-
 app.use('/callback', callbackRouter);
 app.use('/events', eventsRouter);
 app.use('/api', apiRouter);

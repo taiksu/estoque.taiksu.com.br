@@ -127,9 +127,10 @@
         // EDITAR POPUP
         document.addEventListener('click', (event) => {
             if(event.target.id.startsWith('editar-')) {
+                const popupEditarEntrada = document.getElementById('editar-entrada');
                 const id = event.target.id.replace('editar-', '');
 
-                alert(id);
+                popupEditarEntrada.classList.remove('hidden');
             }
         })
 

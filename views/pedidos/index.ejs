@@ -9,6 +9,11 @@
     <%- include('../components/loader', { info: 'Carregando pedidos'}) %>
 </div>
 
+<div class="mt-8 flex flex-row justify-center w-full flex flex-row items-center gap-3">
+  <img src="https://estoque.taiksu.com.br/images/icones/alert.png" class="w-5 h-5">
+  <p class="text-xs text-gray-500">Novos pedidos podem demorar até 3 minutos para aparecer na lista, atualize a página em breve.</p>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const lista_pedidos = document.getElementById('lista-pedidos');

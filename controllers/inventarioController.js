@@ -38,8 +38,8 @@ exports.listarLotes = async (req, res) => {
             valorTotalMap[lote.insumo_id] = parseFloat(lote.dataValues.valor_total_soma);
         });
 
-        // 🔹 3. Busca insumos globais
-        const response = await axios.get('https://insumos.taiksu.com.br/insumos');
+        // 🔹 3. Busca insumos de estoque
+        const response = await axios.get('https://insumos.taiksu.com.br/insumos?visibilidade=estoque');
         const categorias = response.data;
 
         // 🔹 4. Junta dados

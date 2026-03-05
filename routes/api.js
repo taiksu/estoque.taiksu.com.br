@@ -5,7 +5,7 @@ var { inventarioController, listaEntradaController, entradaController } = requir
 
 // Inventário
 router.get('/inventario/:id', inventarioController.listarLotes);
-router.post('/inventario/lista-minima', inventarioController.listarQuantidadesMinimas);
+router.post('/inventario/lista-minima', inventarioController.listarQuantidadesMinimas); 
 router.post('/inventario/atualizar-minima', inventarioController.atualizarMinima);
 
 
@@ -13,6 +13,7 @@ router.post('/inventario/atualizar-minima', inventarioController.atualizarMinima
 router.get('/lista-entrada', listaEntradaController.index);
 router.post('/lista-entrada/add', listaEntradaController.add);
 router.delete('/lista-entrada/delete', listaEntradaController.delete);
+router.put('/lista-entrada/editar', listaEntradaController.editar);
 router.post('/entrada/manual', entradaController.manual);
 
 

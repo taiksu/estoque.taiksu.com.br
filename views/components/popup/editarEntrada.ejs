@@ -1,8 +1,8 @@
 <div id="editar-entrada" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex items-center justify-center">
-                    <div class="w-full max-w-md flex flex-col gap-4 bg-white rounded-xl p-8">
+                    <div class="w-full max-w-sm mx-8 flex flex-col gap-4 bg-white rounded-xl p-8">
 
                         <div class="flex flex-row items-center gap-2 mb-2">
-                            <img id="insumo-foto-edit" src="" class="md:h-12 md:w-12 h-10 w-10 rounded-md bg-white border border-gray-100">
+                            <img id="insumo-foto-edit" src="" class="md:h-14 md:w-14 h-10 w-10 rounded-md bg-white border border-gray-100">
                             <div class="flex flex-col gap-0 mt-1">
                                 <h2 class="text-xs text-gray-500">Editar entrada</h2>
                                 <h2 id="insumo-nome-edit" class="text-lg text-gray-700 font-semibold">Insumo</h2>
@@ -11,24 +11,63 @@
                         
                         <div id="modal-content-quantidade" class="w-full flex flex-col items-center gap-2">
                             <div class="w-full flex flex-row items-center gap-2">
-                                <input type="number" id="preco-edit" class="w-30 p-2 border border-gray-200 rounded-md" placeholder="Preço">
-                                <input type="number" id="quantidade-edit" class="w-28 p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
+                                <input type="number" id="preco-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Preço">
+                                <input type="number" id="quantidade-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
                             </div>
                         </div>
                         <div class="flex flex-row items-center gap-2 mt-4">
                             <button id="cancelar-edicao" class="cursor-pointer w-full p-2 bg-gray-200 hover:bg-gray-300 transition-all duration-300 text-gray-600 rounded-full">Cancelar</button>
-                            <button data-insumo-id="" id="confirmar-edicao" class="cursor-pointer w-full p-2 bg-green-600 hover:bg-green-700 transition-all duration-300 text-white rounded-full">Confirmar</button>
+                            <button data-insumoId="" id="confirmar-edicao" class="cursor-pointer w-full p-2 bg-green-600 hover:bg-green-700 transition-all duration-300 text-white rounded-full">Confirmar</button>
                         </div>
 
                     </div>
 </div>
 
 <script>
+    // FECHAR E ABRIR O POPUP
     document.getElementById('cancelar-edicao').addEventListener('click', () => {
         document.getElementById('editar-entrada').classList.add('hidden');
     });
+
+    // CONFIRMA EDIÇÃO
     document.getElementById('confirmar-edicao').addEventListener('click', () => {
-        document.getElementById('editar-entrada').classList.add('hidden');
+        let idEntrada = document.getElementById('confirmar-edicao').dataset.insumoId;
+        editarEntrada(idEntrada);
     });
+
+    // ELEMENTOS DO POPUP
+    const popupEditarEntrada = document.getElementById('editar-entrada');
+    const insumoFotoEdit = document.getElementById('insumo-foto-edit');
+    const insumoNomeEdit = document.getElementById('insumo-nome-edit');
+    const insumoPrecoEdit = document.getElementById('preco-edit');
+    const insumoQuantidadeEdit = document.getElementById('quantidade-edit');
+    const confirmarEdicao = document.getElementById('confirmar-edicao');
+    const totalEntrada = document.getElementById('total-entrada');
+
+    // FUNÇÃO PARA EDITAR
+    async function editarEntrada(id) {
+        const response = await fetch(`/api/lista-entrada/editar`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id,
+                preco: insumoPrecoEdit.value,
+                quantidade: insumoQuantidadeEdit.value
+            })
+        });
+        const data = await response.json();
+        if(data.success) {
+            console.log(data);
+            document.getElementById(`preco-item-${id}`).textContent = insumoPrecoEdit.value;
+            document.getElementById(`quantidade-item-${id}`).textContent = insumoQuantidadeEdit.value;
+            document.getElementById(`valor-total-${id}`).textContent = (insumoPrecoEdit.value * insumoQuantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            totalEntrada.textContent = Number(data.total_lista).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            popupEditarEntrada.classList.add('hidden');
+        } else {
+            alert('Falha ao editar entrada');
+        }
+    }
 
 </script>

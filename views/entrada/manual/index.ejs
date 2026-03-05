@@ -30,7 +30,7 @@
         const modalContent = document.getElementById('modal-content');
 
         //// Busca os insumos na API
-        const response = await fetch('https://insumos.taiksu.com.br/insumos')
+        const response = await fetch('https://insumos.taiksu.com.br/insumos?visibilidade=estoque')
         const categorias = await response.json();
 
         //// Busca fornecedores

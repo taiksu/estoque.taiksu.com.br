@@ -153,3 +153,52 @@ exports.delete = async (req, res) => {
     }
 }
 
+// Editar quantidade de insumo na lista de entrada
+exports.editar = async (req, res) => {
+    try {
+        const { id, preco, quantidade } = req.body;
+
+        console.log('Editando insumo da lista:', id);
+
+        // Busca o insumo da lista de entrada
+        const insumoEntrada = await InsumosEntrada.findOne({
+            where: {
+                id
+            }
+        });
+
+        if(!insumoEntrada) {
+            return res.status(404).json({ success: false, error: 'Insumo não encontrado' });
+        }
+
+        const Lista_entrada = await ListaEntrada.findOne({
+            where: {
+                id: insumoEntrada.lista_entrada_id
+            }
+        });
+
+        // Edita o insumo da lista de entrada
+        await insumoEntrada.update({
+            preco,
+            quantidade
+        });
+
+        // Encontra o valor total de cada insumo (preco x quantidade)
+        const listaTotal = await InsumosEntrada.findAll({
+            where: {
+                lista_entrada_id: Lista_entrada.id
+            },
+            attributes: ['preco', 'quantidade']
+        });
+
+        // Soma os valores totais de cada insumo
+        const somaTotais = listaTotal.reduce((total, item) => total + Number(item.preco) * Number(item.quantidade), 0);
+
+        console.log('Valor total atualizado:', somaTotais);
+
+        res.status(200).json({ success: true, total_lista: somaTotais, message: 'Insumo editado da lista de entrada' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: 'Erro ao editar insumo da lista de entrada' });
+    }
+}

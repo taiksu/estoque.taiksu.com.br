@@ -62,7 +62,7 @@ exports.manual = async (req, res) => {
                 lotes_entrada: lotesEntrada,
             },
             userId: req.session.id_user,
-            priority: 'high'
+            priority: 'urgent'
         });
 
         res.status(200).json({ success: true, message: 'Lista de entrada finalizada com sucesso' });

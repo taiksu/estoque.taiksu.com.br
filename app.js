@@ -19,6 +19,9 @@ var inventarioRouter = require('./routes/inventario');
 var comprarRouter = require('./routes/comprar');
 var entradaRouter = require('./routes/entrada');
 var pedidosRouter = require('./routes/pedidos');
+var historicoRouter = require('./routes/historico');
+var processoRouter = require('./routes/processo');
+var eventsRouter = require('./routes/events');
 
 var app = express();
 
@@ -39,7 +42,7 @@ var dbHost = process.env.DB_HOST || '127.0.0.1';
 var dbPort = parseIntWithFallback(process.env.DB_PORT, 3306);
 var dbDialect = process.env.DB_DIALECT || 'mysql';
 
-var sessionSecret = process.env.SESSION_SECRET || 'change-this-session-secret';
+var sessionSecret = process.env.SESSION_SECRET;
 var sessionCookieName = process.env.SESSION_COOKIE_NAME || 'TaiksuEstoqueCookie';
 var sessionCookieMaxAge = parseIntWithFallback(process.env.SESSION_COOKIE_MAX_AGE_MS, 2 * 60 * 60 * 1000);
 var sessionCookieHttpOnly = parseBool(process.env.SESSION_COOKIE_HTTP_ONLY, true);
@@ -98,7 +101,11 @@ app.use(
 );
 
 // Sincroniza session no banco
-store.sync();
+store.sync().then(() => {
+  console.log('Sessões sincronizadas com sucesso');
+}).catch((error) => {
+  console.error('Erro ao sincronizar sessões:', error);
+});
 
 app.use('/callback', callbackRouter);
 app.use('/events', eventsRouter);
@@ -110,6 +117,8 @@ app.use('/inventario', inventarioRouter);
 app.use('/comprar', comprarRouter);
 app.use('/entrada', entradaRouter);
 app.use('/pedidos', pedidosRouter);
+app.use('/historico', historicoRouter);
+app.use('/processo', processoRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -120,7 +129,7 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get('env') === 'development' ? err : err;
 
   // render the error page
   res.status(err.status || 500);

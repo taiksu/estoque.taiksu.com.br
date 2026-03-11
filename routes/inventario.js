@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var { inventarioController } = require('../controllers');
+var { loteController } = require('../controllers');
 
-router.get('/:id', inventarioController.show, async (req, res) => {
+router.get('/:id', loteController.show, async (req, res) => {
     res.render('inventario', { title: 'Insumo' });
 });
 

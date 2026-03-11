@@ -9,13 +9,19 @@
     <!-- O conteúdo do container será adicionado dinamicamente -->
 </div>
 
-<div id="modal-adicionar-carrinho" class="fixed inset-0 bg-white/50 transition-all duration-700 ease-in-out backdrop-blur-sm hidden flex items-center justify-center z-20">
-    <div class="bg-white rounded-lg p-8 w-full max-w-lg border border-gray-200">
+<div id="modal-adicionar-carrinho" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center px-8 justify-center">
+    <div class="bg-white rounded-xl p-8 w-full max-w-lg border border-gray-200">
         <div id="modal-content" class="flex flex-col gap-4">
             <!-- O conteúdo do modal será adicionado dinamicamente -->
         </div>
     </div>
+    <div id="fechar-popup" class="cursor-pointer bg-white text-gray-500 text-sm px-3 py-1 rounded-full opacity-70 hover:opacity-80 transition-all duration-600 flex flex-row gap-1 items-center">
+        <img class="h-5 grayscale" src="/images/icones/falha.png">
+        Fechar janela
+    </div>
 </div>
+
+
 
 
 <script>
@@ -25,6 +31,7 @@
         const container = document.getElementById('container-insumos');
         const modal = document.getElementById('modal-adicionar-carrinho');
         const modalContent = document.getElementById('modal-content');
+        const closemodal = document.getElementById('fechar-popup');
 
         //// Busca os insumos na API
         const response = await fetch('https://insumos.taiksu.com.br/insumos?visibilidade=loja')
@@ -100,10 +107,16 @@
                         
                         <div id="modal-content-quantidade" class="w-full flex flex-col items-center gap-2 mt-1">
                             <div class="w-full flex flex-row items-center gap-2">
-                                <select id="fornecedor" class="w-full p-2 border border-gray-200 rounded-md appearance-none">
-                                    <option disabled selected value="">Selecione um fornecedor</option>
-                                </select>
-                                <input type="number" id="quantidade" class="w-24 p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
+                                <div class="w-full flex flex-col gap-0">
+                                    <h2 class="text-xs text-gray-500">Fornecedor</h2>
+                                    <select id="fornecedor" class="w-full p-2 border border-gray-200 rounded-md appearance-none">
+                                        <option disabled selected value="">Selecione um fornecedor</option>
+                                    </select>
+                                </div>
+                                <div class="w-24flex flex-col gap-0">
+                                    <h2 class="text-xs text-gray-500">Quantidade</h2>
+                                    <input type="number" id="quantidade" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
+                                </div>
                             </div>
                         </div>
                         <div class="flex flex-row items-center justify-between">
@@ -248,6 +261,21 @@
 
 
             });
+        });
+
+        // Fecha modal apertando ESC
+        document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            modal.classList.add('hidden');
+            modalContent.innerHTML = '';
+        }});
+
+        // Fecha modal ao clica no botao
+        closemodal.addEventListener('click', function(e) {
+            if (e.target === closemodal) {
+                modal.classList.add('hidden');
+                modalContent.innerHTML = '';
+            }
         });
 
         //// Fecha o pop-up ao clicar fora

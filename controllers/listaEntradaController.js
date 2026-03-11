@@ -46,6 +46,7 @@ exports.add = async (req, res) => {
     try {
         const { insumo_id, preco, quantidade, fornecedor_id, unidade_id, responsavel_id } = req.body;
         let created = false;
+        let quantidade_itens;
         let listaEntrada;
 
         if (Number(preco) <= 0 || Number(quantidade) <= 0) {
@@ -83,9 +84,18 @@ exports.add = async (req, res) => {
                 responsavel_id,
                 lista_entrada_id: listaEntrada.id
             }, { transaction: t });
+
+            // Contabiliza quantidade de itens da lista
+            const itens = await InsumosEntrada.findAll({
+                where: {
+                    lista_entrada_id: listaEntrada.id
+                }
+            }, { transaction: t })
+
+            quantidade_itens = itens.length;
         });
 
-        res.status(201).json({ success: true, message: 'Insumo adicionado à lista de entrada' });
+        res.status(201).json({ success: true, quantidade_itens, message: 'Insumo adicionado à lista de entrada' });
 
         // Se a lista foi criada publica um evento de criação
         if (created) {

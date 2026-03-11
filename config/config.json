@@ -9,6 +9,7 @@
   },
   "production": {
     "use_env_variable": "PROD_DB_URL",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "password": "DB_PASSWORD"
   }
 }

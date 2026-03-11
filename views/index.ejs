@@ -1,5 +1,36 @@
+<style>
+    #conteiner-2{
+        opacity:0;
+        transform: translateY(10px);
+        transition: opacity .2s ease, transform .4s ease;
+    }
+
+    #conteiner-2.show{
+        opacity:1;
+        transform: translateY(0);
+    }
+</style>
+
+<a href="https://ajuda.taiksu.com.br/callback?token=<%= userToken %>&categoria=90">
+<img class="w-full rounded-xl mb-5 border border-gray-200" src="/images/banners/lancamento.png" alt="">
+</a>
+
 <%- include('components/cards/statusBar'); %>
 <%- include('components/cards/totalEstoque', { value: 'R$ 54.526,59' }) %>
 <%- include('partials/actionButtons') %>
+<div id="conteiner-2">
 <%- include('components/searchBox', { placeholder: 'Pesquisar insumo' }) %>
 <%- include('partials/inventario') %>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const conteiner2 = document.getElementById("conteiner-2");
+
+        setTimeout(() => {  
+            conteiner2.classList.add("show");
+        }, 650);
+
+    });
+</script>

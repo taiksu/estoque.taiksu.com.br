@@ -1,0 +1,1 @@
+// Esta função auxiliar limpa lotes com quantidade 0, ou seja os que já foram totalmente utilizados

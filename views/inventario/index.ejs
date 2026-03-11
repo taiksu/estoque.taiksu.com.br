@@ -14,6 +14,58 @@
     </div>
 </div>
 
+<!--Modal de informácões do lote-->
+<div id="lote-modal" class="hidden bg-black/20 z-20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center px-8 justify-center">
+    <div class="w-full max-w-md bg-white rounded-xl p-8 border border-gray-200">
+        <div class="flex flex-row items-center justify-between mb-8">
+            <h2 class="text-xl font-semibold text-green-800">Lote em estoque</h2>
+            <a id="btn-excluir-lote" href="" class="flex flex-row items-center gap-2 rounded-full border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 px-3 py-0.5 transition-color duration-300 cursor-pointer">
+                <img class="h-5 w-5" src="/images/icones/delete.png">
+                    Excluir lote
+                </a>
+            </a>
+        </div>
+        <div class="flex flex-row gap-4 items-center mt-2 mb-8">
+            <img src="https://insumos.taiksu.com.br<%= insumo.foto_url %>" class="w-16 h-16 rounded-lg border border-gray-100">
+            <div class="flex flex-col">
+                <h1 class="text-xl font-semibold text-gray-600"><%= insumo.nome %></h1>
+                <span id="quantiade-preco-lote" class="text-gray-500">3.785 kg x R$ 62,50</span>
+            </div>
+        </div>
+        <hr class="border border-gray-100 w-full my-4 border-1">
+        <div class="flex flex-row justify-between items-center">
+            <h3 class="text-md font-semibold text-gray-600">Fornecedor</h3>
+            <span id="fornecedor-popup" class="text-sm text-gray-500">--</span>
+        </div>
+        <hr class="border border-gray-100 w-full my-4 border-1">
+        <div class="flex flex-row justify-between items-center">
+            <h3 class="text-md font-semibold text-gray-600">Data de entrada</h3>
+            <span id="data-entrada-lote" class="text-sm text-gray-500">--</span>
+        </div>
+        <hr class="border border-gray-100 w-full my-4 border-1">
+        <div class="flex flex-row justify-between items-center">
+            <h3 class="text-md font-semibold text-gray-600">Quantidade original</h3>
+            <span id="quantidade-original-popup" class="text-sm text-gray-500">--</span>
+        </div>
+        <hr class="border border-gray-100 w-full my-4 border-1">
+        <div class="flex flex-row justify-between items-center">
+            <h3 class="text-md font-semibold text-gray-600">Responsável</h3>
+                <div class="flex flex-row items-center gap-3">
+                    <img id="responsavel-popup" class="rounded-full h-5 w-5 bg-gray-50" src="">
+                    <span id="responsavel-entrada" class="text-sm text-gray-500">--</span>
+                </div>
+        </div>
+        <div class="w-full text-gray-400 text-xs mt-8 text-right">
+            ID do lote: <span id="id-lote-popup"></span>
+        </div>
+    </div>
+    <div id="fechar-popup" class="cursor-pointer bg-white text-gray-500 text-sm px-3 py-1 rounded-full opacity-70 hover:opacity-80 transition-all duration-600 flex flex-row gap-1 items-center">
+        <img class="h-5 grayscale" src="/images/icones/falha.png">
+        Fechar janela
+    </div>
+</div>
+
+
 <%- include('../partials/lotes', { lotes: lotes }) %>
 
 
@@ -21,3 +73,5 @@
   <img src="/images/icones/alert.png" class="w-7 h-7">
   <p class="text-xs text-gray-500">Alterações em lotes impactam apenas movimentações futuras.<br> O histórico e o CMV já registrados não são recalculados.</p>
 </a>
+
+

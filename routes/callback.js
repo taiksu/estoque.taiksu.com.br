@@ -30,6 +30,7 @@ router.get('/', async (req, res) => {
     req.session.cidade = userData.unidade ? userData.unidade.cidade : null;
     req.session.grupo_id = userData.grupo_id;
     req.session.token = token; // salva token na sessão
+    req.session.pin = userData.pin;
     req.session.save(); //Salva sessão
 
     res.redirect('/');

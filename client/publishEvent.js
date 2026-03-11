@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const EVENT_BROKER_BASE_URL = process.env.EVENT_BROKER_BASE_URL || 'http://127.0.0.1:3093';
 const EVENT_BROKER_PUBLISH_PATH = process.env.EVENT_BROKER_PUBLISH_PATH || '/api/event';
-const EVENT_BROKER_SERVICE_TOKEN = process.env.EVENT_BROKER_SERVICE_TOKEN || '';
+const EVENT_BROKER_SERVICE_TOKEN = process.env.SERVICE_TOKEN || '';
 
 async function publishEvent({ eventId, payload, userId, priority }) {
     // Implementar try-cath para tratar erros de conexão com o Event Broker

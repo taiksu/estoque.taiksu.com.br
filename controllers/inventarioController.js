@@ -2,6 +2,8 @@ const { LoteInsumo, QuantidadeMinima, Sequelize } = require('../models');
 const publishEvent = require('../client/publishEvent');
 const axios = require('axios');
 
+
+// Retorna lotes no inventário da loja
 exports.listarLotes = async (req, res) => {
     try {
 
@@ -73,50 +75,6 @@ exports.listarLotes = async (req, res) => {
     }
 };
 
-// Show de Lote Insumo
-exports.show = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-
-        // Encontra lotes do insumo
-        const lotes = await LoteInsumo.findAll({
-            where: {
-                insumo_id: id,
-                unidade_id: req.session.unidade_id
-            }
-        });
-
-        // Soma valor de todos os valotes
-        const valorTotal = lotes.reduce((acc, lote) => {
-            return acc + Number(lote.valor_total);
-        }, 0);
-
-        // Tem que desestruturar porque o findOrCreate retorna um array
-        const [quantidadeMinima, created] = await QuantidadeMinima.findOrCreate({
-            where: {
-                insumo_id: id,
-                unidade_id: req.session.unidade_id
-            },
-            defaults: {
-                quantidade: 0
-            }
-        });
-
-        // Busca informações do insumo
-        const response = await fetch(`https://insumos.taiksu.com.br/insumos/${id}`);
-        const insumo = await response.json();
-
-        res.locals.lotes = lotes;
-        res.locals.quantidadeMinima = quantidadeMinima;
-        res.locals.valorTotal = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        res.locals.insumo = insumo;
-        next();
-
-    } catch (error) {
-        console.error('Erro ao buscar insumo:', error);
-        res.status(500).json({ error: 'Erro ao buscar insumo' });
-    }
-};
 
 // Retorna lista de quantidades mínimas para a unidade
 exports.listarQuantidadesMinimas = async (req, res) => {

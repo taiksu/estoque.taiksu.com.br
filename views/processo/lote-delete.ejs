@@ -1,0 +1,76 @@
+<%- include('../components/breadcrumb', { link: '/historico/entradas', paginaAnterior: 'Entradas'}) %>
+<%- include('../components/popup/pinModal') %>
+
+<div class="flex flex-col gap-4 mt-5">
+    <div class="flex flex-col items-center gap-1 p-8 bg-white rounded-xl border border-gray-200">
+        <img class="h-20 w-20" src="/images/icones/delete.png" alt="Desfazer">
+        <h1 class="text-2xl font-semibold text-red-800">Excluir lote</h1>
+        <p class="text-gray-500 text-center">Este lote será zerado no estoque e não poderá mais ser utilizado.<br>
+As saídas relacionadas não serão removidas automaticamente e<br> devem ser desfeitas no <a class="text-green-600 underline hover:text-green-700" href="/historico/saidas">histórico.</a></p>
+    </div>
+
+    <div class="flex flex-col gap-1 bg-white rounded-xl border border-gray-200 p-6">
+        <select id="motivo" class="border border-gray-400 p-1 appearance-none rounded-md outline-none" id="motivo" name="motivo_cancelamento">
+        <option value="">Selecione o motivo</option>
+        <option value="Erro lancamento">Erro no lançamento</option>
+        <option value="Produto incorreto">Produto incorreto</option>
+        <option value="Quantidade incorreta">Quantidade informada incorreta</option>
+        <option value="Entrada duplicada">Entrada duplicada</option>
+        <option value="Nota incorreta">Nota fiscal incorreta</option>
+        <option value="Fornecedor errado">Fornecedor errado</option>
+        <option value="Devolucao fornecedor">Produto devolvido ao fornecedor</option>
+        </select>
+        <button id="excluir" class="mt-8 bg-red-600 hover:bg-red-700 transition-colors duration-200 text-white px-4 py-2 rounded-full cursor-pointer">Excluir lote</button>
+    </div>
+    <p class="text-xs text-gray-600 text-right">
+        ID da movimentação: <%= loteId %>
+    </p>
+</div>
+
+<script>
+    const pinModal = document.getElementById('pin-modal');
+    const confirmar = document.getElementById('confirmar-pin');
+    const pinInput = document.getElementById('pin-input');
+    const excluir = document.getElementById('excluir');
+    
+    excluir.addEventListener('click', () => {
+        pinModal.classList.remove('hidden');
+    });
+
+    excluir.addEventListener('click', () => {
+        if (!motivo.value) {
+            pinModal.classList.add('hidden');
+            alert('Selecione um motivo para prosseguir');
+        }
+    });
+
+    confirmar.addEventListener('click', () => {
+        if (pinInput.value !== '<%= userPin %>') {
+            alert('Pin incorreto');
+            return;
+        }
+
+        const motivo = document.getElementById('motivo').value;
+        if (motivo) {
+            fetch('https://estoque.taiksu.com.br/api/excluir/lote', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    motivo,
+                    responsavel_id: '<%= user_id %>',
+                    id: '<%= loteId %>'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+</script>

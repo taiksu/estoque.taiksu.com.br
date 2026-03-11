@@ -1,0 +1,49 @@
+<div class="flex flex-row items-center justify-between">
+    <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Estoque'}) %>
+    <a href="https://ajuda.taiksu.com.br/artigos/39bd5669-44c9-4442-819b-68c54ea8123f" target="_blank" class="flex flex-row items-center gap-1">
+        <img src="https://dre.taiksu.com.br/images/icones/ajuda.png" class="w-5 h-5">
+        <h1 class="text-sm text-gray-500">Ajuda</h1>
+    </a>
+</div>
+
+<div class="rounded-xl bg-white border border-gray-200 p-8 mt-5 flex flex-col group">
+    <img id="icone" src="/images/icones/historico.png" class="h-10 w-10 transition-rotate ease-in-out duration-900" />
+    <h2 class="font-semibold text-gray-600 text-lg mt-2">Deseja ver o histórico de qual tipo de movimentação?</h2>
+    <p class="text-gray-400 text-sm">Selecione entre saídas ou entradas para filtrar os registros</p>
+</div>
+
+<div class="flex flex-col gap-3 mt-5">
+
+    <a href="/historico/saidas" class="group w-full flex flex-col gap-4 rounded-xl bg-white border border-gray-200 px-8 py-6">
+        <div class="flex flex-row items-center justify-between">
+            <div class="flex flex-row items-center gap-2">
+                <img src="/images/icones/saida.png" class="h-7 group-hover:scale-110 transition-scale duration-300" />
+                <h3 class="font-semibold text-gray-600">Saídas</h3>
+            </div>
+
+            <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="h-5" />
+        </div>
+    </a>
+
+    <a href="/historico/entradas" class="group w-full flex flex-col gap-4 rounded-xl bg-white border border-gray-200 px-8 py-6">
+        <div class="flex flex-row items-center justify-between">
+            <div class="flex flex-row items-center gap-2">
+                <img src="/images/icones/entrada.png" class="h-7 group-hover:scale-110 transition-scale duration-300" />
+                <h3 class="font-semibold text-gray-600">Entradas</h3>
+            </div>
+
+            <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="h-5" />
+        </div>
+    </a>
+</div>
+
+
+
+<script>
+    const icone = document.getElementById('icone');
+    document.addEventListener('DOMContentLoaded', async function() {
+        setTimeout(() => {
+            icone.classList.add('-rotate-360');
+        }, 120);
+    });
+</script>

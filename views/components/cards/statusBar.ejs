@@ -13,10 +13,35 @@ if (data >= 6 && data < 12) {
 
 %>
 
-<div class="flex flex-row items-center justify-between mb-5">
+<style>
+    .statusbar{
+        opacity:0;
+        transform: translateY(10px);
+        transition: opacity .3s ease, transform .3s ease;
+    }
+
+
+    .statusbar.show{
+        opacity:1;
+        transform: translateY(0);
+    }
+</style>
+
+<div id="statusbar" class="statusbar flex flex-row items-center justify-between mb-5">
     <div class="flex flex-row items-center gap-4">
         <img class="md:w-8 md:h-8 w-9 h-9 rounded-full shadow-xl" src="<%= userFoto %>">
         <h1 class="hidden md:block text-xl font-medium text-gray-600"><%= saudacao %>, <span class="text-green-700 font-semibold"> <%= userNome.split(' ')[0] %> </span></h1>
     </div>
     <%- include('../buttons/indicadorAlerta') %>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const statusbar = document.getElementById("statusbar");
+
+        setTimeout(() => {
+            statusbar.classList.add("show");
+        }, 220);
+
+    });
+</script>

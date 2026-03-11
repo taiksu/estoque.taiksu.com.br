@@ -5,20 +5,24 @@
     </div>
 
     <div class="border border-gray-200 rounded-lg p-1 bg-white">
-              <% if (lotes.length === 0) { %>
+              <% if (lotesAtivos.length === 0) { %>
                 <div class="flex flex-col items-center justify-center p-16">
                   <img src="/images/icones/vazio.png" class="w-14 h-14 mb-4">
                   <p class="text-gray-600 text-lg font-semibold text-center">Nenhum lote encontrado</p>
                   <a href="/comprar" class="text-white bg-green-600 px-5 shadow-xl hover:shadow-none py-1 rounded-full hover:bg-green-700 transition-all mt-4 duration-300">Comprar agora</a>
                 </div>
               <% } else { %>
-                <% lotes.forEach(lote => { %>
-                <div class="hover:bg-gray-50 px-6 border-b border-gray-200 last:border-none flex flex-row justify-between items-center py-3">
+                <% lotesAtivos.forEach(lote => { %>
+                <div id="<%= lote.id %>" data-entrada="<%= lote.createdAt %>" class="lote-conteiner cursor-pointer hover:bg-gray-50 px-6 border-b border-gray-200 last:border-none flex flex-row justify-between items-center py-3">
                   <div class="flex flex-row gap-2 items-center">
                     <img id="foto-fornecedor-<%= lote.fornecedor_id %>" class="w-12 h-12 rounded-full border border-gray-200" src="#">
+                    <h2 class="hidden" id="nome-fornecedor-<%= lote.id%>"><%= lote.fornecedor_id %></h2>
+                    <h2 class="hidden" id="quantidade-original-<%= lote.id%>"><%= lote.quantidade_original %></h2>
+                    <h1 id="unidade-medida-<%= lote.id%>" class="hidden"><% if(insumo.unidade_medida === 'kg') { %>kg<% } else {%>uni<% } %></h1>
+                    <h3 class="hidden" id="responsavel-<%= lote.id%>"><%= lote.responsavel_id %></h3>
                     <div class="flex flex-col mt-1">
-                        <p id="quantidade-atual-insumo" class="text-gray-600 text-sm font-semibold"><% if(insumo.unidade_medida === 'kg') { %> <%= lote.quantidade.replace('.', ',') %> kg <% } else { %> <%= Number(lote.quantidade).toFixed(0) %> uni <% } %></p>
-                        <p class="text-gray-400 text-sm"><%= lote.data_entrada.toLocaleDateString('pt-BR') %></p>
+                        <p id="quantidade-atual-insumo" class="text-gray-600 text-md font-semibold"><% if(insumo.unidade_medida === 'kg') { %> <%= lote.quantidade.replace('.', ',') %> kg <% } else { %> <%= Number(lote.quantidade).toFixed(0) %> uni <% } %></p>
+                        <p class="text-gray-400 text-sm"><%= Number(lote.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %> /<% if(insumo.unidade_medida === 'kg') { %>kg <% } else { %>un. <% } %></p>
                     </div>
                   </div>
                   <div class="flex flex-row gap-6 items-center">
@@ -31,12 +35,45 @@
     </div>
 </div>
 
+<% if (lotesAcabados.length > 0) { %>
+<div class="w-full flex flex-col gap-1 mt-12">
+    <div class="flex flex-row items-center justify-between">
+        <h1 class="text-sm text-gray-500">Histórico de lotes</h1>
+        <p class="text-gray-500 text-sm"></p>
+    </div>
+    <% lotesAcabados.forEach(lote => { %>
+                <div class="opacity-70 bg-white rounded-md  px-6 border border-gray-200 flex flex-row justify-between items-center py-3">
+                  <div class="flex flex-row gap-2 items-center">
+                    <img id="foto-fornecedor-<%= lote.fornecedor_id %>" class="w-12 h-12 rounded-full border border-gray-200" src="#">
+                    <div class="flex flex-col mt-1">
+                        <p id="quantidade-atual-insumo" class="text-gray-600 text-sm font-semibold">Acabou em <%= new Date(lote.updatedAt).toLocaleString('pt-BR', { month: '2-digit', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }).replace('.', '').replace(',',' às') %></p>
+                    </div>
+                  </div>
+                  <div class="flex flex-row gap-6 items-center">
+                    <p id="preco-fornecedor-#" class="text-gray-400 font-normal"><%= Number(lote.valor_unitario * lote.quantidade_original).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></p>
+                    <img id="editar-preco-fornecedor-#" src="https://login.taiksu.com.br/frontend/img/seta.png" class=" h-6 cursor-pointer group-hover:scale-110 transition-all duration-300">
+                  </div>
+                </div>
+    <% }); %>
+</div>
+<% } %>
+
+
     <script>
       // Popula foto do fornecedor
-      
       document.addEventListener('DOMContentLoaded', async function() {
         const fotosFornecedores = document.querySelectorAll('[id^="foto-fornecedor-"]');
-        
+        const nomesFornecedores = document.querySelectorAll('[id^="nome-fornecedor-"]');
+        const lotes = document.querySelectorAll('.lote-conteiner');
+        const modal = document.getElementById('lote-modal');
+        const idLotePopup = document.getElementById('id-lote-popup');
+        const fornecedorPopup = document.getElementById('fornecedor-popup');
+        const dataEntradaLote = document.getElementById('data-entrada-lote');
+        const quantidadeOriginalPopup = document.getElementById('quantidade-original-popup');
+        const responsavelPopup = document.getElementById('responsavel-entrada');
+        const responsavelFoto = document.getElementById('responsavel-popup');
+        const btnDeleteLote = document.getElementById('btn-excluir-lote');
+
         // Busca fornecedores na API
         const response = await fetch('https://insumos.taiksu.com.br/fornecedores');
         const fornecedores = await response.json();
@@ -45,6 +82,77 @@
           const fornecedorId = fotoFornecedor.id.split('-')[2];
           const fornecedor = fornecedores.find(fornecedor => fornecedor.id == fornecedorId);
           fotoFornecedor.src = 'https://insumos.taiksu.com.br/images/fornecedores/' + fornecedor.logo_path;
+        });
+
+        nomesFornecedores.forEach(nomeFornecedor => {
+          const fornecedorId = nomeFornecedor.id.split('-')[2];
+          const fornecedor = fornecedores.find(fornecedor => fornecedor.id == fornecedorId);
+        });
+
+        // Clique para abrir popup lote
+        lotes.forEach(lote => {
+          lote.addEventListener('click', async () => {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            idLotePopup.textContent = lote.id;
+            btnDeleteLote.href = '/processo/excluir/lote/' + lote.id;
+            const unidadeMedida = document.getElementById('unidade-medida-' + lote.id).textContent
+            const quantidadeOriginal = document.getElementById('quantidade-original-' + lote.id).textContent;
+            const responsavel = document.getElementById('responsavel-' + lote.id);
+            const responsavelId = responsavel.textContent;
+
+            let quantidadeFormatada;
+            console.log('unidade de medida encontrada:', unidadeMedida)
+
+            // Formata de acordo com tipo de unidade de medida
+            if (unidadeMedida == 'kg') {
+              quantidadeFormatada = quantidadeOriginal.replace('.', ',') + ' kg';
+            } else {
+              quantidadeFormatada = Number(quantidadeOriginal).toFixed(0) + ' unidade(s)'
+            }
+
+            // Busca dados dos responsave
+            const responsavelResponse = await fetch(`https://login.taiksu.com.br/api/users/${responsavelId}`, {
+              headers: {
+                'Authorization': 'Bearer <%= userToken %>'
+              }
+            })
+
+            const dataResponsavel = await responsavelResponse.json();
+
+            console.log(dataResponsavel);
+
+        
+            console.log('Quantidade formatadada:', quantidadeFormatada)
+            quantidadeOriginalPopup.textContent = quantidadeFormatada;
+            responsavelPopup.textContent = dataResponsavel.name.split(' ', 1);
+            const fornecedorId = document.getElementById('nome-fornecedor-' + lote.id).textContent;
+            const fornecedor = fornecedores.find(fornecedor => fornecedor.id == fornecedorId);
+            responsavelFoto.src = 'https://login.taiksu.com.br/frontend/profiles/' + dataResponsavel.profile_photo_path;
+
+          // Busca fornecedores na API
+          const response = await fetch(`https://insumos.taiksu.com.br/fornecedores/${fornecedorId}`);
+          const fornecedorResponse = await response.json();
+          console.log(fornecedorResponse)
+            
+
+
+            fornecedorPopup.textContent = fornecedorResponse.nome;
+            dataEntradaLote.textContent = new Date(lote.dataset.entrada).toLocaleString('pt-BR', {day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: 'numeric'});
+          });
+        });
+
+        const close = document.getElementById('fechar-popup');
+        close.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        });
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
         });
       });
     </script>

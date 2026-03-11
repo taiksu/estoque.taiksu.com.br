@@ -1,32 +1,68 @@
+<style>
+    .menu-card{
+        opacity:0;
+        transform: translateY(10px);
+        transition: opacity .2s ease, transform .4s ease;
+    }
+
+    .menu-card.show{
+        opacity:1;
+        transform: translateY(0);
+    }
+</style>
+
 <div class="w-full flex flex-row items-center justify-between my-6 md:px-0 px-2">
-    <a href="/comprar" class="flex flex-col items-center gap-2">
+
+    <a href="/comprar" class="menu-card flex flex-col items-center gap-2">
         <div class="bg-white md:p-8 p-4 rounded-full border border-gray-200 hover:bg-orange-100">
-            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/comprar.png" alt="">
+            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/comprar.png">
         </div>
         <p class="text-gray-600 md:text-sm text-xs font-medium">Comprar</p>
     </a>
-    <div class="hidden md:flex flex-col items-center gap-2">
+
+    <a href="/historico" class="menu-card hidden md:flex flex-col items-center gap-2">
         <div class="bg-white md:p-8 p-4 rounded-full border border-gray-200 hover:bg-blue-100">
-            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/historico.png" alt="">
+            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/historico.png">
         </div>
         <p class="text-gray-600 md:text-sm text-xs font-medium">Histórico</p>
-    </div>
-    <div class="flex flex-col items-center gap-2">
+    </a>
+
+    <div class="menu-card flex flex-col items-center gap-2">
         <div class="bg-white md:p-8 p-4 rounded-full border border-gray-200 hover:bg-yellow-100">
-            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/balanco.png" alt="">
+            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/balanco.png">
         </div>
         <p class="text-gray-600 md:text-sm text-xs font-medium">Balanço</p>
     </div>
-    <div class="flex flex-col items-center gap-2">
+
+    <div class="menu-card flex flex-col items-center gap-2">
         <div class="bg-white md:p-8 p-4 rounded-full border border-gray-200 hover:bg-red-100">
-            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/saida.png" alt="">
+            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/saida.png">
         </div>
         <p class="text-gray-600 md:text-sm text-xs font-medium">Saída</p>
     </div>
-    <a href="/entrada" class="flex flex-col items-center gap-2">
+
+    <a href="/entrada" class="menu-card flex flex-col items-center gap-2">
         <div class="bg-white md:p-8 p-4 rounded-full border border-gray-200 hover:bg-green-100">
-            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/entrada.png" alt="">
+            <img class="md:h-9 md:w-9 h-7 w-7" src="/images/icones/entrada.png">
         </div>
         <p class="text-gray-600 md:text-sm text-xs font-medium">Entrada</p>
     </a>
+
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const cards = document.querySelectorAll(".menu-card");
+
+        setTimeout(() => {  
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add("show");
+                }, index * 100);
+            });
+
+        }, 450);
+
+    });
+</script>

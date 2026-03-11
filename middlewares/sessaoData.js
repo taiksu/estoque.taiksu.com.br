@@ -7,6 +7,7 @@ function sessaoData(req, res, next) {
     res.locals.user_id = req.session.id_user
     res.locals.userToken = req.session.token || null;
     res.locals.unidade_id = req.session.unidade_id || null;
+    res.locals.userPin = req.session.pin || null;
 
     if (req.session.id_user == null) {
         res.redirect('https://login.taiksu.com.br');

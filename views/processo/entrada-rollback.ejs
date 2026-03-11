@@ -1,0 +1,76 @@
+<%- include('../components/breadcrumb', { link: '/historico/entradas', paginaAnterior: 'Entradas'}) %>
+<%- include('../components/popup/pinModal') %>
+
+<div class="flex flex-col gap-4 mt-5">
+    <div class="flex flex-col items-center gap-1 p-8 bg-white rounded-xl border border-gray-200">
+        <img class="h-24 w-24" src="/images/icones/desfazer.png" alt="Desfazer">
+        <h1 class="text-2xl font-semibold text-green-800">Desfazer Entrada</h1>
+        <p class="text-gray-500 text-center">Ao desfazer esta entrada, o estoque do lote será removido.<br> Saídas feitas com esse lote continuarão registradas<br> até serem desfeitas manualmente.</p>
+    </div>
+
+    <div class="flex flex-col gap-1 bg-white rounded-xl border border-gray-200 p-6">
+        <select id="motivo" class="border border-gray-400 p-1 appearance-none rounded-md outline-none" id="motivo" name="motivo_cancelamento">
+        <option value="">Selecione o motivo</option>
+        <option value="Erro lancamento">Erro no lançamento</option>
+        <option value="Produto incorreto">Produto incorreto</option>
+        <option value="Quantidade incorreta">Quantidade informada incorreta</option>
+        <option value="Entrada duplicada">Entrada duplicada</option>
+        <option value="Nota incorreta">Nota fiscal incorreta</option>
+        <option value="Fornecedor errado">Fornecedor errado</option>
+        <option value="Devolucao fornecedor">Produto devolvido ao fornecedor</option>
+        <option value="Criacao por engano">Entrada criada por engano</option>
+        </select>
+        <button id="desfazer" class="mt-8 bg-green-600 hover:bg-green-700 transition-colors duration-200 text-white px-4 py-2 rounded-full cursor-pointer">Desfazer Entrada</button>
+    </div>
+    <p class="text-xs text-gray-600 text-right">
+        ID da movimentação: <%= entradaId %>
+    </p>
+</div>
+
+<script>
+    const pinModal = document.getElementById('pin-modal');
+    const confirmar = document.getElementById('confirmar-pin');
+    const pinInput = document.getElementById('pin-input');
+    const desfazer = document.getElementById('desfazer');
+    
+    desfazer.addEventListener('click', () => {
+        pinModal.classList.remove('hidden');
+    });
+
+    desfazer.addEventListener('click', () => {
+        if (!motivo.value) {
+            pinModal.classList.add('hidden');
+            alert('Selecione um motivo para prosseguir');
+        }
+    });
+
+    confirmar.addEventListener('click', () => {
+        if (pinInput.value !== '<%= userPin %>') {
+            alert('Pin incorreto');
+            return;
+        }
+
+        const motivo = document.getElementById('motivo').value;
+        if (motivo) {
+            fetch('https://movimentacoes.taiksu.com.br/api/desfazer/entrada', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    motivo,
+                    responsavel_id: '<%= user_id %>',
+                    id: '<%= entradaId %>'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+</script>

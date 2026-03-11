@@ -1,0 +1,53 @@
+<div id="pin-modal" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center px-8 justify-center">
+    <div class="max-w-sm w-full bg-white rounded-xl p-8 border border-gray-200">
+        <div class="flex flex-row items-center gap-5 mb-12">
+        <img src="https://login.taiksu.com.br/frontend/img/pin.png" class="w-12 h-12 p-3 rounded-xl bg-gray-200">
+            <div class="flex flex-col gap-0">
+                <h2 class="text-gray-700 font-semibold text-lg">Autenticação obrigatória</h2>
+                <p class="text-gray-500 text-sm">Informe seu PIN para confirmar.</p>
+            </div>
+        </div>
+
+        <input type="password" id="pin-input" class="w-full border border-gray-400 p-2 appearance-none rounded-md outline-none">
+        <div class="mt-4 text-xs text-gray-400 text-right"><%= userNome %></div>
+        <button id="confirmar-pin" class="w-full mt-8 bg-gray-600 hover:bg-gray-700 transition-colors duration-200 text-white px-4 py-2 rounded-full cursor-pointer">Confirmar</button>
+    </div>
+    <div id="fechar-popup" class="cursor-pointer bg-white text-gray-500 text-sm px-3 py-1 rounded-full opacity-70 hover:opacity-80 transition-all duration-600 flex flex-row gap-1 items-center">
+        <img class="h-5 grayscale" src="/images/icones/falha.png">
+        Fechar janela
+    </div>
+</div>
+
+<script>
+const modal = document.getElementById('pin-modal');
+const lotes = document.getElementById('lotes-movimentacao');
+const close = document.getElementById('fechar-popup');
+const pin = '<%= userPin %>';
+
+
+close.addEventListener('click', (event) => {
+    if (event.target === close) {
+        fecharModal();
+    }
+});
+
+// fechar clicando no background
+modal.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        fecharModal();
+    }
+});
+
+
+// Fecha modal apertando ESC
+document.addEventListener('keydown', (e) => {
+if (e.key === 'Escape') {
+    fecharModal();
+}});
+
+function fecharModal() {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    lotes.innerHTML = '';
+}
+</script>

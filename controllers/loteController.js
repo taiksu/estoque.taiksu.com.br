@@ -51,6 +51,98 @@ exports.excluir = async (req, res) => {
     }
 };
 
+// Zerar lote - Action
+exports.desfazer = async (req, res) => {
+    try {
+        const { lote_id, responsavel_id } = req.body;
+        console.log('Excluindo lote agora...')
+
+        const lote = await sequelize.transaction(async (t) => {
+            const lote = await LoteInsumo.findOne({
+                where: {
+                    id: lote_id
+                },
+                transaction: t
+            });
+
+            if (!lote) {
+                return res.status(404).json({ error: 'Lote não encontrado' });
+            }
+
+            await lote.update({
+                quantidade: 0,
+                valor_total: 0,
+                responsavel_id
+            }, {
+                transaction: t
+            });
+
+            return lote;
+        });
+
+        publishEvent({
+            eventId: 88,
+            payload: {
+                motivo,
+                lote,
+                responsavel_cancelamento,
+                id
+            },
+            userId: req.session.id_user,
+            priority: 'high'
+        })
+
+        res.status(200).json({ success: true, message: 'Lote excluído com sucesso' });
+
+    } catch (error) {
+        console.log('Erro ao excluir lote:', error)
+    }
+};
+
+// Cancelamento de limpeza - remover lote
+exports.excluirLimpeza = async (req, res) => {
+    try {
+        const { id } = req.body;
+        console.log('Excluindo lote da limpeza de salmão agora...')
+
+        const lote = await sequelize.transaction(async (t) => {
+            const lote = await LoteInsumo.findOne({
+                where: {
+                    id
+                },
+                transaction: t
+            });
+
+            if (!lote) {
+                return res.status(404).json({ error: 'Lote não encontrado' });
+            }
+
+            await lote.update({
+                quantidade: 0,
+                valor_total: 0,
+                responsavel_id: 0
+            }, {
+                transaction: t
+            });
+
+            return lote;
+        });
+
+        publishEvent({
+            eventId: 89,
+            payload: {
+                lote
+            },
+            userId: req.session.id_user,
+            priority: 'high'
+        })
+
+        res.status(200).json({ success: true, message: 'Lote excluído com sucesso' });
+
+    } catch (error) {
+        console.log('Erro ao excluir lote:', error)
+    }
+};
 
 
 // Exibir todos lotes de um item

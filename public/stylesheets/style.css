@@ -13,3 +13,12 @@ body {
 .animate-fade-in {
   animation: fade-in 0.6s ease-out;
 }
+
+    .noscrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .noscrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }

@@ -16,8 +16,10 @@ document.addEventListener("DOMContentLoaded", async function() {
         const inventario = await response.json();
         const container = document.getElementById("inventario-container");
         const valorTotalEstoque = document.getElementById("valor-total-estoque");
-
-        valorTotalEstoque.innerText = inventario.valor_total_estoque.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        valorTotalEstoque.textContent = inventario.valor_total_estoque.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
 
         // 🔹 Agrupa por categoria
         const categorias = {};
@@ -37,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
             categoriaDiv.innerHTML = `
                     <h2 class=" text-sm text-gray-500">${categoria}</h2>
-                    <div class=" flex flex-col gap-3">
+                    <div class="flex flex-col gap-3">
                     ${categorias[categoria].map(insumo => {
 
                         let quantidade = insumo.quantidade || 0;

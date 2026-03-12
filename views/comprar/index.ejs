@@ -1,6 +1,10 @@
-<div class="flex flex-row items-center justify-between">
+<div class="flex flex-row items-center justify-between mb-6">
     <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Estoque'}) %>
     <%- include('../components/buttons/carrinho') %>
+</div>
+
+<div id="fornecedores-container" class="w-full flex flex-row gap-8 overflow-x-scroll my-3 noscrollbar">
+<!-- Fornecedores serão populados aqui com JS-->
 </div>
 
 <%- include('../components/searchBox', { placeholder: 'Pesquisar insumo' }) %>
@@ -21,6 +25,24 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        const fornecedoresContainer = document.getElementById('fornecedores-container');
+
+        const response = await fetch('https://insumos.taiksu.com.br/fornecedores')
+        const fornecedores = await response.json();
+
+        fornecedores.forEach(fornecedor => {
+            const divFornecedor = document.createElement('div');
+            divFornecedor.className = 'flex-shrink-0 flex flex-col items-center gap-2';
+            divFornecedor.innerHTML = `
+                <img src="https://insumos.taiksu.com.br/images/fornecedores/${fornecedor.logo_path}" class="h-24 w-24 object-contain rounded-full bg-white border border-gray-200">
+                <h2 class="text-xs text-gray-600">${fornecedor.nome}</h2>
+            `;
+            fornecedoresContainer.appendChild(divFornecedor);
+        });
+    });
+</script>
 
 
 
@@ -54,20 +76,23 @@
             divCategoria.className = 'flex flex-col gap-1 my-4 categoria-insumos';
             divCategoria.innerHTML = `
                 <h2 class="text-sm text-gray-500">${categoria}</h2>
-                <div class="flex flex-col gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     ${categorias[categoria].map(insumo => `
-                            <div data-insumo-id="${insumo.id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
+                            <div data-insumo-id="${insumo.id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl px-6 py-8 hover:shadow-lg transition-all duration-400">
 
-                                <div class="flex flex-row items-center gap-2">
-                                    <img class="insumo-foto md:h-12 md:w-12 h-10 w-10 rounded-md bg-white group-hover:scale-110 transition-all duration-400" 
+                                <div class="w-full flex flex-col items-center justify-between">
+                                    <img class="insumo-foto md:h-32 md:w-32 h-16 w-16 rounded-md bg-white" 
                                          src="https://insumos.taiksu.com.br/${insumo.foto_url}">
                                     
-                                    <div class="flex flex-col gap-0">
-                                        <h3 class="insumo-nome md:text-md text-sm text-gray-600 font-medium">
-                                            ${insumo.nome}
+                                    <div class="w-full flex flex-col gap-0">
+                                        <h3 class="mt-4 w-full insumo-nome md:text-sm text-md text-gray-600 font-medium">
+                                            ${insumo.nome.length > 26 ? insumo.nome.substring(0, 24) + '...' : insumo.nome} 
                                         </h3>
-
+                                        <h4 class="text-xs text-gray-500">
+                                            ${insumo.marca.nome}
+                                        </h4>
                                     </div>
+                                    <div class="mt-8 w-full text-white bg-green-600 rounded-full text-center py-1 hover:bg-green-700 transition-all duration-300">Adicionar</div>
                                 </div>
 
 

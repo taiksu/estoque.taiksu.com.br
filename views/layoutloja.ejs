@@ -5,16 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title id="title-tag"><%= title %> - Gestão de Estoque</title>
         <meta name="theme-color" content="#2c8516ff" />
-        <link rel="stylesheet" href="/stylesheets/tailwind.css?time=<%= new Date().getTime() %>">
+        <link rel="stylesheet" href="/stylesheets/tailwind.css">
         <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
-        <script src="/javascripts/menu.js?time=<%= new Date().getTime() %>" defer></script>
+        <script src="/javascripts/menu.js" defer></script>
     </head>
 
     <%- include('partials/header') %>
-    <body class="max-w-2xl min-h-screen mx-auto mt-28 mb-10 px-8">
-        <a href="https://ajuda.taiksu.com.br/callback?token=<%= userToken %>&categoria=90">
-<img class="w-full rounded-xl mb-5 border border-gray-200" src="/images/banners/lancamento.png" alt="">
-</a>
+    <body class="max-w-3xl min-h-screen mx-auto mt-28 mb-10 px-8">
         <%- body %>
          <%- include('partials/menu') %>
     </body>

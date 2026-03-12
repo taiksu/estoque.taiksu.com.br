@@ -71,4 +71,40 @@ exports.manual = async (req, res) => {
         console.error(error);
         res.status(500).json({ success: false, error: 'Erro ao finalizar lista de entrada' });
     }
-}
+};
+
+// Processa limpeza de salmao
+exports.salmao = async (req, res) => {
+    try {
+        const { unidade_id, id, peso_limpo, responsavel_id, fornecedor, valor_caixa } = req.body;
+
+        const valorKgRecalculado = Number(valor_caixa) / Number(peso_limpo)
+
+        const lote = await LoteInsumo.create({
+                id,
+                insumo_id: 159,
+                quantidade: peso_limpo,
+                quantidade_original: peso_limpo,
+                valor_unitario: valorKgRecalculado,
+                valor_total: valor_caixa,
+                fornecedor_id: fornecedor,
+                unidade_id,
+                responsavel_id,
+                grupo_id: id
+        })
+        
+
+        //evento 87
+        publishEvent({
+            eventId: 87,
+            payload: {
+                lote
+            },
+            userId: responsavel_id,
+            priority: 'urgent'
+        });
+
+    } catch (error) {
+        
+    }
+};

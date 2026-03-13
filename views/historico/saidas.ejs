@@ -1,0 +1,317 @@
+<style>
+    #conteiner-grande{
+        opacity:0;
+        transform: translateY(10px);
+        transition: opacity .2s ease-in-out, transform .2s ease-in-out;
+    }
+
+    #conteiner-grande.show{
+        opacity:1;
+        transform: translateY(0);
+    }
+
+</style>
+
+<div class="flex flex-row items-center justify-between">
+    <%- include('../components/breadcrumb', { link: '/historico', paginaAnterior: 'Histórico'}) %>
+    <%- include('../components/dateSelector/index', { mes: new Date().getMonth(), ano: new Date().getFullYear() }) %>
+</div>
+
+<%- include('../components/popup/detalhesMovimentacao'); %>
+<div id="conteiner-grande">
+    <div id="card-total-saidas" class="mt-5 w-full group w-full bg-white rounded-xl flex flex-col gap-1 md:px-12 p-6 md:py-10 border border-gray-200">
+        <div class="flex flex-row items-center gap-1 items-center">
+            <h2 class="text-gray-500 text-sm">Total em saídas</h2>
+            <img id="icone-total-saidas" src="https://media.tenor.com/WX_LDjYUrMsAAAAi/loading.gif" alt="Icone do card" class="hidden w-4 h-4">
+        </div>
+        <p id="valor-total-saidas" class="md:text-5xl text-3xl font-extrabold text-gray-600 transition-colors duration-300"></p>
+    </div>
+
+
+    <div id="lista-movimentacoes" class="flex flex-col gap-3 w-full mt-5">
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+
+        // DATE SELECTOR BUTTON
+        const prevBtn = document.getElementById('prev-month-btn');
+        const nextBtn = document.getElementById('next-month-btn');
+        const dateDisplay = document.getElementById('date-display');
+        const monthDisplay = document.getElementById('month-display');
+        const yearDisplay = document.getElementById('year-display');
+        const listaMovimentacoes = document.getElementById('lista-movimentacoes');
+        const popupDetalhes = document.getElementById('detalhes-movimentacao');
+        const totalSaidas = document.getElementById('valor-total-saidas');
+        const lotesContainer = document.getElementById('lotes-movimentacao');
+        const conteinerGrande = document.getElementById('conteiner-grande');
+        let valorTotalSaidas = 0;
+
+
+        //INTERACTIONS
+        prevBtn.addEventListener('click', () => changeMonth(-1));
+        nextBtn.addEventListener('click', () => changeMonth(1));
+
+        // Carrega dados iniciais
+        changeMonth(1);
+
+        function updateView(data) {
+            console.log('Dados passados para a updateView:', data);
+            dateDisplay.dataset.mes = data.mes;
+            dateDisplay.dataset.ano = data.ano;
+            monthDisplay.textContent = data.mes_formatado;
+            yearDisplay.textContent = data.ano;
+            totalSaidas.textContent = data.valor_total_saidas.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            const movimentacoes_lista = data.movimentacoes_agrupadas;
+
+            if(Object.keys(data.movimentacoes_agrupadas).length == 0) {
+                console.log('vazio')
+                listaMovimentacoes.innerHTML = `
+                <div class="bg-white rounded-xl border border-gray-200 p-10 flex flex-col items-center gap-3">
+                <img class="w-16 h-16" src="/images/icones/mes.png">
+                <h1 class="text-lg font-semibold text-gray-600 text-center">
+                    Nenhuma movimentação
+                </h1>
+                </div>`;
+                return;
+            }
+
+            // Popula lista
+            listaMovimentacoes.innerHTML = '';
+            Object.values(data.movimentacoes_agrupadas).forEach(grupo => {
+                let transparencia
+                const itensConfirmados = grupo.filter(item => item.status == 'confirmada');
+                const quantidade_itens = itensConfirmados.length ? itensConfirmados.length + ' itens' : 'Cancelada integralmente'
+                const responsavelId = grupo[0].responsavel_id
+                const item = document.createElement('div');
+
+                if (itensConfirmados.length == 0) {
+                    transparencia = 'opacity-50';
+                }
+
+                item.classList.add('border', 'bg-white', 'hover:shadow-lg', 'transition-shadow', 'duration-300', 'border-gray-200', 'rounded-xl', 'flex', 'flex-col', 'gap-3');
+                item.innerHTML = `
+                    <button class="${transparencia} cursor-pointer p-4" id="detalhes-movimentacao-${grupo[0].grupo_id}" data-movimentacao-id="${grupo[0].grupo_id}">
+                        <div class="flex flex-row items-center justify-between mb-3">
+                        <div class="flex flex-row items-center gap-2">
+                                <h1 class="font-semibold text-lg text-gray-600">${quantidade_itens}</h1>
+                                •
+                                <h1 class="text-sm text-gray-500 mt-1">${itensConfirmados.reduce((acc, movimentacao) => acc + Number(movimentacao.valor_total), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h1>
+                        </div>
+                        <div class="cursor-pointer flex flex-row items-center gap-2 rounded-full border border-green-600 bg-green-50 hover:bg-green-100 text-green-800 px-3 py-0.5 transition-color duration-300">
+                            <img class="h-5 w-5" src="https://login.taiksu.com.br/applications/6967173ec2616.png">
+                            <h4>
+                                Detalhes
+                            </h4>
+                        </div>
+                        </div>
+                    
+                        <div>
+                        <div class="flex flex-row justify-between border-t border-gray-100 text-sm pt-3">
+                            <div class="flex flex-row items-center gap-2">
+                                <img data-user-id="${responsavelId}" class="h-5 w-5 rounded-full" src="">
+                                <span data-user-id="${responsavelId}" class="font-medium mt-0.5">Username</span>
+                            </div>
+                            <p class="text-gray-500">${new Date(grupo[0].data_movimentacao).toLocaleString('pt-BR', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).replace('.', '').replace(',',' às')}</p>
+                        </div>
+                        </div>
+                    </button>
+                `;
+                listaMovimentacoes.appendChild(item);
+            });
+
+            // Dados dos usuários
+            const users = document.querySelectorAll('span[data-user-id]');
+            const images = document.querySelectorAll('img[data-user-id]');
+            const profile = document.getElementById('profile');
+            users.forEach(user => {
+                const id = user.dataset.userId;
+                fetch('https://login.taiksu.com.br/api/users/' + id,
+                {
+                    method: 'GET',
+                    headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer <%= userToken %>'
+                    }
+                }
+                )
+                .then(response => response.json())
+                .then(data => {
+                    user.textContent = data.name.split(' ')[0];
+                    images.forEach(image => {
+                    if (image.dataset.userId === id) {
+                        image.src = 'https://login.taiksu.com.br/frontend/profiles/' + data.profile_photo_path;
+                    }
+                    });
+                    if (profile) {
+                    profile.src = 'https://login.taiksu.com.br/frontend/profiles/' + data.profile_photo_path;
+                    username.textContent = data.name;
+                    }
+                });
+            });
+
+            // ADICIONA CLIQUE NO BOTÃO DETALHES
+            const detalhesButton = document.querySelectorAll('button[data-movimentacao-id]');
+            detalhesButton.forEach(botao => {
+                const grupo_id = botao.dataset.movimentacaoId;
+
+                botao.addEventListener('click', () => {
+                    abrirDetalhesMovimentacao(grupo_id);
+                });
+            });
+
+            // POPUP DETALHES (DECLAREI DEPOIS, MAS FUNCTION SOBE NO ESCOPO -  HOISTING)
+            async function abrirDetalhesMovimentacao(id) {
+                lotesContainer.innerHTML = '';
+                const idGrupo = document.getElementById('id-grupo');
+                idGrupo.textContent = id;
+                popupDetalhes.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Desativa rolagem da página atrás
+
+                const lotes = movimentacoes_lista[id]; // pega apenas o grupo clicado
+
+                if (!lotes) return;
+
+                lotes.forEach(lote => {
+                    const loteMovimentacao = document.createElement('div');
+                    const status = lote.status;
+                    let visibilidade = 'block';
+                    loteMovimentacao.classList.add('border', 'border-gray-200', 'rounded-md');
+
+                    if (status == 'cancelada') {
+                        loteMovimentacao.innerHTML = `
+                        <div class="opacity-50 cursor-not-allowed flex flex-row items-center justify-between p-3 text-gray-400">
+                            <div class="flex flex-row items-center gap-2">
+                                <a href="/inventario/${lote.insumo_id}">
+                                    <img id="image-${lote.insumo_id}" src="https://login.taiksu.com.br/frontend/profiles/${lote.responsavel_id}" class="border border-gray-100 h-12 w-12 rounded-lg">
+                                </a>
+                                <div class="insumo-info flex flex-col" id="${lote.insumo_id}">
+                                <span class="text-gray-700 font-semibold" id="nome-${lote.insumo_id}">--</span>
+                                <span >${Number(lote.quantidade)} <span id="unidade-medida-${lote.insumo_id}">--</span> x ${Number(lote.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-row items-center gap-2">
+                            <span>${Number(lote.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            <button class="flex flex-row items-center gap-2 rounded-full text-gray-500 px-3 py-0.5">
+                                <img class="h-5 w-5" src="/images/icones/falha.png">
+                                    Cancelada
+                            </button>
+                            </div>
+                        </div>
+                        `;
+                    } else {
+                        loteMovimentacao.innerHTML = `
+                        <div class="flex flex-row items-center justify-between p-3 text-gray-500">
+                            <div class="flex flex-row items-center gap-2">
+                                <a href="/inventario/${lote.insumo_id}">
+                                    <img id="image-${lote.insumo_id}" src="https://login.taiksu.com.br/frontend/profiles/${lote.responsavel_id}" class="border border-gray-100 h-12 w-12 rounded-lg">
+                                </a>
+                                <div class="insumo-info flex flex-col" id="${lote.insumo_id}">
+                                <span class="text-gray-700 font-semibold" id="nome-${lote.insumo_id}">--</span>
+                                <span >${Number(lote.quantidade)} <span id="unidade-medida-${lote.insumo_id}">--</span> x ${Number(lote.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-row items-center gap-2">
+                            <span class="font-medium text-green-700">${Number(lote.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            <a href="/processo/desfazer/entrada/${lote.id}" class="flex flex-row items-center gap-2 rounded-full border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 px-3 py-0.5 transition-color duration-300 cursor-pointer">
+                                <img class="h-5 w-5" src="/images/icones/desfazer.png">
+                                    Desfazer
+                                </a>
+                            </a>
+                            </div>
+                        </div>
+                        `;
+                    }
+
+                    lotesContainer.appendChild(loteMovimentacao);
+                });
+
+                async function infoInsumos() {
+                    const insumosLista = await document.querySelectorAll('.insumo-info')
+            
+                    for await (const insumo of insumosLista) {
+                        const id = insumo.id
+                        const insumo_name = await document.querySelector('#nome-' + id)
+                        const unidadeMedida = await document.querySelector('#unidade-medida-' + id);
+                        const image = await document.querySelector('#image-' + id);
+
+                        const response = await fetch(`https://insumos.taiksu.com.br/insumos/${id}`,
+                        {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+
+                        });
+
+                        const data = await response.json()
+                        console.log(data)
+                        insumo_name.textContent = data.nome;
+                        image.src = 'https://insumos.taiksu.com.br' + data.foto_url;
+
+                        if (data.unidade_medida == 'uni') { 
+                            unidadeMedida.textContent = 'uni'
+                        } else {
+                            unidadeMedida.textContent = 'kg'
+                        }
+
+                        console.log(data)
+
+                    }
+                }    
+                
+                infoInsumos();
+            }
+        }
+
+
+        // FUNÇÃO TROCAR MÊS
+        async function changeMonth(delta) {
+            let mes = parseInt(dateDisplay.dataset.mes);
+            let ano = parseInt(dateDisplay.dataset.ano);
+
+            const currentDate = new Date(ano, mes, 1);
+            currentDate.setMonth(currentDate.getMonth() + delta);
+
+            const newMes = currentDate.getMonth();
+            const newAno = currentDate.getFullYear();
+            const unidade = '<%= unidade_id %>';
+
+            dateDisplay.dataset.mes = newMes;
+            dateDisplay.dataset.ano = newAno;
+
+            try {
+                const res = await fetch(`https://movimentacoes.taiksu.com.br/api/saidas?unidade=${unidade}&mes=${newMes}&ano=${newAno}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                
+
+                const data = await res.json();
+                updateView(data);
+
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao atualizar dados');
+            }
+        }
+
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModal();
+            }
+        });
+
+        // Fade-in Effect
+        setTimeout(() => {  
+            conteinerGrande.classList.add("show");
+        }, 600);
+
+
+    });
+</script>

@@ -28,6 +28,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    valor_total: {
+      type: DataTypes.DECIMAL(8, 2),
+      allowNull: true,
+      defaultValue: 0,
+      comment: 'Valor total da saída para CMV',
+      after: 'responsavel_id'
+    },
     status: {
       type: DataTypes.ENUM('pendente', 'concluida'),
       defaultValue: 'pendente'

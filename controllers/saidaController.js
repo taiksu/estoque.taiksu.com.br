@@ -39,6 +39,7 @@ exports.saidaManual = async (req, res) => {
                 ]
             });
 
+
             // Verifica se tem estoque suficiente
             const totalEmEstoque = lotes.reduce((acc, lote) => acc + Number(lote.quantidade), 0);
             console.log('Total em estoque', totalEmEstoque);
@@ -47,15 +48,23 @@ exports.saidaManual = async (req, res) => {
             console.log('tipo do quantidade_retirada', typeof item.quantidade);
             let quantidadeRestante = Number(item.quantidade);
 
-            // Verifica se tem estoque suficiente
-            if(totalEmEstoque < item.quantidade) {
+            if(totalEmEstoque < Number(item.quantidade)) {
+                // Remove item da lista de saida
+                await InsumoSaida.destroy({
+                    where: {
+                        id: item.id
+                    }
+                });
+
+                // Retorna o erro para o front
                 console.log('Estoque insuficiente para a retirada');
                 return res.status(400).json({
                     success: false,
                     mensagem: "Estoque insuficiente para a retirada",
+                    motivo:'estoque-baixo',
                     insumo_id: item.insumo_id,
                     quantidade_retirada: item.quantidade,
-                    totalEmEstoque: totalEmEstoque
+                    total_em_estoque: totalEmEstoque
                 });
                 
                 
@@ -76,7 +85,6 @@ exports.saidaManual = async (req, res) => {
                         });
                     }
                 }
-                
             }
         }
 

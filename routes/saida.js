@@ -5,7 +5,8 @@ router.get('/', function(req, res, next) {
     res.render('saida/index', { title: 'Saída' });
 });
 
-router.get('/revisar', function(req, res, next) {
+
+router.get('/manual/revisar', function(req, res, next) {
     res.render('saida/revisar', { title: 'Revisar saída' });
 });
 

@@ -1,0 +1,53 @@
+<%- include('../components/toast', { sucess: true, texto: 'Saida de estoque finalizada com sucesso', id: 'sucesso-toast' }); %>
+<%- include('../components/toast', { sucess: false, texto: 'Falha ao finalizar a saida de estoque', id: 'falha-toast' }); %>
+
+
+<div id="container-saida">
+    <div class="flex flex-row items-center justify-between">
+        <%- include('../components/breadcrumb', { link: '/saida', paginaAnterior: 'Saida manual'}) %>
+    </div>
+
+    <%- include('../partials/containerListaSaida') %>
+
+    <%- include('../partials/termosSaida') %>
+
+    <button id="finalizar-saida" class="hidden w-full cursor-pointer bg-green-600 text-white py-3 rounded-full hover:bg-green-700 transition-colors duration-300">
+        Confirmar saída
+    </button>
+</div>
+
+<script>
+    const finalizarSaida = document.getElementById('finalizar-saida');
+    const sucessoToast = document.getElementById('sucesso-toast');
+    const containerSaida = document.getElementById('container-saida');
+    const falhaToast = document.getElementById('falha-toast');
+    const unidade_id = <%= unidade_id %>;
+
+    finalizarSaida.addEventListener('click', async () => {
+        const response = await fetch('/api/saida/manual', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                unidade_id
+            })
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        if(data.success) {
+            containerSaida.remove();
+            sucessoToast.classList.remove('hidden');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+        } else {
+            falhaToast.classList.remove('hidden');
+            setTimeout(() => {
+                falhaToast.classList.add('hidden');
+            }, 2000);
+        }
+    });
+</script>

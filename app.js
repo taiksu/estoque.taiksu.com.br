@@ -26,6 +26,9 @@ var eventsRouter = require('./routes/events');
 
 var app = express();
 
+// Sincroniza tabelas
+require('./models').sequelize.sync({ alter: true });
+
 function parseBool(value, fallback) {
   if (value === undefined) return fallback;
   return String(value).toLowerCase() === 'true';
@@ -102,11 +105,7 @@ app.use(
 );
 
 // Sincroniza session no banco
-store.sync().then(() => {
-  console.log('Sessões sincronizadas com sucesso');
-}).catch((error) => {
-  console.error('Erro ao sincronizar sessões:', error);
-});
+store.sync();
 
 app.use('/callback', callbackRouter);
 app.use('/events', eventsRouter);

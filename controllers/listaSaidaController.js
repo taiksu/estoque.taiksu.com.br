@@ -1,60 +1,20 @@
-const { ListaEntrada, InsumosEntrada, LoteInsumo, sequelize } = require('../models');
+const { InsumoSaida, sequelize, ListaSaida } = require('../models');
 const publishEvent = require('../client/publishEvent');
 
-
-exports.index = async (req, res) => {
-    try {
-        const { unidade_id } = req.query;
-
-        // Busca a lista de entrada pendente
-        const info_lista = await ListaEntrada.findOne({
-            where: {
-                status: 'pendente',
-                unidade_id
-            },
-            attributes: ['id', 'unidade_id', 'status', 'responsavel_id']
-        });
-
-        // Se não existir lista de entrada, retorna vazio
-        if (!info_lista) {
-            return res.status(200).json({
-                info_lista: null,
-                insumos_entrada: [],
-                message: 'Nenhuma lista de entrada encontrada'
-            });
-        }
-
-        // Busca os insumos da lista de entrada
-        const insumos_entrada = await InsumosEntrada.findAll({
-            where: {
-                lista_entrada_id: info_lista.id
-            }
-        });
-
-        res.status(200).json({
-            info_lista,
-            insumos_entrada
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar lista de entrada' });
-    }
-}
-
+// Adiciona um item à lista de saída
 exports.add = async (req, res) => {
     try {
-        const { insumo_id, preco, quantidade, fornecedor_id, unidade_id, responsavel_id } = req.body;
+        const { insumo_id, quantidade, unidade_id, responsavel_id } = req.body;
         let created = false;
         let quantidade_itens;
-        let listaEntrada;
+        let listaSaida;
 
-        if (Number(preco) <= 0 || Number(quantidade) <= 0) {
-            return res.status(400).json({ error: 'Preço e quantidade devem ser maiores que zero' });
+        if (Number(quantidade) <= 0) {
+            return res.status(400).json({ error: 'Quantidade deve ser maior que zero' });
         }
 
         // Apaga todas as listas concluidas para evitar erros
-        await ListaEntrada.destroy({
+        await ListaSaida.destroy({
             where: {
                 status: 'concluida',
                 unidade_id
@@ -63,7 +23,7 @@ exports.add = async (req, res) => {
 
         await sequelize.transaction(async (t) => {
             // Verifica se já existe uma lista de entrada pendente
-            [listaEntrada, created] = await ListaEntrada.findOrCreate({ 
+            [listaSaida, created] = await ListaSaida.findOrCreate({ 
                 where: { 
                     status: 'pendente',
                     unidade_id 
@@ -75,140 +35,93 @@ exports.add = async (req, res) => {
                 transaction: t
             });
 
-            // Adiciona o insumo à lista de entrada
-            const insumoEntrada = await InsumosEntrada.create({
-                insumo_id,
-                preco,
-                quantidade,
-                fornecedor_id,
-                responsavel_id,
-                lista_entrada_id: listaEntrada.id
-            }, { transaction: t });
-
-            // Contabiliza quantidade de itens da lista
-            const itens = await InsumosEntrada.findAll({
+            // Adiciona o insumo à lista de entrada ou substitui caso já exista
+            const [insumoSaida, createdInsumoSaida] = await InsumoSaida.findOrCreate({
                 where: {
-                    lista_entrada_id: listaEntrada.id
-                }
-            }, { transaction: t })
+                    insumo_id,
+                    lista_saida_id: listaSaida.id,
+                    unidade_id
+                },
+                defaults: {
+                    insumo_id,
+                    quantidade,
+                    responsavel_id,
+                    lista_saida_id: listaSaida.id,
+                    unidade_id
+                }, transaction: t });
 
-            quantidade_itens = itens.length;
+            if (!createdInsumoSaida) {
+                await insumoSaida.update({ quantidade }, { transaction: t });
+            }
+
+            // Atualiza o responsável da lista
+            await listaSaida.update({
+                responsavel_id: responsavel_id
+            }, { transaction: t });
         });
 
-        res.status(201).json({ success: true, quantidade_itens, message: 'Insumo adicionado à lista de entrada' });
+        // Contabiliza quantidade de itens da lista
+        const itens = await InsumoSaida.findAll({
+            where: {
+                lista_saida_id: listaSaida.id
+            }
+        })
+        quantidade_itens = itens.length;
 
+        res.status(201).json({ success: true, quantidade_itens, message: 'Insumo adicionado à lista de saída' });
+        
         // Se a lista foi criada publica um evento de criação
         if (created) {
             publishEvent({
-                eventId: 82,
-                payload: {
-                    listaEntradaId: listaEntrada.id,
-                    unidade_id
-                },
+                eventId: 92,
+                payload: listaSaida,
                 userId: responsavel_id,
-                priority: 'high'
+                priority: 'low'
             });
         }
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, error: 'Erro ao adicionar lista de entrada' });
+        res.status(500).json({ success: false, error: 'Erro ao adicionar lista de saída' });
     }
 }
 
-
-exports.delete = async (req, res) => {
+exports.index = async (req, res) => {
     try {
-        const { id } = req.body;
+        const { unidade_id } = req.query;
 
-        console.log('Removendo insumo da lista:', id);
-
-        // Busca o insumo da lista de entrada
-        const insumoEntrada = await InsumosEntrada.findOne({
+        // Busca a lista de entrada pendente
+        const info_lista = await ListaSaida.findOne({
             where: {
-                id
-            }
+                status: 'pendente',
+                unidade_id
+            },
+            attributes: ['id', 'unidade_id', 'status', 'responsavel_id']
         });
 
-        if(!insumoEntrada) {
-            return res.status(404).json({ success: false, error: 'Insumo não encontrado' });
+        // Se não existir lista de entrada, retorna vazio
+        if (!info_lista) {
+            return res.status(200).json({
+                info_lista: null,
+                insumos_saida: [],
+                message: 'Nenhuma lista de saída encontrada'
+            });
         }
 
-        const Lista_entrada = await ListaEntrada.findOne({
+        // Busca os insumos da lista de entrada
+        const insumos_saida = await InsumoSaida.findAll({
             where: {
-                id: insumoEntrada.lista_entrada_id
+                lista_saida_id: info_lista.id
             }
         });
 
-        // Remove o insumo da lista de entrada
-        await insumoEntrada.destroy();
-
-        // Encontra o valor total de cada insumo (preco x quantidade)
-        const listaTotal = await InsumosEntrada.findAll({
-            where: {
-                lista_entrada_id: Lista_entrada.id
-            },
-            attributes: ['preco', 'quantidade']
+        res.status(200).json({
+            info_lista,
+            insumos_saida
         });
 
-        // Soma os valores totais de cada insumo
-        const somaTotais = listaTotal.reduce((total, item) => total + Number(item.preco) * Number(item.quantidade), 0);
-
-        console.log('Valor total atualizado:', somaTotais);
-
-        res.status(200).json({ success: true, total_lista: somaTotais, message: 'Insumo removido da lista de entrada' });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, error: 'Erro ao remover insumo da lista de entrada' });
-    }
-}
-
-// Editar quantidade de insumo na lista de entrada
-exports.editar = async (req, res) => {
-    try {
-        const { id, preco, quantidade } = req.body;
-
-        console.log('Editando insumo da lista:', id);
-
-        // Busca o insumo da lista de entrada
-        const insumoEntrada = await InsumosEntrada.findOne({
-            where: {
-                id
-            }
-        });
-
-        if(!insumoEntrada) {
-            return res.status(404).json({ success: false, error: 'Insumo não encontrado' });
-        }
-
-        const Lista_entrada = await ListaEntrada.findOne({
-            where: {
-                id: insumoEntrada.lista_entrada_id
-            }
-        });
-
-        // Edita o insumo da lista de entrada
-        await insumoEntrada.update({
-            preco,
-            quantidade
-        });
-
-        // Encontra o valor total de cada insumo (preco x quantidade)
-        const listaTotal = await InsumosEntrada.findAll({
-            where: {
-                lista_entrada_id: Lista_entrada.id
-            },
-            attributes: ['preco', 'quantidade']
-        });
-
-        // Soma os valores totais de cada insumo
-        const somaTotais = listaTotal.reduce((total, item) => total + Number(item.preco) * Number(item.quantidade), 0);
-
-        console.log('Valor total atualizado:', somaTotais);
-
-        res.status(200).json({ success: true, total_lista: somaTotais, message: 'Insumo editado da lista de entrada' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, error: 'Erro ao editar insumo da lista de entrada' });
+        res.status(500).json({ error: 'Erro ao buscar lista de saída' });
     }
 }

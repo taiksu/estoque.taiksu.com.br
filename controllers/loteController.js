@@ -149,12 +149,17 @@ exports.excluirLimpeza = async (req, res) => {
 exports.show = async (req, res, next) => {
     try {
         const { id } = req.params;
+        const unidade_id = req.session.unidade_id;
+
+        if (!unidade_id) {
+            return res.status(401).json({ error: 'Unidade não identificada' });
+        }
 
         // Encontra lotes do insumo
         const lotes = await LoteInsumo.findAll({
             where: {
                 insumo_id: id,
-                unidade_id: req.session.unidade_id
+                unidade_id: unidade_id
             },
             order: [
                 ['createdAt', 'DESC']
@@ -170,7 +175,7 @@ exports.show = async (req, res, next) => {
         const [quantidadeMinima, created] = await QuantidadeMinima.findOrCreate({
             where: {
                 insumo_id: id,
-                unidade_id: req.session.unidade_id
+                unidade_id: unidade_id
             },
             defaults: {
                 quantidade: 0
@@ -185,13 +190,61 @@ exports.show = async (req, res, next) => {
         const lotesAtivos = lotes.filter(lote => lote.quantidade > 0);
         const lotesAcabados = lotes.filter(lote => lote.quantidade <= 0);
 
+        // Quantidade total de lotes
+        const quantidadeTotal = lotes.reduce((acc, lote) => {
+            return acc + Number(lote.quantidade);
+        }, 0);
+
         res.locals.lotes = lotes;
         res.locals.quantidadeMinima = quantidadeMinima;
         res.locals.valorTotal = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         res.locals.lotesAtivos = lotesAtivos;
         res.locals.lotesAcabados = lotesAcabados;
         res.locals.insumo = insumo;
+        res.locals.quantidadeTotal = quantidadeTotal;
         next();
+
+    } catch (error) {
+        console.error('Erro ao buscar insumo:', error);
+        res.status(500).json({ error: 'Erro ao buscar insumo' });
+    }
+};
+
+// Exibir quantidade de um item no estoque
+exports.emEstoque = async (req, res, next) => {
+    try {
+        const { id, unidade } = req.params;
+        console.log(req.params);
+
+        if (!unidade) {
+            return res.status(401).json({ error: 'Unidade não identificada' });
+        }
+
+        // Encontra lotes do insumo
+        const lotes = await LoteInsumo.findAll({
+            where: {
+                insumo_id: id,
+                unidade_id: unidade
+            },
+            order: [
+                ['createdAt', 'DESC']
+            ]
+        });
+
+        // Soma valor de todos os valotes
+        const valorTotal = lotes.reduce((acc, lote) => {
+            return acc + Number(lote.valor_total);
+        }, 0);
+
+        // Soma quantidade de todos os lotes
+        const quantidadeTotal = lotes.reduce((acc, lote) => {
+            return acc + Number(lote.quantidade);
+        }, 0);
+
+        res.status(200).json({
+            valor_total: valorTotal,
+            quantidade: quantidadeTotal
+        });
 
     } catch (error) {
         console.error('Erro ao buscar insumo:', error);

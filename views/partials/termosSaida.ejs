@@ -1,6 +1,6 @@
-<div id="termos-entrada" class="flex flex-col gap-2 bg-white border border-gray-200 rounded-xl p-6 my-4">
+<div id="termos-saida" class="flex flex-col gap-2 bg-white border border-gray-200 rounded-xl p-6 my-4">
     <h3 class="text-md font-medium text-orange-800">Responsabilidade pelas informações</h3>
-    <p class="text-sm text-gray-500 text-justify">As informações registradas na entrada ou saída de insumos são de responsabilidade exclusiva do usuário. 
+    <p class="text-sm text-gray-500 text-justify">As informações registradas na saída de insumos são de responsabilidade exclusiva do usuário. 
         O sistema calcula o CMV com base nas movimentações de saída durante o período. Divergências de lançamentos incorretos deverão ser ajustadas pelo próprio 
         usuário no histórico.</p>
 
@@ -13,13 +13,13 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const checkResponsavel = document.getElementById('check-responsavel');
-        const finalizarEntrada = document.getElementById('finalizar-entrada');
+        const finalizarSaida = document.getElementById('finalizar-saida');
 
         checkResponsavel.addEventListener('change', function() {
             if (this.checked) {
-                finalizarEntrada.classList.remove('hidden');
+                finalizarSaida.classList.remove('hidden');
             } else {
-                finalizarEntrada.classList.add('hidden');
+                finalizarSaida.classList.add('hidden');
             }
         });
     });

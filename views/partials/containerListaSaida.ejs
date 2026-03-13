@@ -10,9 +10,9 @@
         // ELEMENTOS DOM
         const containerLista = document.getElementById('container-lista');
         const dadosLista = document.getElementById('dados-lista');
-        const finalizarEntrada = document.getElementById('finalizar-entrada');
-        const termosEntrada = document.getElementById('termos-entrada');
-        const totalEntrada = document.getElementById('total-entrada');
+        const finalizarSaida = document.getElementById('finalizar-saida');
+        const termosSaida = document.getElementById('termos-saida');
+        const totalSaida = document.getElementById('total-saida');
         const loader = document.getElementById('loader');
         const toastFalha = document.getElementById('falha-toast');
         const unidade_id = '<%= unidade_id %>';
@@ -21,18 +21,18 @@
         const responseInsumos = await fetch('https://insumos.taiksu.com.br/insumos').then(response => response.json())
 
         // LISTA DE ENTRADA API
-        const responseEntrada = await fetch(`/api/lista-entrada?unidade_id=${unidade_id}`).then(response => response.json())
+        const responseSaida = await fetch(`/api/lista-saida?unidade_id=${unidade_id}`).then(response => response.json())
 
         // FORNECEDORES API
         const responseFornecedores = await fetch('https://insumos.taiksu.com.br/fornecedores').then(response => response.json())
 
-        if(responseEntrada) {
+        if(responseSaida) {
             loader.remove();
         } 
-        if (responseEntrada.insumos_entrada.length == 0) {
+        if (responseSaida.insumos_saida.length == 0) {
             dadosLista.remove();
-            termosEntrada.remove();
-            containerLista.innerHTML = '<div class="flex text-gray-500 flex-col items-center justify-center p-16 bg-white rounded-xl border border-gray-200"><img src="/images/icones/manual.png" class="w-14 h-14 mb-5"><h2 class="text-xl font-semibold">Lista de entrada vazia</h2><a class="text-white bg-green-600 px-5 shadow-lg hover:shadow-none py-1 rounded-full hover:bg-green-700 transition-all mt-5 duration-300" href="/entrada/manual">Criar lista manual</a></div>';
+            termosSaida.remove();
+            containerLista.innerHTML = '<div class="flex text-gray-500 flex-col items-center justify-center p-16 bg-white rounded-xl border border-gray-200"><img src="/images/icones/manual.png" class="w-14 h-14 mb-5"><h2 class="text-xl font-semibold">Lista de saída vazia</h2><a class="text-white bg-green-600 px-5 shadow-lg hover:shadow-none py-1 rounded-full hover:bg-green-700 transition-all mt-5 duration-300" href="/saida">Criar lista manual</a></div>';
         }
 
 
@@ -40,15 +40,13 @@
         const listaInsumos = Object.values(responseInsumos).flat();
 
         // Pega só o array de insumos dentro da lista de entrada
-        const listaEntrada = responseEntrada.insumos_entrada;
+        const listaSaida = responseSaida.insumos_saida;
 
         // Junta a lista de entrada com os insumos
-        const listaEntradaCompleta = listaEntrada.map(item => {
-            const fornecedor = responseFornecedores.find(fornecedor => fornecedor.id === item.fornecedor_id)
+        const listaSaidaCompleta = listaSaida.map(item => {
             return {
                 ...item,
-                info: listaInsumos.find(insumo => insumo.id === item.insumo_id),
-                fornecedor: fornecedor.nome
+                info: listaInsumos.find(insumo => insumo.id === item.insumo_id)
             }
         })
 
@@ -56,7 +54,7 @@
         ////// FUNCTIONS ////////
 
         // FUNCTION - RENDERIZA LISTA
-        listaEntradaCompleta.forEach(item => {
+        listaSaidaCompleta.forEach(item => {
             const div = document.createElement('div');
             
             let quantidadeFormadata;
@@ -65,8 +63,6 @@
             } else {
                 quantidadeFormadata = Number(item.quantidade).toFixed(3) + ' ' + item.info.unidade_medida;
             }
-
-            const valorTotal = Number(item.preco) * Number(item.quantidade);
 
             div.classList.add('flex', 'flex-row', 'items-center', 'justify-between', 'border', 'border-gray-200', 'bg-white', 'rounded-xl', 'p-4');
             div.id = `item-${item.id}`;
@@ -77,14 +73,12 @@
                             </a>
                             <div class="flex flex-col gap-0 mt-1">
                                 <h2 id="insumo-nome-${item.id}" class=" text-gray-700 font-semibold">${item.info.nome.length > 26 ? item.info.nome.slice(0, 24) + '...' : item.info.nome}</h2>
-                                <h2 class="text-sm text-gray-500">
-                                    <span id="quantidade-item-${item.id}">${quantidadeFormadata}</span> x 
-                                    <span class="text-green-700 font-medium" id="preco-item-${item.id}">${Number(item.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                <h2 class="text-sm text-red-600">
+                                    <span id="quantidade-item-${item.id}">- ${quantidadeFormadata}</span>
                                 </h2>
                             </div>
                         </div>
                         <div class="flex flex-row items-center gap-4 justify-between">
-                            <h2 id="valor-total-${item.id}" class="text-end font-semibold text-sm text-green-700">${valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h2>
                             <button id="editar-${item.id}" class="cursor-pointer bg-gray-200 text-gray-600 px-4 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors duration-300">Editar</button>
                             <img id="delete-${item.id}" src="/images/icones/delete.png" class="w-8 h-8 cursor-pointer group bg-red-50 hover:bg-red-100 rounded-full p-1.5">
                         </div>
@@ -92,17 +86,11 @@
             containerLista.appendChild(div);
         })
 
-        // FUNNCTION - ATUALIZAR TOTAL
-        async function atualizarTotal() {
-            const somaTotais = listaEntradaCompleta.reduce((total, item) => total + Number(item.preco) * Number(item.quantidade), 0);
-            totalEntrada.textContent = somaTotais.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
-
         // FUNCTION - DELETE
         async function deleteItem(id) {
             console.log('Removendo item', id);
             const item = document.getElementById(`item-${id}`);
-            const response = await fetch('/api/lista-entrada/delete', {
+            const response = await fetch('/api/lista-saida/delete', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
@@ -114,7 +102,7 @@
             const data = await response.json();
             
             if(data.success == true) {
-                totalEntrada.textContent = data.total_lista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                totalSaida.textContent = data.total_lista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 item.remove();
             } else {
                 toastFalha.classList.remove('hidden');
@@ -130,7 +118,7 @@
         // EDITAR POPUP
         document.addEventListener('click', (event) => {
             if(event.target.id.startsWith('editar-')) {
-                const popupEditarEntrada = document.getElementById('editar-entrada');
+                const popupEditarSaida = document.getElementById('editar-saida');
                 const insumoFoto = document.getElementById('insumo-foto-edit');
                 const insumoNome = document.getElementById('insumo-nome-edit');
                 const insumoQuantidade = document.getElementById('quantidade-edit');
@@ -146,7 +134,7 @@
                 console.log('preço obtido ao abrir popup:', insumoPreco.value);
                 insumoNome.textContent = document.getElementById(`insumo-nome-${id}`).textContent.length > 20 ? document.getElementById(`insumo-nome-${id}`).textContent.slice(0, 18) + '...' : document.getElementById(`insumo-nome-${id}`).textContent;
 
-                popupEditarEntrada.classList.remove('hidden');
+                popupEditarSaida.classList.remove('hidden');
             }
         })
 
@@ -157,8 +145,5 @@
                 await deleteItem(id);
             }
         })
-        
-
-        atualizarTotal();
     });
 </script>

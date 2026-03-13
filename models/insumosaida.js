@@ -3,20 +3,21 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class InsumosEntrada extends Model {
+  class InsumoSaida extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      InsumosEntrada.belongsTo(models.ListaEntrada, { foreignKey: 'lista_entrada_id',
+      InsumoSaida.belongsTo(models.ListaSaida, { 
+        foreignKey: 'lista_saida_id',
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE'
-       });
+      });
     }
   }
-  InsumosEntrada.init({
+  InsumoSaida.init({
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -26,36 +27,37 @@ module.exports = (sequelize, DataTypes) => {
     insumo_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      comment: 'insumo que vai ser adicionado'
+      comment: 'insumo que vai ser removido do estoque'
     },
     quantidade: {
       type: DataTypes.DECIMAL(8, 3),
       allowNull: false,
-      comment: 'quantidade de insumo'
-    },
-    preco: {
-      type: DataTypes.DECIMAL(8, 3),
-      allowNull: false,
-      comment: 'preço do insumo'
-    },
-    fornecedor_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      comment: 'fornecedor do insumo'
+      comment: 'quantidade de insumo que vai ser removido do estoque'
     },
     responsavel_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      comment: 'responsavel pela entrada'
+      comment: 'responsavel pela saida'
     },
-    lista_entrada_id: {
+    lista_saida_id: {
       type: DataTypes.UUID,
       allowNull: false,
-      comment: 'lista de entrada'
+      comment: 'lista de saida'
+    },
+    unidade_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      comment: 'unidade que vai ser feita a saida',
+      after: 'lista_saida_id'
     }
   }, {
     sequelize,
-    modelName: 'InsumosEntrada',
+    modelName: 'InsumoSaida',
+    indexes: [
+      {
+        fields: ['lista_saida_id']
+      }
+    ]
   });
-  return InsumosEntrada;
+  return InsumoSaida;
 };

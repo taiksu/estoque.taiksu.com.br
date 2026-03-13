@@ -1,7 +1,7 @@
 <div class="w-full flex flex-col gap-1 mt-5">
     <div class="flex flex-row items-center justify-between">
         <h1 class="text-sm text-gray-500">Lotes em estoque</h1>
-        <p class="text-gray-500 text-sm">Mínimo: <% const minimo = quantidadeMinima?.quantidade ?? 0; %><% if(insumo.unidade_medida === 'kg') { %><%= Number(minimo).toFixed(3).replace('.', ',') %> kg <% } else { %><%= Number(minimo).toFixed(0) %> uni <% } %></p>
+        <p class="text-gray-400 text-sm"><% if(insumo.unidade_medida === 'kg') { %><%= Number(quantidadeTotal).toFixed(3).replace('.', ',') %> kg <% } else { %><%= Number(quantidadeTotal).toFixed(0) %> uni <% } %></p>
     </div>
 
     <div class="border border-gray-200 rounded-lg p-1 bg-white">

@@ -66,7 +66,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     grupo_id: {
       type: DataTypes.UUIDV4,
-      allowNull: false,
+      allowNull: true,
+      defaultValue: null,
       comment: 'ID do grupo de entrada'
     },
     deletedAt: {

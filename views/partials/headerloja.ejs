@@ -1,0 +1,15 @@
+<header id="header" class="fixed top-0 left-0 w-full z-30 flex items-center justify-between py-5 px-8 bg-white shadow-xs">
+    <div class="shrink-0 flex flex-row gap-3 items-center">
+          <a href="https://login.taiksu.com.br"><img src="https://login.taiksu.com.br/frontend/img/menu_service.png" class="h-6"></a>
+          <a href="/comprar"><img src="https://login.taiksu.com.br/frontend/img/logo.png" class="h-6"></a>
+    </div>
+    <div class="w-full mx-16">
+        <% if (title === 'Comprar') { %>
+            <%- include('../components/searchBoxInit', { placeholder: 'Pesquisar insumo' }) %>
+        <% } %>
+    </div>
+    <div class="shrink-0 flex flex-row gap-3 items-center">
+            <%- include('../components/buttons/meusPedidos') %>
+            <%- include('../components/buttons/carrinho') %>
+        </div>
+</header> 

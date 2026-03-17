@@ -2,8 +2,24 @@
 <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Inventário'}) %>
 </div>
 
-<div class="flex flex-col gap-2 bg-white rounded-xl p-12 items-center justify-center border border-gray-200">
-    <img src="/images/icones/certo.png" alt="Alerta" class="w-14 h-14 mb-5">
+<div class="flex flex-col gap-2 bg-white rounded-xl p-12 items-center justify-center border border-gray-200 mb-6">
+    <img id="ok-icon" src="/images/icones/certo.png" alt="Alerta" class="w-12 h-12 mb-5 transition-all duration-500">
     <h1 class="font-semibold text-xl text-green-700">Tudo em dia com seu estoque.</h1>
     <p class="text-gray-500 text-center">Todos os insumos estão com a quantidade<br>acima do mínimo recomendado</p>
 </div>
+
+<a href="https://login.taiksu.com.br/?redirect_uri=https%3A%2F%2Fdashboard.taiksu.com.br%2Fcallback" class="max-w-sm mx-auto shadow-md hover:shadow-xs px-4 py-1 flex flex-row items-center justify-center gap-3 rounded-full bg-white border border-gray-200 text-green-800 hover:text-green-600 transition-all duration-300">
+    <img src="https://login.taiksu.com.br/applications/6967173ec2616.png" class="w-8 h-8">
+    <p class="font-medium">Detalhes do CMV no visão geral</p>
+</a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const okIcon = document.getElementById('ok-icon');
+        
+        setTimeout(() => {
+            okIcon.classList.add('scale-140');
+        }, 400);
+
+    });
+</script>

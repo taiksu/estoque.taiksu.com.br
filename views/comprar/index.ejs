@@ -1,13 +1,10 @@
 <div class="flex flex-row items-center justify-between mb-6">
     <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Estoque'}) %>
-    <%- include('../components/buttons/carrinho') %>
 </div>
 
-<div id="fornecedores-container" class="w-full flex flex-row gap-8 overflow-x-scroll my-3 noscrollbar">
+<div id="fornecedores-container" class="w-full flex flex-row justify-between gap-8 overflow-x-scroll my-3 noscrollbar">
 <!-- Fornecedores serão populados aqui com JS-->
 </div>
-
-<%- include('../components/searchBox', { placeholder: 'Pesquisar insumo' }) %>
 
 <div id="container-insumos" class="flex flex-col gap-3">
     <!-- O conteúdo do container será adicionado dinamicamente -->
@@ -76,13 +73,12 @@
             divCategoria.className = 'flex flex-col gap-1 my-4 categoria-insumos';
             divCategoria.innerHTML = `
                 <h2 class="text-sm text-gray-500">${categoria}</h2>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-5 gap-4">
                     ${categorias[categoria].map(insumo => `
-                            <div data-insumo-id="${insumo.id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl px-6 py-8 hover:shadow-lg transition-all duration-400">
+                            <div data-insumo-id="${insumo.id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
 
                                 <div class="w-full flex flex-col items-center justify-between">
-                                    <img class="insumo-foto md:h-32 md:w-32 h-16 w-16 rounded-md bg-white" 
-                                         src="https://insumos.taiksu.com.br/${insumo.foto_url}">
+                                    <img class="insumo-foto h-auto w-full rounded-sm bg-white" src="https://insumos.taiksu.com.br/${insumo.foto_url}">
                                     
                                     <div class="w-full flex flex-col gap-0">
                                         <h3 class="mt-4 w-full insumo-nome md:text-sm text-md text-gray-600 font-medium">
@@ -92,7 +88,7 @@
                                             ${insumo.marca.nome}
                                         </h4>
                                     </div>
-                                    <div class="mt-8 w-full text-white bg-green-600 rounded-full text-center py-1 hover:bg-green-700 transition-all duration-300">Adicionar</div>
+                                    <div class="mt-8 h-full w-full text-white bg-green-600 rounded-full text-center py-1 hover:bg-green-700 transition-all duration-300">Adicionar</div>
                                 </div>
 
 

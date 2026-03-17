@@ -9,7 +9,6 @@
 
         // ELEMENTOS DOM
         const containerLista = document.getElementById('container-lista');
-        const dadosLista = document.getElementById('dados-lista');
         const finalizarSaida = document.getElementById('finalizar-saida');
         const termosSaida = document.getElementById('termos-saida');
         const totalSaida = document.getElementById('total-saida');
@@ -30,7 +29,6 @@
             loader.remove();
         } 
         if (responseSaida.insumos_saida.length == 0) {
-            dadosLista.remove();
             termosSaida.remove();
             containerLista.innerHTML = '<div class="flex text-gray-500 flex-col items-center justify-center p-16 bg-white rounded-xl border border-gray-200"><img src="/images/icones/manual.png" class="w-14 h-14 mb-5"><h2 class="text-xl font-semibold">Lista de saída vazia</h2><a class="text-white bg-green-600 px-5 shadow-lg hover:shadow-none py-1 rounded-full hover:bg-green-700 transition-all mt-5 duration-300" href="/saida">Criar lista manual</a></div>';
         }

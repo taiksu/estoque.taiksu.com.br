@@ -1,6 +1,6 @@
 // Recebe o event-type e executa a ação correspondente
 // As actions seguem o padrão: evento recebido -> Controller responsável
-const { entradaController, loteController } = require('../controllers');
+const { entradaController, saidaController, loteController } = require('../controllers');
 
 async function actions(req, res) {
     const eventType = req.headers['event-type'];
@@ -19,6 +19,11 @@ async function actions(req, res) {
     if (eventType == 2) {
         console.log('Cancelamento de limpeza de salmão - remover lote');
         loteController.excluirLimpeza(req, res);
+    }
+
+    // Cancelamento de saída - Devolver ao estoque
+    if (eventType == 95) {
+        saidaController.desfazer(req, res);
     }
 
 }

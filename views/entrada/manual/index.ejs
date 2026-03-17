@@ -114,9 +114,11 @@
                 const valorMaximo = Number(document.querySelector('[data-valor-maximo-' + insumoId + ']').textContent);
                 const unidadeMedida = document.getElementById('unidade-' + insumoId).textContent;
                 let placeholderQuantidade = '1 uni';
+                let labelValor = 'Valor unitário';
 
                 if (unidadeMedida == 'kg') {
                     placeholderQuantidade = '0.000 kg';
+                    labelValor = 'Preço por kg';
                 }
 
                 // Abre o modal
@@ -142,7 +144,7 @@
                         <div id="modal-content-quantidade" class="w-full flex flex-col items-start gap-1 mt-1">
                             <div class="w-full flex flex-row items-center gap-4">
                                 <div class="w-full flex flex-col gap-1">
-                                    <h2 class="text-xs text-gray-500">Preço</h2>    
+                                    <h2 class="text-xs text-gray-500">${labelValor}</h2>    
                                     <input type="number" id="preco" class="w-full focus:outline-none p-2 border border-gray-200 rounded-md" placeholder="${valorMaximo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}">
                                 </div>
                                 <div class="flex flex-col items-center justify-center text-md font-bold text-gray-600 mt-5">X</div>
@@ -151,7 +153,7 @@
                                     <input type="number" id="quantidade" class="w-full focus:outline-none p-2 border border-gray-200 rounded-md" placeholder="${placeholderQuantidade}">
                                 </div>
                             </div>
-                            <p data-valor-maximo-${insumoId} class="text-xs text-gray-400 ml-1">Máx: ${valorMaximo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+                            <p data-valor-maximo-${insumoId} class="text-xs text-gray-300 ml-1">Máx: ${valorMaximo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                         <div class="flex flex-row items-center justify-between mt-4">
                             <h3 class="text-md text-gray-600">Total:</h3>

@@ -10,9 +10,20 @@
                         </div>
                         
                         <div id="modal-content-quantidade" class="w-full flex flex-col items-center gap-2">
-                            <div class="w-full flex flex-row items-center gap-2">
-                                <input type="number" id="preco-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Preço">
-                                <input type="number" id="quantidade-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
+                            <div class="w-full flex flex-row items-center gap-4 border-b border-gray-100 pb-5">
+                                <div class="w-full flex flex-col gap-0">
+                                    <label for="preco-edit" class="text-xs text-gray-500">Preço</label>
+                                    <input type="number" id="preco-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Preço">
+                                </div>
+                                <div class="w-full flex flex-col gap-0">
+                                    <label for="quantidade-edit" class="text-xs text-gray-500">Quantidade</label>
+                                    <input type="number" id="quantidade-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
+                                </div>
+                            </div>
+
+                            <div class="w-full flex flex-row items-center justify-between">
+                                <h1 class="text-md text-gray-700">Total</h1>
+                                <h1 id="total-item-edit" class="text-md text-green-600 font-semibold">R$ 0,00</h1>
                             </div>
                         </div>
                         <div class="flex flex-row items-center gap-2 mt-4">
@@ -24,6 +35,20 @@
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // CALCULA VALOR TOTAL
+    const precoEdit = document.getElementById('preco-edit');
+    const quantidadeEdit = document.getElementById('quantidade-edit');
+    const totalItemEdit = document.getElementById('total-item-edit');
+
+    precoEdit.addEventListener('input', () => {
+        totalItemEdit.textContent = (precoEdit.value * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    });
+
+    quantidadeEdit.addEventListener('input', () => {
+        totalItemEdit.textContent = (precoEdit.value * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    });
+
     // FECHAR E ABRIR O POPUP
     document.getElementById('cancelar-edicao').addEventListener('click', () => {
         document.getElementById('editar-entrada').classList.add('hidden');
@@ -69,5 +94,5 @@
             alert('Falha ao editar entrada');
         }
     }
-
+});
 </script>

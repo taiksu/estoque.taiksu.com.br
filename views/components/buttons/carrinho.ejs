@@ -1,6 +1,6 @@
-<a id="carrinho-container" href="/comprar/carrinho" class="px-4 py-1 rounded-full bg-white border border-gray-200 flex flex-row gap-2 items-center  hover:shadow-none transition-shadow duration-300">
-    <img id="icone-carrinho" class="h-6 w-6" src="/images/icones/comprar.png" alt="">
-    <span id="quantidade-carrinho" class="text-gray-500 font-medium">Carrinho vazio</span>
+<a id="carrinho-container" href="/comprar/carrinho" class="px-4 py-1 hover:bg-green-50 rounded-full bg-white border border-gray-200 flex flex-row gap-2 items-center transition-colors duration-300">
+    <img id="icone-carrinho" class="h-5 w-5" src="/images/icones/comprar.png" alt="">
+    <span id="quantidade-carrinho" class="text-gray-500 text-sm">Carrinho vazio</span>
 </a>
 
 <!--Script pra verificar carrinho no microserviço-->
@@ -20,7 +20,7 @@
                 quantidadeCarrinho.textContent = data.quantidade_itens + ' itens';
                 iconeCarrinho.src = '/images/icones/carrinho-cheio.png';
             } else {
-                quantidadeCarrinho.textContent = 'Carrinho vazio';
+                quantidadeCarrinho.textContent = '0 itens';
             }
         } else {
             alert('Não foi possível carregar o carrinho, recarregue a página');

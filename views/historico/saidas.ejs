@@ -17,7 +17,7 @@
     <%- include('../components/dateSelector/index', { mes: new Date().getMonth(), ano: new Date().getFullYear() }) %>
 </div>
 
-<%- include('../components/popup/detalhesMovimentacao'); %>
+<%- include('../components/popup/detalhesMovimentacao', {tipo: 'saida'}); %>
 <div id="conteiner-grande">
     <div id="card-total-saidas" class="mt-5 w-full group w-full bg-white rounded-xl flex flex-col gap-1 md:px-12 p-6 md:py-10 border border-gray-200">
         <div class="flex flex-row items-center gap-1 items-center">
@@ -25,6 +25,7 @@
             <img id="icone-total-saidas" src="https://media.tenor.com/WX_LDjYUrMsAAAAi/loading.gif" alt="Icone do card" class="hidden w-4 h-4">
         </div>
         <p id="valor-total-saidas" class="md:text-5xl text-3xl font-extrabold text-gray-600 transition-colors duration-300"></p>
+        <p class="text-gray-400 text-sm">Custo de Mercadoria Vendida</p>
     </div>
 
 
@@ -218,10 +219,9 @@
                             
                             <div class="flex flex-row items-center gap-2">
                             <span class="font-medium text-green-700">${Number(lote.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                            <a href="/processo/desfazer/entrada/${lote.id}" class="flex flex-row items-center gap-2 rounded-full border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 px-3 py-0.5 transition-color duration-300 cursor-pointer">
+                            <a href="/processo/desfazer/saida/${lote.id}" class="flex flex-row items-center gap-2 rounded-full border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 px-3 py-0.5 transition-color duration-300 cursor-pointer">
                                 <img class="h-5 w-5" src="/images/icones/desfazer.png">
                                     Desfazer
-                                </a>
                             </a>
                             </div>
                         </div>

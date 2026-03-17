@@ -23,6 +23,7 @@ var pedidosRouter = require('./routes/pedidos');
 var historicoRouter = require('./routes/historico');
 var processoRouter = require('./routes/processo');
 var eventsRouter = require('./routes/events');
+var balancoRouter = require('./routes/balanco');
 
 var app = express();
 
@@ -120,6 +121,7 @@ app.use('/saida', saidaRouter);
 app.use('/pedidos', pedidosRouter);
 app.use('/historico', historicoRouter);
 app.use('/processo', processoRouter);
+app.use('/balanco', balancoRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

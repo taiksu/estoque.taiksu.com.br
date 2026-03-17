@@ -1,11 +1,13 @@
 // Controller responsável pelas regras de negócio de saída de estoque, mecanismo FIFO, total em insumos, etc..
 const publishEvent = require('../client/publishEvent');
+const confirmaProcesso = require('../client/confirmaProcesso');
 const { LoteInsumo, InsumoSaida, sequelize, ListaSaida } = require('../models');
 const { Op } = require('sequelize');
 
 exports.saidaManual = async (req, res) => {
     try {
         console.log('Entrou no controller de saida manual');
+        let lotesComValor = [];
 
         // Busca a lista de saída pendente para a unidade
         const lista_saida = await ListaSaida.findOne({
@@ -16,7 +18,7 @@ exports.saidaManual = async (req, res) => {
         });
 
         // Busca os itens da lista de saída
-        const itens_saida = await InsumoSaida.findAll({
+        let itens_saida = await InsumoSaida.findAll({
             where: {
                 lista_saida_id: lista_saida.id
             }
@@ -71,10 +73,20 @@ exports.saidaManual = async (req, res) => {
             // Se tiver estoque suficiente, distribui a quantidade da retirada entre os lotes    
             } else {
                 for (const lote of lotes) {
+
                     // Se ainda houver quantidade restante, retira a quantidade do próximo lote
                     if (quantidadeRestante > 0) {
+                        
                         const quantidadeRetirada = Math.min(quantidadeRestante, Number(lote.quantidade));
                         quantidadeRestante -= quantidadeRetirada;
+
+
+                        lotesComValor.push({
+                            ...lote.dataValues,
+                            quantidade: quantidadeRetirada,
+                            valor_total: quantidadeRetirada * Number(lote.valor_unitario)
+                        })
+
                         await LoteInsumo.update({
                             quantidade: Number(lote.quantidade) - quantidadeRetirada,
                             valor_total: Number(lote.valor_total) - quantidadeRetirada * Number(lote.valor_unitario)
@@ -97,7 +109,7 @@ exports.saidaManual = async (req, res) => {
             eventId: 11,
             payload: {
                 lista_saida,
-                itens_saida
+                itens_saida: lotesComValor
             },
             userId: lista_saida.responsavel_id,
             priority: 'urgent'
@@ -116,4 +128,60 @@ exports.saidaManual = async (req, res) => {
         });
     }
 
+};
+
+// Devolve ao estoque
+exports.desfazer = async (req, res) => {
+    try {
+        const { lote_id, quantidade, unidade_id } = req.body;
+        const deliveryId = req.headers['delivery-id'];
+
+        console.log('Devolvendo ao estoque');
+
+        await sequelize.transaction(async (t) => {
+            const lote = await LoteInsumo.findOne({
+                where: {
+                    id: lote_id,
+                    unidade_id
+                }
+            }, { transaction: t });
+
+            const quantidadeAtualizada = Number(lote.quantidade) + Number(quantidade);
+            const valorTotalAtualizado = Number(lote.valor_total) + Number(quantidade) * Number(lote.valor_unitario);
+
+            await LoteInsumo.update({
+                quantidade: quantidadeAtualizada,
+                valor_total: valorTotalAtualizado,
+            }, {
+                where: {
+                    id: lote_id,
+                    unidade_id
+                }
+            }, { transaction: t });
+        });
+
+        // Marca como processado no Event Broker
+        await confirmaProcesso(deliveryId);
+
+        // Pulbica evento
+        await publishEvent({
+            eventId: 96,
+            payload: {
+                lote_id,
+                quantidade_devolvida: quantidade,
+                unidade_id
+            },
+            userId: 0,
+            priority: 'high'
+        });
+
+        res.json({
+            success: true,
+            mensagem: "Devolução ao estoque realizada com sucesso"
+        });
+        
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
 };

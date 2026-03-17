@@ -4,5 +4,6 @@ module.exports = {
     entradaController: require('./entradaController'),
     loteController: require('./loteController'),
     saidaController: require('./saidaController'),
-    listaSaidaController: require('./listaSaidaController')
+    listaSaidaController: require('./listaSaidaController'),
+    balancoController: require('./balancoController')
 }

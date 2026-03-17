@@ -1,0 +1,277 @@
+<div class="flex flex-row items-center justify-between">
+    <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Estoque'}) %>
+    <a id="revisar-balanco" href="/balanco/revisar" class="flex flex-row gap-2 items-center rounded-full bg-white border border-gray-200 pl-4 pr-2 py-1 text-gray-600 font-medium shadow-xl hover:shadow-none transition-all duration-300">
+        Revisar balanço
+        <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="w-5 h-5">
+    </a>
+</div>
+
+<%- include('../components/searchBox', { placeholder: 'Pesquisar insumo' }) %>
+
+<div id="inventario-container" class="flex flex-col gap-3"></div>
+
+<div id="modal-adicionar-lista-balanco" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center px-8 justify-center">
+    <div class="bg-white rounded-xl p-8 w-full max-w-md border border-gray-200">
+        <div id="modal-content" class="flex flex-col gap-4">
+            <!-- O conteúdo do modal será adicionado dinamicamente -->
+        </div>
+    </div>
+    <div id="fechar-popup" class="cursor-pointer bg-white text-gray-500 text-sm px-3 py-1 rounded-full opacity-70 hover:opacity-80 transition-all duration-600 flex flex-row gap-1 items-center">
+        <img class="h-5 grayscale" src="/images/icones/falha.png">
+        Fechar janela
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async function() {
+    const modalBalanco = document.getElementById("modal-adicionar-lista-balanco");
+    const modalContent = document.getElementById("modal-content");
+    const fecharPopup = document.getElementById("fechar-popup");
+    const modal = document.getElementById("modal-adicionar-lista-balanco");
+    try {
+        const response = await fetch("https://estoque.taiksu.com.br/api/inventario/<%= unidade_id %>");
+        const unidadeId = <%= unidade_id %>;
+        const indicadorAlerta = document.getElementById("indicador-alerta");
+
+        if (!response.ok) {
+            alert("Não foi possível carregar o inventário.");
+            return;
+        }
+
+        const inventario = await response.json();
+        const container = document.getElementById("inventario-container");
+
+        // 🔹 Agrupa por categoria
+        const categorias = {};
+
+        inventario.inventario.forEach(item => {
+            if (!categorias[item.categoria]) {
+                categorias[item.categoria] = [];
+            }
+            categorias[item.categoria].push(item);
+        });
+
+        // 🔹 Renderiza Inventário
+        Object.keys(categorias).forEach(categoria => {
+
+            const categoriaDiv = document.createElement("div");
+            categoriaDiv.className = "flex flex-col gap-3 categoria-insumos my-2";
+
+            categoriaDiv.innerHTML = `
+                    <h2 class=" text-sm text-gray-500">${categoria}</h2>
+                    <div class="flex flex-col gap-3">
+                    ${categorias[categoria].map(insumo => {
+
+                        let quantidade = insumo.quantidade || 0;
+                        const quantidadeOriginal = quantidade;
+                        const tipo = insumo.unidade_medida;
+
+                        if (tipo === 'kg') {
+                            quantidade = Number(quantidade)
+                                .toFixed(3)
+                                .replace('.', ',');
+                        } else {
+                            quantidade = parseInt(quantidade);
+                        }
+
+                        return `
+                            <div id="card-${insumo.id}" 
+                               class="group insumo-card cursor-pointer flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
+
+                                <div class="flex flex-row items-center gap-2">
+                                    <img id="insumo-foto-${insumo.id}" class="md:h-12 md:w-12 h-10 w-10 rounded-md bg-white group-hover:scale-105 transition-all duration-400" 
+                                         src="https://insumos.taiksu.com.br/${insumo.foto_url}">
+                                    
+                                    <div class="flex flex-col gap-0">
+                                        <h3 id="insumo-nome-${insumo.id}" class="insumo-nome md:text-md text-sm text-gray-600 font-medium">
+                                            ${insumo.nome}
+                                        </h3>
+                                        <p class="md:text-sm text-xs text-gray-400">
+                                            ${insumo.valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' } || '0')}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-row items-center gap-2">
+                                    <div id="quantidade-${insumo.id}" data-valor="${quantidadeOriginal}" class="group-hover:scale-110 transition-all duration-300 quantidade md:block text-md font-semibold text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
+                                            ${quantidade} <span class="text-sm font-medium text-gray-500">${tipo}</span>
+                                    </div>
+                                    <h2 id="quantidade-modal-${insumo.id}" class="hidden">${quantidade}</h2>
+                                    <h4 id="unidade-medida-${insumo.id}" class="hidden">${tipo}</h4>
+                                    <img class="h-6 w-6" src="https://login.taiksu.com.br/frontend/img/seta.png">
+                                </div>
+
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+
+            container.appendChild(categoriaDiv);
+        });
+
+        // Adiciona clique em cada card
+        const cards = document.querySelectorAll('.insumo-card');
+        cards.forEach(card => {
+            card.addEventListener('click', function() {
+                const insumoId = this.id.split('-')[1];
+                let labelQuantidade = 'Contabilizado';
+                const insumoFoto = document.getElementById(`insumo-foto-${insumoId}`).src;
+                const insumoNome = document.getElementById(`insumo-nome-${insumoId}`).textContent;
+                const quantidade = document.getElementById(`quantidade-modal-${insumoId}`).textContent;
+                const unidadeMedida = document.getElementById(`unidade-medida-${insumoId}`).textContent;
+                if (unidadeMedida === 'kg') {
+                    labelQuantidade = 'Pesado';
+                }
+                modalBalanco.classList.remove('hidden');
+                modalContent.innerHTML = `
+                    <div class="flex flex-col gap-4">
+
+                        <div class="flex flex-row items-center gap-2 mb-4">
+                            <img src="${insumoFoto}" class="md:h-14 md:w-14 h-10 w-10 rounded-md bg-white border border-gray-100">
+                            <div class="flex flex-col gap-0 mt-1">
+                                <h2 class="text-sm text-gray-500">Realizando <span class="text-green-700 font-semibold">balanço</span></h2>
+                                <h2 class="text-lg text-gray-700 font-semibold">${insumoNome}</h2>
+                            </div>
+                        </div>
+                    
+                        <div id="modal-content-quantidade" class="w-full flex flex-col items-center gap-2">
+                            <div class="w-full flex flex-row items-center gap-2">
+                                <div class="w-full flex flex-col gap-0">
+                                    <h2 class="text-xs text-gray-500">Estoque no sistema</h2>
+                                    <div class="text-xl text-gray-600 font-semibold flex flex-row items-center gap-2">
+                                        <h2 id="quantidade-sistema-popup">${quantidade}</h2><span>${unidadeMedida}</span>
+                                    </div>
+                                </div>
+                                <div class="w-24flex flex-col gap-0">
+                                    <h2 class="text-xs text-gray-500">${labelQuantidade}</h2>
+                                    <input id="quantidade-popup" class="outline-none focus:border-green-500 w-full p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="modal-content-diferenca" class="hidden flex flex-col gap-3">
+                            <div class="flex flex-col bg-white border bg-yellow-50 border-yellow-200 mt-4  gap-2 p-3 rounded-md ">
+                           <div class="flex flex-row items-center gap-2">
+                            <img src="/images/icones/balanca.png" class="h-5 w-5">
+                            <h2 class="font-medium text-yellow-800">Diferença detectada</h2>
+                           </div>
+
+                            <div class="w-full rounded-lg bg-white/80 flex flex-row items-center gap-2">
+                                <div class="w-full p-1 rounded-md flex flex-col items-start gap-2">
+                                    <div class="flex flex-row items-center gap-2">
+                                        <h2 class="text-sm text-gray-600">Sistema</h2>
+                                        <h2 id="quantidade-sistema-fixo" class="text-sm text-gray-700 font-medium">--</h2>
+                                    </div>
+                                    <div class="flex flex-row items-center gap-2">
+                                        <h2 class="text-sm text-gray-600">Contabilizado</h2>
+                                        <h2 id="quantidade-contabilizado-fixo" class="text-sm text-gray-700 font-medium">10.849 kg</h2>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-center px-2">
+                                    <h2 id="preco-diferenca" class="shrink-0 whitespace-nowrap text-3xl font-semibold"></h2>
+                                </div>
+                            </div>
+                            </div>
+                            <p class="text-xs text-gray-500">O sistema irá ajustar automaticamente o estoque pela diferença.</p>
+                        </div>
+
+                        <hr class="border-gray-100 my-2">
+
+                        <button data-insumo-id="${insumoId}" id="adicionar-carrinho" class="mt-2 cursor-pointer w-full p-2 bg-green-600 hover:bg-green-700 transition-all duration-300 text-white rounded-full">Ajustar estoque</button>
+
+                    </div>
+                `;
+                
+                //Validações
+                const quantidadeInput = document.getElementById('quantidade-popup');
+                const diferenca = document.getElementById('preco-diferenca');
+                const quantidadeSistema = Number(document.getElementById('quantidade-sistema-popup').textContent.replace(',', '.'));
+                const quantidadeSistemaFixo = document.getElementById('quantidade-sistema-fixo');
+                const quantidadeContabilizadoFixo = document.getElementById('quantidade-contabilizado-fixo');
+                const modalDiferenca = document.getElementById('modal-content-diferenca');
+
+                
+                if( unidadeMedida == 'kg') {
+                new AutoNumeric(quantidadeInput, {
+                    decimalCharacter: ',',
+                    digitGroupSeparator: '.',
+                    decimalCharacterAlternative: '.',
+                    currencySymbol: ' kg',
+                    currencySymbolPlacement: 's', // 'p' = prefixo, 's' = sufixo
+                    decimalPlaces: 3, // 3 casas decimais para kg
+                    minimumValue: '0',
+                    maximumValue: quantidadeSistema + 3,
+                    emptyInputBehavior: 'zero'
+                });
+                }
+
+                quantidadeInput.focus();
+                quantidadeInput.addEventListener('input', function() {
+                    const valorBruto = Number(this.value.replace(',', '.').replace(' kg', ''));
+                    console.log(valorBruto, quantidadeSistema);
+
+                    // Atualiza diferenca e formata
+                    if( unidadeMedida == 'uni') {
+                        diferenca.textContent = Number(valorBruto - quantidadeSistema).toFixed(0) + ' ' + unidadeMedida;
+                        quantidadeContabilizadoFixo.textContent = Number(valorBruto).toFixed(0) + ' ' + unidadeMedida;
+                    } else {
+                        diferenca.textContent = Number(valorBruto - quantidadeSistema).toFixed(3) + ' ' + unidadeMedida;
+                        quantidadeContabilizadoFixo.textContent = Number(valorBruto).toFixed(3) + ' ' + unidadeMedida;
+                    }
+                    quantidadeSistemaFixo.textContent = quantidadeSistema + ' ' + unidadeMedida;
+                    
+
+                    // Validações
+                    if (valorBruto > Number(quantidadeSistema)) {
+                        console.log('maior');
+                        diferenca.classList.remove('text-red-600');
+                        diferenca.classList.add('text-green-600');
+                        modalDiferenca.classList.remove('hidden');
+                    } else if (valorBruto < Number(quantidadeSistema)) {
+                        console.log('menor');
+                        modalDiferenca.classList.remove('hidden');
+                        diferenca.classList.remove('text-green-600');
+                        diferenca.classList.add('text-red-600');
+                    } else {
+                        console.log('igual');
+                        modalDiferenca.classList.add('hidden');
+                    }
+                });
+            });
+        });
+
+
+        
+
+        // 🔹 Pega a quantidade de cada insumo
+        const quantidades = document.querySelectorAll('.quantidade');
+
+    } catch (error) {
+        console.error("Erro ao carregar inventário:", error);
+    }
+
+        // Fecha modal apertando ESC
+        document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            modal.classList.add('hidden');
+            modalContent.innerHTML = '';
+        }});
+
+        // Fecha modal ao clica no botao
+        fecharPopup.addEventListener('click', function(e) {
+            if (e.target === fecharPopup) {
+                modalBalanco.classList.add('hidden');
+                modalContent.innerHTML = '';
+            }
+        });
+
+        //// Fecha o pop-up ao clicar fora
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                modalContent.innerHTML = '';
+            }
+        });
+});
+</script>
+

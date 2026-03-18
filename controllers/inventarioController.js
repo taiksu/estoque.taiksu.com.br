@@ -1,6 +1,7 @@
 const { LoteInsumo, QuantidadeMinima, Sequelize } = require('../models');
 const publishEvent = require('../client/publishEvent');
 const axios = require('axios');
+const { Op } = require('sequelize');
 
 
 // Retorna lotes no inventário da loja
@@ -133,5 +134,30 @@ exports.atualizarMinima = async (req, res) => {
     } catch (error) {
         console.error('Erro ao atualizar quantidade mínima:', error);
         res.status(500).json({ error: 'Erro ao atualizar quantidade mínima' });
+    }
+};
+
+// Retorna apenas ids de insumos com estoque
+exports.listarIdsComEstoque = async (req, res) => {
+    try {
+        const unidadeId = req.params.id;
+        const lotesAgrupados = await LoteInsumo.findAll({
+            attributes: [
+                'insumo_id',
+                [Sequelize.fn('SUM', Sequelize.col('quantidade')), 'quantidade_total']
+            ],
+            where: {
+                unidade_id: unidadeId,
+                quantidade: {
+                    [Sequelize.Op.gt]: 0
+                }
+            },
+            group: ['insumo_id']
+        });
+        const idsComEstoque = lotesAgrupados.map(lote => lote.insumo_id);
+        res.json(idsComEstoque);
+    } catch (error) {
+        console.error('Erro ao buscar ids com estoque:', error);
+        res.status(500).json({ error: 'Erro ao buscar ids com estoque' });
     }
 };

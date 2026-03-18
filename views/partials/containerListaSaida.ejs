@@ -116,21 +116,24 @@
         // EDITAR POPUP
         document.addEventListener('click', (event) => {
             if(event.target.id.startsWith('editar-')) {
-                const popupEditarSaida = document.getElementById('editar-saida');
-                const insumoFoto = document.getElementById('insumo-foto-edit');
-                const insumoNome = document.getElementById('insumo-nome-edit');
+                const popupEditarSaida = document.getElementById('popup-editar-saida');
                 const insumoQuantidade = document.getElementById('quantidade-edit');
                 const insumoId = document.getElementById('confirmar-edicao');
-                const insumoPreco = document.getElementById('preco-edit');
                 const id = event.target.id.replace('editar-', '');
+                const insumoFoto = document.getElementById(`insumo-foto-${id}`);
+                const quantidadeItem = document.getElementById(`quantidade-item-${id}`).textContent;
+                const insumoNome = document.getElementById(`insumo-nome-${id}`);
+                const nomePopup = document.getElementById('insumo-nome-edit');
+                const fotoPopup = document.getElementById('insumo-foto-edit');
+                const quantidadePopup = document.getElementById('quantidade-edit');
 
-                insumoId.dataset.insumoId = id;
-                console.log('ID do insumo populado no botão do popup:', insumoId.dataset.insumoId);
-                insumoFoto.src = document.getElementById(`insumo-foto-${id}`).src;
-                insumoQuantidade.value = Number(document.getElementById(`quantidade-item-${id}`).textContent.replace(' ', '').replace('uni', '').replace('kg', ''));
-                insumoPreco.value = Number(document.getElementById(`preco-item-${id}`).textContent.replace('R$', '').replace(',', '.'));
-                console.log('preço obtido ao abrir popup:', insumoPreco.value);
-                insumoNome.textContent = document.getElementById(`insumo-nome-${id}`).textContent.length > 20 ? document.getElementById(`insumo-nome-${id}`).textContent.slice(0, 18) + '...' : document.getElementById(`insumo-nome-${id}`).textContent;
+                // Passa os dados para o popup
+                nomePopup.textContent = insumoNome.textContent;
+                fotoPopup.src = insumoFoto.src;
+                console.log(quantidadeItem);
+                insumoId.value = id;
+
+                console.log('ID do insumo populado no botão do popup:', id);
 
                 popupEditarSaida.classList.remove('hidden');
             }

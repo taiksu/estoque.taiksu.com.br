@@ -1,10 +1,10 @@
-<div id="popup-editar-entrada" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex items-center justify-center">
+<div id="popup-editar-saida" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex items-center justify-center">
                     <div class="w-full max-w-sm mx-8 flex flex-col gap-4 bg-white rounded-xl p-8">
 
                         <div class="flex flex-row items-center gap-2 mb-2">
                             <img id="insumo-foto-edit" src="" class="md:h-14 md:w-14 h-10 w-10 rounded-md bg-white border border-gray-100">
                             <div class="flex flex-col gap-0 mt-1">
-                                <h2 class="text-sm text-gray-500">Editar <span class="font-medium text-green-700">entrada</span></h2>
+                                <h2 class="text-sm text-gray-500">Editar <span class="font-medium text-red-700">saída</span></h2>
                                 <h2 id="insumo-nome-edit" class="text-lg text-gray-700 font-semibold">Insumo</h2>
                             </div>
                         </div>
@@ -12,18 +12,9 @@
                         <div id="modal-content-quantidade" class="w-full flex flex-col items-center gap-2">
                             <div class="w-full flex flex-row items-center gap-4 border-b border-gray-100 pb-5">
                                 <div class="w-full flex flex-col gap-0">
-                                    <label for="preco-edit" class="text-xs text-gray-500">Preço</label>
-                                    <input type="number" id="preco-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Preço">
-                                </div>
-                                <div class="w-full flex flex-col gap-0">
                                     <label for="quantidade-edit" class="text-xs text-gray-500">Quantidade</label>
                                     <input type="number" id="quantidade-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
                                 </div>
-                            </div>
-
-                            <div class="w-full flex flex-row items-center justify-between">
-                                <h1 class="text-md text-gray-700">Total</h1>
-                                <h1 id="total-item-edit" class="text-md text-green-600 font-semibold">R$ 0,00</h1>
                             </div>
                         </div>
                         <div class="flex flex-row items-center gap-2 mt-4">
@@ -37,13 +28,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // CALCULA VALOR TOTAL
-    const precoEdit = document.getElementById('preco-edit');
     const quantidadeEdit = document.getElementById('quantidade-edit');
-    const totalItemEdit = document.getElementById('total-item-edit');
-
-    precoEdit.addEventListener('input', () => {
-        totalItemEdit.textContent = (precoEdit.value * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    });
 
     quantidadeEdit.addEventListener('input', () => {
         totalItemEdit.textContent = (precoEdit.value * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -51,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // FECHAR E ABRIR O POPUP
     document.getElementById('cancelar-edicao').addEventListener('click', () => {
-        document.getElementById('popup-editar-entrada').classList.add('hidden');
+        document.getElementById('popup-editar-saida').classList.add('hidden');
     });
 
     // CONFIRMA EDIÇÃO
@@ -64,14 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const popupEditarEntrada = document.getElementById('popup-editar-entrada');
     const insumoFotoEdit = document.getElementById('insumo-foto-edit');
     const insumoNomeEdit = document.getElementById('insumo-nome-edit');
-    const insumoPrecoEdit = document.getElementById('preco-edit');
     const insumoQuantidadeEdit = document.getElementById('quantidade-edit');
     const confirmarEdicao = document.getElementById('confirmar-edicao');
-    const totalEntrada = document.getElementById('total-entrada');
 
     // FUNÇÃO PARA EDITAR
     async function editarEntrada(id) {
-        const response = await fetch(`/api/lista-entrada/editar`, {
+        const response = await fetch(`/api/lista-saida/editar`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -85,9 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         if(data.success) {
             console.log(data);
-            document.getElementById(`preco-item-${id}`).textContent = Number(insumoPrecoEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             document.getElementById(`quantidade-item-${id}`).textContent = insumoQuantidadeEdit.value;
-            document.getElementById(`valor-total-${id}`).textContent = (insumoPrecoEdit.value * insumoQuantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             totalEntrada.textContent = Number(data.total_lista).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             popupEditarEntrada.classList.add('hidden');
         } else {

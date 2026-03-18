@@ -47,8 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     unidade_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      comment: 'unidade que vai ser feita a saida',
-      after: 'lista_saida_id'
+      comment: 'unidade que vai ser feita a saida'
     }
   }, {
     sequelize,

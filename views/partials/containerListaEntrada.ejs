@@ -130,20 +130,22 @@
         // EDITAR POPUP
         document.addEventListener('click', (event) => {
             if(event.target.id.startsWith('editar-')) {
-                const popupEditarEntrada = document.getElementById('editar-entrada');
+                const popupEditarEntrada = document.getElementById('popup-editar-entrada');
                 const insumoFoto = document.getElementById('insumo-foto-edit');
                 const insumoNome = document.getElementById('insumo-nome-edit');
                 const insumoQuantidade = document.getElementById('quantidade-edit');
                 const insumoId = document.getElementById('confirmar-edicao');
-                const insumoPreco = document.getElementById('preco-edit');
+                const totalItemEdit = document.getElementById('total-item-edit');
+                const inputePreco = document.getElementById('preco-edit');
                 const id = event.target.id.replace('editar-', '');
 
                 insumoId.dataset.insumoId = id;
                 console.log('ID do insumo populado no botão do popup:', insumoId.dataset.insumoId);
                 insumoFoto.src = document.getElementById(`insumo-foto-${id}`).src;
                 insumoQuantidade.value = Number(document.getElementById(`quantidade-item-${id}`).textContent.replace(' ', '').replace('uni', '').replace('kg', ''));
-                insumoPreco.value = Number(document.getElementById(`preco-item-${id}`).textContent.replace('R$', '').replace(',', '.'));
-                console.log('preço obtido ao abrir popup:', insumoPreco.value);
+                totalItemEdit.textContent = document.getElementById(`valor-total-${id}`).textContent;
+                inputePreco.value = Number(document.getElementById(`preco-item-${id}`).textContent.replace('R$', '').replace(',', '.'));
+                console.log('preço obtido ao abrir popup:', inputePreco.value);
                 insumoNome.textContent = document.getElementById(`insumo-nome-${id}`).textContent.length > 20 ? document.getElementById(`insumo-nome-${id}`).textContent.slice(0, 18) + '...' : document.getElementById(`insumo-nome-${id}`).textContent;
 
                 popupEditarEntrada.classList.remove('hidden');

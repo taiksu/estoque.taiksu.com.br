@@ -65,7 +65,8 @@ module.exports = (sequelize, DataTypes) => {
       comment: 'Fornecedor do lote'
     },
     grupo_id: {
-      type: DataTypes.UUIDV4,
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       allowNull: true,
       defaultValue: null,
       comment: 'ID do grupo de entrada'

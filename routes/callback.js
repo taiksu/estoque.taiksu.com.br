@@ -4,7 +4,7 @@ var router = express.Router();
 const SSO_USER_ME_URL = process.env.SSO_USER_ME_URL || 'https://login.taiksu.com.br/api/user/me';
 
 // callback do SSO
-router.get('/', async (req, res) => {
+router.get('/:page?', async (req, res) => {
   const token = req.query.token; // Pega o Token da Query String URL
   if (!token) return res.status(400).send('Token não informado');
 
@@ -33,7 +33,11 @@ router.get('/', async (req, res) => {
     req.session.pin = userData.pin;
     req.session.save(); //Salva sessão
 
-    res.redirect('/');
+    if(req.params.page) {
+      res.redirect(`/${req.params.page}`);
+    } else {
+      res.redirect('/');
+    }
 
   } catch (err) {
     console.error("Erro ao validar token:", err);

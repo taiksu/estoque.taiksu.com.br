@@ -154,8 +154,8 @@ exports.listarIdsComEstoque = async (req, res) => {
             },
             group: ['insumo_id']
         });
-        const idsComEstoque = lotesAgrupados.map(lote => lote.insumo_id);
-        res.json(idsComEstoque);
+        const disponiveis = lotesAgrupados.map(lote => lote.insumo_id);
+        res.json(disponiveis);
     } catch (error) {
         console.error('Erro ao buscar ids com estoque:', error);
         res.status(500).json({ error: 'Erro ao buscar ids com estoque' });

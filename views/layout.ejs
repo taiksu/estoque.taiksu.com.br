@@ -12,14 +12,14 @@
     </head>
 
     <%- include('partials/header') %>
-    <body class="max-w-2xl min-h-screen mx-auto mt-28 mb-10 px-8">
+    <body class="max-w-2xl min-h-screen mx-auto mt-32 mb-10 px-8">
         <a href="https://ajuda.taiksu.com.br/callback?token=<%= userToken %>&categoria=90">
             <img class="hidden w-full rounded-xl mb-5 border border-gray-200" src="/images/banners/lancamento.png" alt="">
         </a>
         <div class="hidden flex flex-row items-center justify-start gap-4 bg-red-50 rounded-xl p-4 mb-5 border border-red-200">
             <img src="/images/icones/alert.png" alt="Alerta" class="w-10 h-10">
             <div class="flex flex-col">
-                <p class="text-md">Você está <span class="font-bold text-pink-600">testando</span> uma nova versão.<br> O estoque real não será alterado.</p>
+                <p class="text-sm text-gray-600">Você está <span class="font-semibold ">testando</span> uma nova versão.<br> O estoque real não será alterado.</p>
             </div>
         </div>
         <%- body %>

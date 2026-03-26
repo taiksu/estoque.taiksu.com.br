@@ -1,0 +1,61 @@
+<%- include('../components/breadcrumb', { link: '/historico/entradas', paginaAnterior: 'Entradas'}) %>
+<%- include('../components/popup/pinModal') %>
+
+<div class="flex flex-col gap-4 mt-5">
+    <div class="flex flex-col items-center gap-1 p-8 bg-white rounded-xl border border-gray-200">
+        <img class="h-20 w-20" src="/images/icones/calendar.png" alt="Desfazer">
+        <h1 class="text-2xl font-semibold text-green-800">Editar data da movimentação</h1>
+        <p class="text-gray-500 text-center">Ao confirmar, a data desta movimentação será alterada para a data selecionada, e o CMV será recalculado automaticamente.<br>
+            Todas as outras movimentações não serão afetadas.</p>
+    </div>
+
+    <div class="w-full flex flex-col gap-1 bg-white rounded-xl border border-gray-200 p-6">
+        <div class="max-w-md mx-auto w-full flex flex-col items-center gap-8 mb-8">
+            <input type="date" id="data" name="data" class="w-full border border-gray-400 p-1 text-xl appearance-none rounded-md outline-none">
+            <button id="retroagir" class="cursor-pointer w-full bg-green-600 hover:bg-green-700 text-white px-8 py-2 rounded-full transition-colors duration-300">Confirmar</button>
+        </div>
+    <p class="text-xs text-gray-600 text-center">
+        ID da movimentação: <%= movimentacaoId %>
+    </p>
+</div>
+
+<script>
+    const pinModal = document.getElementById('pin-modal');
+    const confirmar = document.getElementById('confirmar-pin');
+    const pinInput = document.getElementById('pin-input');
+    const retroagir = document.getElementById('retroagir');
+    
+    retroagir.addEventListener('click', () => {
+        pinModal.classList.remove('hidden');
+    });
+
+    confirmar.addEventListener('click', () => {
+        if (pinInput.value !== '<%= userPin %>') {
+            alert('Pin incorreto');
+            return;
+        }
+
+        const data = document.getElementById('data').value;
+        if (data) {
+            fetch('https://movimentacoes.taiksu.com.br/api/retroagir', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    data,
+                    id: '<%= movimentacaoId %>',
+                    user_id: '<%= user_id %>'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+</script>

@@ -16,6 +16,17 @@ if (place) {
         const input = document.getElementById('search');
         const filter = input.value.toLowerCase();
         const cards = document.querySelectorAll('.insumo-card');
+        const fornecedores = document.getElementById('fornecedores-container');
+        const banner = document.getElementById('banner-01');
+
+        // Oculta fornecedores e banner se digitar mais de 1 caractere
+        if (filter.length > 1) {
+            fornecedores.style.display = 'none';
+            banner.style.display = 'none';
+        } else {
+            fornecedores.style.display = 'flex';
+            banner.style.display = 'flex';
+        }
 
         cards.forEach(card => {
             const nome = card.querySelector('.insumo-nome').textContent.toLowerCase();

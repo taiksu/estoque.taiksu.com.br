@@ -1,8 +1,6 @@
-<div class="flex flex-row items-center justify-between mb-6">
-    <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Estoque'}) %>
-</div>
+<img id="banner-01" src="/images/banners/banner-01.png" class="cursor-default w-full rounded-xl border border-gray-100">
 
-<div id="fornecedores-container" class="w-full flex flex-row justify-between gap-8 overflow-x-scroll my-3 noscrollbar">
+<div id="fornecedores-container" class="mt-8 w-full flex flex-row justify-between gap-8 overflow-x-scroll my-3 noscrollbar">
 <!-- Fornecedores serão populados aqui com JS-->
 </div>
 
@@ -30,10 +28,11 @@
         const fornecedores = await response.json();
 
         fornecedores.forEach(fornecedor => {
-            const divFornecedor = document.createElement('div');
+            const divFornecedor = document.createElement('a');
             divFornecedor.className = 'flex-shrink-0 flex flex-col items-center gap-2';
+            divFornecedor.href = `/comprar/fornecedor/${fornecedor.id}`;
             divFornecedor.innerHTML = `
-                <img src="https://insumos.taiksu.com.br/images/fornecedores/${fornecedor.logo_path}" class="h-24 w-24 object-contain rounded-full bg-white border border-gray-200">
+                <img src="https://insumos.taiksu.com.br/images/fornecedores/${fornecedor.logo_path}" class="cursor-pointer hover:shadow-xl transition-all duration-300 h-28 w-28 object-contain rounded-full bg-white border border-gray-200">
                 <h2 class="text-xs text-gray-600">${fornecedor.nome}</h2>
             `;
             fornecedoresContainer.appendChild(divFornecedor);
@@ -75,10 +74,12 @@
                 <h2 class="text-sm text-gray-500">${categoria}</h2>
                 <div class="grid grid-cols-5 gap-4">
                     ${categorias[categoria].map(insumo => `
-                            <div data-insumo-id="${insumo.id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
+                            <div data-insumo-id="${insumo.id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-2 hover:shadow-md transition-all duration-400">
 
                                 <div class="w-full flex flex-col items-center justify-between">
-                                    <img class="insumo-foto h-auto w-full rounded-sm bg-white" src="https://insumos.taiksu.com.br/${insumo.foto_url}">
+                                    <div class="w-full flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden">
+                                        <img class="insumo-foto object-contain h-32 w-full group-hover:scale-105 transition-scale duration-400" src="https://insumos.taiksu.com.br/${insumo.foto_url}">
+                                    </div>
                                     
                                     <div class="w-full flex flex-col gap-0">
                                         <h3 class="mt-4 w-full insumo-nome md:text-sm text-md text-gray-600 font-medium">
@@ -88,7 +89,7 @@
                                             ${insumo.marca.nome}
                                         </h4>
                                     </div>
-                                    <div class="mt-8 h-full w-full text-white bg-green-600 rounded-full text-center py-1 hover:bg-green-700 transition-all duration-300">Adicionar</div>
+                                    <div class="mt-8 h-full w-full text-green-600 bg-green-100 rounded-full text-center py-1 group-hover:bg-green-200 transition-all duration-300">Comprar</div>
                                 </div>
 
 

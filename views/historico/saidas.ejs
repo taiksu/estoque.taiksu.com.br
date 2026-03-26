@@ -166,6 +166,7 @@
 
             // POPUP DETALHES (DECLAREI DEPOIS, MAS FUNCTION SOBE NO ESCOPO -  HOISTING)
             async function abrirDetalhesMovimentacao(id) {
+                const editarButton = document.getElementById('editar-data-movimentacao');
                 lotesContainer.innerHTML = '';
                 const idGrupo = document.getElementById('id-grupo');
                 idGrupo.textContent = id;
@@ -183,6 +184,7 @@
                     loteMovimentacao.classList.add('border', 'border-gray-200', 'rounded-md');
 
                     if (status == 'cancelada') {
+                        editarButton.classList.add('hidden');
                         loteMovimentacao.innerHTML = `
                         <div class="opacity-50 cursor-not-allowed flex flex-row items-center justify-between p-3 text-gray-400">
                             <div class="flex flex-row items-center gap-2">
@@ -205,6 +207,8 @@
                         </div>
                         `;
                     } else {
+                        editarButton.classList.remove('hidden');
+                        editarButton.href = `/processo/retroagir/${id}`;
                         loteMovimentacao.innerHTML = `
                         <div class="flex flex-row items-center justify-between p-3 text-gray-500">
                             <div class="flex flex-row items-center gap-2">

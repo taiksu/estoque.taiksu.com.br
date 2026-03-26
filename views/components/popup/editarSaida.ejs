@@ -18,6 +18,7 @@
                             </div>
                         </div>
                         <div class="flex flex-row items-center gap-2 mt-4">
+                            <input type="hidden" id="id-edit-insumos" value="">
                             <button id="cancelar-edicao" class="cursor-pointer w-full p-2 bg-gray-200 hover:bg-gray-300 transition-all duration-300 text-gray-600 rounded-full">Cancelar</button>
                             <button data-insumoId="" id="confirmar-edicao" class="cursor-pointer w-full p-2 bg-green-600 hover:bg-green-700 transition-all duration-300 text-white rounded-full">Confirmar</button>
                         </div>
@@ -27,33 +28,28 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // CALCULA VALOR TOTAL
-    const quantidadeEdit = document.getElementById('quantidade-edit');
-
-    quantidadeEdit.addEventListener('input', () => {
-        totalItemEdit.textContent = (precoEdit.value * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    });
 
     // FECHAR E ABRIR O POPUP
     document.getElementById('cancelar-edicao').addEventListener('click', () => {
         document.getElementById('popup-editar-saida').classList.add('hidden');
     });
 
-    // CONFIRMA EDIÇÃO
-    document.getElementById('confirmar-edicao').addEventListener('click', () => {
-        let idEntrada = document.getElementById('confirmar-edicao').dataset.insumoId;
-        editarEntrada(idEntrada);
-    });
-
     // ELEMENTOS DO POPUP
-    const popupEditarEntrada = document.getElementById('popup-editar-entrada');
+    const popupEditarSaida = document.getElementById('popup-editar-saida');
     const insumoFotoEdit = document.getElementById('insumo-foto-edit');
     const insumoNomeEdit = document.getElementById('insumo-nome-edit');
     const insumoQuantidadeEdit = document.getElementById('quantidade-edit');
     const confirmarEdicao = document.getElementById('confirmar-edicao');
 
+    // CONFIRMA EDIÇÃO
+    document.getElementById('confirmar-edicao').addEventListener('click', () => {
+        const idEditInsumos = document.getElementById('id-edit-insumos').value;
+        editarSaida(idEditInsumos);
+    });
+    
+
     // FUNÇÃO PARA EDITAR
-    async function editarEntrada(id) {
+    async function editarSaida(id) {
         const response = await fetch(`/api/lista-saida/editar`, {
             method: 'PUT',
             headers: {
@@ -61,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({
                 id,
-                preco: insumoPrecoEdit.value,
                 quantidade: insumoQuantidadeEdit.value
             })
         });
@@ -69,8 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(data.success) {
             console.log(data);
             document.getElementById(`quantidade-item-${id}`).textContent = insumoQuantidadeEdit.value;
-            totalEntrada.textContent = Number(data.total_lista).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            popupEditarEntrada.classList.add('hidden');
+            popupEditarSaida.classList.add('hidden');
         } else {
             alert('Falha ao editar entrada');
         }

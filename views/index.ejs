@@ -1,4 +1,10 @@
 <style>
+    .total-estoque{
+        opacity:0;
+        transform: translateY(10px);
+        transition: opacity .2s ease, transform .4s ease;
+    }
+    
     #conteiner-2{
         opacity:0;
         transform: translateY(10px);
@@ -6,6 +12,11 @@
     }
 
     #conteiner-2.show{
+        opacity:1;
+        transform: translateY(0);
+    }
+
+    .total-estoque.show{
         opacity:1;
         transform: translateY(0);
     }
@@ -23,6 +34,11 @@
     document.addEventListener("DOMContentLoaded", () => {
 
         const conteiner2 = document.getElementById("conteiner-2");
+        const totalEstoque = document.getElementById("card-total-estoque");
+
+        setTimeout(() => {  
+            totalEstoque.classList.add("show");
+        }, 350);
 
         setTimeout(() => {  
             conteiner2.classList.add("show");

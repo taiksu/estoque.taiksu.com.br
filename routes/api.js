@@ -20,8 +20,10 @@ router.post('/entrada/manual', entradaController.manual);
 
 // Saída
 router.get('/lista-saida', listaSaidaController.index);
+router.put('/lista-saida/editar', listaSaidaController.editar);
 router.put('/saida/manual', saidaController.saidaManual);
 router.put('/lista-saida/add', listaSaidaController.add);
+router.delete('/lista-saida/delete', listaSaidaController.delete);
 
 // Lote
 router.delete('/excluir/lote', loteController.excluir);

@@ -122,6 +122,32 @@ exports.index = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar lista de saída' });
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+exports.editar = async (req, res) => {
+    try {
+        const { id, quantidade } = req.body;
+        console.log('id', id);
+        console.log('quantidade', quantidade);
+        const insumoSaida = await InsumoSaida.findByPk(id);
+        await insumoSaida.update({ quantidade });
+        res.status(200).json({ success: true, message: 'Lista de saída editada com sucesso' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+}
+
+exports.delete = async (req, res) => {
+    try {
+        const { id } = req.body;
+        const insumoSaida = await InsumoSaida.findByPk(id);
+        await insumoSaida.destroy();
+        res.status(200).json({ success: true, message: 'Item deletado da lista de saída' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: error.message });
     }
 }

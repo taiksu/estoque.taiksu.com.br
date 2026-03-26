@@ -47,7 +47,9 @@
                 <div class="flex flex-row items-center justify-between bg-white rounded-xl border border-gray-200 p-6">
                     <div class="flex flex-row items-center gap-3">
                         <div id="fornecedor-id" class="hidden">${fornecedor.id}</div>
-                        <img src="https://insumos.taiksu.com.br/images/fornecedores/${fornecedor.logo_path}" class="h-14 w-14 rounded-full shadow-xl">
+                        <a href="/comprar/fornecedor/${fornecedor.id}">
+                            <img src="https://insumos.taiksu.com.br/images/fornecedores/${fornecedor.logo_path}" class="h-14 w-14 rounded-full shadow-xl">
+                        </a>
                         <div>
                             <h2 class="text-gray-600 text-lg font-semibold">${fornecedor.nome}</h2>
                             <h2 class="text-gray-500 text-sm">${new Date(pedido.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</h2>
@@ -83,7 +85,7 @@
                 <div id="form-avaliacao" class="flex flex-row items-center justify-between bg-white rounded-xl border border-gray-200 p-6">
                     <div class="flex flex-col gap-0">
                         <h2 class="text-gray-700 font-semibold">Avalie sua experiência neste pedido</h2>
-                        <p class="text-gray-500 text-sm">Seu feedback é importante para nós</p>
+                        <p class="text-gray-500 text-sm">Sua avaliação ajuda o fornecedor</p>
                     </div>
 
                     <div id="estrelas" class="flex flex-row items-center gap-4">
@@ -123,18 +125,25 @@
 
         // Renderiza card do insumo
         function insumoCard(item) {
+            let quantidadeFormatada;
+            if(item.unidade_medida == 'uni') {
+                quantidadeFormatada = Number(item.quantidade).toFixed(0) + ' ' + item.unidade_medida;
+            } else {
+                quantidadeFormatada = Number(item.quantidade).toFixed(3) + ' ' + item.unidade_medida;
+            }
             return `
                 <div class="flex flex-row justify-between items-center px-6 py-4 border-b border-gray-200 last:border-0 px-3">
-                    <div class="flex flex-row items-center gap-3">
-                        <h1 class="bg-green-50 font-semibold rounded-full py-1 px-3 text-sm text-green-600">x ${Number(item.quantidade).toFixed(0)}</h1>
+                    <a class="flex flex-row items-center gap-3" href="/inventario/${item.insumo_id}">
+                        <img src="https://insumos.taiksu.com.br${item.foto_path}" class="hover:scale-105 transition-all duration-300 h-13 w-13 bg-gray-50 rounded-md">
                         <div>
                             <h1 class="text-gray-600 font-semibold">${item.nome}</h1>
                             <h4 class="text-gray-500 text-sm">${Number(item.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h4>
                         </div>
-                    </div>
-                    <a href="/inventario/${item.insumo_id}">
-                        <img src="https://insumos.taiksu.com.br${item.foto_path}" class="hover:scale-105 transition-all duration-300 h-13 w-13 bg-gray-50 rounded-md">
                     </a>
+                    <div class="flex flex-row items-center gap-3">
+                        <h1 class="bg-gray-50 font-semibold rounded-full py-1 px-3 text-green-700">${quantidadeFormatada}</h1>
+
+                    </div>
                 </div>
             `;
         }

@@ -1,0 +1,108 @@
+<div class="flex flex-row items-center justify-between mb-6">
+    <%- include('../components/breadcrumb', { link: '/comprar', paginaAnterior: 'Comprar'}) %>
+</div>
+
+<div class="flex flex-row gap-4 items-center justify-between bg-white rounded-xl border border-gray-200 p-10">
+    <div class="flex flex-row gap-4 items-center">
+        <img src="" id="logo" class="shadow-lg hover:shadow-xl w-24 h-24 hover:scale-105 transition-all duration-300 shrink-0 border border-gray-200 rounded-full bg-green-600">
+        <div class="flex flex-col items-start">
+            <h1 id="nome" class="text-xl text-green-800 font-semibold"></h1>
+            <p id="endereco" class="text-gray-600"></p>
+            <a id="whatsapp" href="" class="bg-green-600 hover:bg-green-700 transition-colors duration-300 px-5 py-1 rounded-full text-white text-sm font-medium mt-2">Enviar mensagem</a>
+        </div>
+    </div>
+    <div class="flex flex-col items-start">
+        <h2 class="text-gray-500 text-sm font-semibold">Pontuação do fornecedor</h2>
+    <div id="estrelas" class="flex flex-row gap-2">
+        <img id="nota-1" src="/images/icones/estrela.png" class="opacity-0 transition-opacity duration-300 h-8 w-8 p-1">
+        <img id="nota-2" src="/images/icones/estrela.png" class="opacity-0 transition-opacity duration-300 h-8 w-8 p-1">
+        <img id="nota-3" src="/images/icones/estrela.png" class="opacity-0 transition-opacity duration-300 h-8 w-8 p-1">
+        <img id="nota-4" src="/images/icones/estrela.png" class="opacity-0 transition-opacity duration-300 h-8 w-8 p-1">
+        <img id="nota-5" src="/images/icones/estrela.png" class="opacity-0 transition-opacity duration-300 h-8 w-8 p-1">
+    </div>
+    <p id="info-media" class="text-gray-400 text-xs mt-2">Média nos últimos 2 meses</p>
+    </div>
+</div>
+
+<div id="conteiner-produtos" class="w-full">
+
+</div>
+
+
+
+<script>
+    const fornecedorId = '<%- fornecedorId %>';
+    const estrelas = [
+        document.getElementById('nota-1'),
+        document.getElementById('nota-2'),
+        document.getElementById('nota-3'),
+        document.getElementById('nota-4'),
+        document.getElementById('nota-5')
+    ];
+    const infoMedia = document.getElementById('info-media');
+
+    async function getProdutos() {
+        const response = await fetch(`/api/fornecedores/${fornecedorId}/produtos`);
+        const data = await response.json();
+        return data;
+    }
+
+    async function getAvaliacao() {
+        const response = await fetch(`https://pedidos.taiksu.com.br/api/nota/${fornecedorId}`);
+        const data = await response.json();
+
+        if(data.media == null) {
+            infoMedia.textContent = 'Nenhuma avaliação disponível';
+            return;
+        }
+
+        estrelas.forEach((estrela, index) => {
+            if (index < data.media) {
+                estrela.src = '/images/icones/estrela-preenchida.png';
+            }
+        });
+
+        return data;
+    }
+
+    function cnpjFormatado(cnpj) {
+        return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+
+    function telefoneRaw(telefone) {
+        return telefone.replace(/\D/g, '');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        // Popoula dados do fornecedor
+        const title = document.getElementById('title-tag');
+        const breadcrumb = document.getElementById('bread2');
+        const nome = document.getElementById('nome');
+        const endereco = document.getElementById('endereco');
+        const whatsapp = document.getElementById('whatsapp');
+        const logo = document.getElementById('logo');
+
+        await getAvaliacao();
+
+        // Fade para cada estrela
+        estrelas.forEach((estrela, index) => {
+            setTimeout(() => {
+                estrela.classList.remove('opacity-0');
+            }, index * 150);
+        });
+
+
+        const response = await fetch(`https://insumos.taiksu.com.br/fornecedores/${fornecedorId}`);
+        const data = await response.json();
+
+
+        title.textContent = data.nome;
+        breadcrumb.textContent = data.nome;
+        nome.textContent = data.nome;
+        endereco.textContent = data.endereco + ', ' + data.cidade + ' - ' + data.estado;
+        whatsapp.href = `https://wa.me/55${telefoneRaw(data.telefone)}`;
+        logo.src = `https://insumos.taiksu.com.br/images/fornecedores/${data.logo_path}`;
+    });
+
+</script>

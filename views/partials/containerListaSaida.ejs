@@ -57,9 +57,9 @@
             
             let quantidadeFormadata;
             if(item.info.unidade_medida == 'uni') {
-                quantidadeFormadata = Number(item.quantidade).toFixed(0) + ' ' + item.info.unidade_medida;
+                quantidadeFormadata = Number(item.quantidade).toFixed(0);
             } else {
-                quantidadeFormadata = Number(item.quantidade).toFixed(3) + ' ' + item.info.unidade_medida;
+                quantidadeFormadata = Number(item.quantidade).toFixed(3);
             }
 
             div.classList.add('flex', 'flex-row', 'items-center', 'justify-between', 'border', 'border-gray-200', 'bg-white', 'rounded-xl', 'p-4');
@@ -72,7 +72,7 @@
                             <div class="flex flex-col gap-0 mt-1">
                                 <h2 id="insumo-nome-${item.id}" class=" text-gray-700 font-semibold">${item.info.nome.length > 26 ? item.info.nome.slice(0, 24) + '...' : item.info.nome}</h2>
                                 <h2 class="text-sm text-red-600">
-                                    <span id="quantidade-item-${item.id}">- ${quantidadeFormadata}</span>
+                                    <span id="quantidade-item-${item.id}">${quantidadeFormadata}</span> ${item.info.unidade_medida}
                                 </h2>
                             </div>
                         </div>
@@ -100,7 +100,6 @@
             const data = await response.json();
             
             if(data.success == true) {
-                totalSaida.textContent = data.total_lista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 item.remove();
             } else {
                 toastFalha.classList.remove('hidden');
@@ -118,7 +117,6 @@
             if(event.target.id.startsWith('editar-')) {
                 const popupEditarSaida = document.getElementById('popup-editar-saida');
                 const insumoQuantidade = document.getElementById('quantidade-edit');
-                const insumoId = document.getElementById('confirmar-edicao');
                 const id = event.target.id.replace('editar-', '');
                 const insumoFoto = document.getElementById(`insumo-foto-${id}`);
                 const quantidadeItem = document.getElementById(`quantidade-item-${id}`).textContent;
@@ -126,14 +124,14 @@
                 const nomePopup = document.getElementById('insumo-nome-edit');
                 const fotoPopup = document.getElementById('insumo-foto-edit');
                 const quantidadePopup = document.getElementById('quantidade-edit');
+                const idEditInsumos = document.getElementById('id-edit-insumos');
 
                 // Passa os dados para o popup
                 nomePopup.textContent = insumoNome.textContent;
                 fotoPopup.src = insumoFoto.src;
-                console.log(quantidadeItem);
-                insumoId.value = id;
+                idEditInsumos.value = id;
 
-                console.log('ID do insumo populado no botão do popup:', id);
+                console.log('ID do insumo populado no botão do popup:', idEditInsumos.value);
 
                 popupEditarSaida.classList.remove('hidden');
             }

@@ -7,11 +7,13 @@
         <meta name="theme-color" content="#2c8516ff" />
         <link rel="stylesheet" href="/stylesheets/tailwind.css">
         <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
-        <script src="/javascripts/menu.js" defer></script>
     </head>
 
     <%- include('partials/headerloja') %>
-    <body class="max-w-5xl min-h-screen mx-auto mt-28 mb-10 px-8">
-        <%- body %>
+    <body class="min-h-screen mx-auto mt-28">
+        <main class="max-w-5xl mx-auto px-8 min-h-[calc(70vh)]">
+            <%- body %>
+        </main>
     </body>
+    <%- include('partials/footer') %>
 </html> 

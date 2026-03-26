@@ -1,32 +1,36 @@
-<%- include('../components/toast', { id: 'toast', texto: 'Insumo removido do carrinho!', sucess: true }) %>
-<%- include('../components/toast', { id: 'toastfalha', texto: 'Falha ao enviar pedido, tente novamente!', sucess: false }) %>
-<%- include('../components/toast', { id: 'toastcerto', texto: 'Carrinho enviado com sucesso!<br><span class="text-sm text-gray-500">Em breve você poderá acompanhar o pedido no histórico.</span><br><br><div class="w-full flex flex-row items-center justify-center gap-3"><a href="/" class="text-gray-600 text-md px-5 py-1 bg-gray-200 hover:bg-gray-300 rounded-full">Inventário</a><a href="/pedidos" class="text-white text-md px-5 py-1 bg-green-600 hover:bg-green-700 rounded-full">Ver pedidos</a></div>', sucess: true }) %>
+<div class="w-full mb-32">
+    <%- include('../components/toast', { id: 'toast', texto: 'Insumo removido do carrinho!', sucess: true }) %>
+    <%- include('../components/toast', { id: 'toastfalha', texto: 'Falha ao enviar pedido, tente novamente!', sucess: false }) %>
+    <%- include('../components/toast', { id: 'toastcerto', texto: 'Carrinho enviado com sucesso!<br><span class="text-sm text-gray-500">Em breve você poderá acompanhar o pedido no histórico.</span><br><br><div class="w-full flex flex-row items-center justify-center gap-3"><a href="/" class="text-gray-600 text-md px-5 py-1 bg-gray-200 hover:bg-gray-300 rounded-full">Inventário</a><a href="/pedidos" class="text-white text-md px-5 py-1 bg-green-600 hover:bg-green-700 rounded-full">Ver pedidos</a></div>', sucess: true }) %>
 
-<div class="w-full flex flex-row items-center justify-between">
-    <%- include('../components/breadcrumb', { link: '/comprar', paginaAnterior: 'Comprar'}) %>
-    <a class="flex flex-row gap-2 items-center text-gray-600" href="https://ajuda.taiksu.com.br/artigos/70c5db63-624f-495e-b4b3-8079b54de951" target="_blank">
-        <img class="h-5" src="https://dre.taiksu.com.br/images/icones/ajuda.png">
-        Ajuda
-    </a>
-</div>
-
-<div id="lista-itens" class=" w-full flex flex-col gap-3 mt-4">
-    <%- include('../components/loader', { info: 'Carregando carrinho' }) %>
-</div>
-
-<div id="container-botoes" class=" w-full flex flex-col gap-4">
-    <div class="flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-6 mt-8">
-        <h2 class="text-lg text-gray-600 font-semibold">Total</h2>
-        <h2 id="total-carrinho" class="text-lg font-semibold text-gray-500">R$ 0,00</h2>
+    <div class="w-full flex flex-row items-center justify-between">
+        <%- include('../components/breadcrumb', { link: '/comprar', paginaAnterior: 'Comprar'}) %>
+        <a class="flex flex-row gap-2 items-center text-gray-600" href="https://ajuda.taiksu.com.br/artigos/70c5db63-624f-495e-b4b3-8079b54de951" target="_blank">
+            <img class="h-5" src="https://dre.taiksu.com.br/images/icones/ajuda.png">
+            Ajuda
+        </a>
     </div>
 
-    <button id="enviar-pedido" class=" w-full cursor-pointer bg-green-600 text-white py-3 rounded-full hover:bg-green-700 transition-colors duration-300">
-        Enviar pedido
-    </button>
-</div>
+    <div id="lista-itens" class=" w-full flex flex-col gap-3 mt-4 bg-white rounded-xl border border-gray-200">
+        <%- include('../components/loader', { info: 'Carregando carrinho' }) %>
+    </div>
 
-<p class="text-xs text-gray-500 mt-5  w-full">Um carrinho com vários fornecedores vira um pedido individual por fornecedor.<br>
-     Você pode adicionar itens aqui e finalizar quando quiser, tudo fica salvo automaticamente.</p>
+    <div id="container-botoes" class=" w-full flex flex-col gap-4">
+        <div class="flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-6 mt-8">
+            <h2 class="text-lg text-gray-600 font-semibold">Total</h2>
+            <h2 id="total-carrinho" class="text-lg font-semibold text-gray-500">R$ 0,00</h2>
+        </div>
+
+        <button id="enviar-pedido" class=" w-full cursor-pointer bg-green-600 text-white py-3 rounded-full hover:bg-green-700 transition-colors duration-300">
+            Enviar pedido
+        </button>
+    </div>
+
+    <div class="w-full flex flex-row items-center justify-center">
+        <p class="text-xs text-gray-500 mt-5 w-full">Um carrinho com vários fornecedores vira um pedido individual por fornecedor.<br>
+            Você pode adicionar itens aqui e finalizar quando quiser, tudo fica salvo automaticamente.</p>
+    </div>
+</div>
 
 <script>
     let calcularTotal;
@@ -49,7 +53,7 @@
             loader.style.display = 'none';
             data.lista_itens.forEach(item => {
                 lista_itens.innerHTML += `
-                    <div id="insumo-card-${item.id}" class="group insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 transition-all duration-400">
+                    <div id="insumo-card-${item.id}" class="group insumo-card flex flex-row items-center justify-between border-b last:border-none border-gray-100 p-4 transition-all duration-400">
                         <div class="flex flex-row items-center gap-2">
                             <img src="${item.foto_url}" class="md:h-14 md:w-14 h-10 w-10 rounded-md bg-white border border-gray-50">
                             <div class="flex flex-col gap-0 mt-1">
@@ -84,7 +88,7 @@
             const valores_totais = document.querySelectorAll('[id^="valor-total-"]');
             let total = 0;
             valores_totais.forEach(valor_total => {
-                total += Number(valor_total.textContent.replace('R$', '').replace(' ', '').replace(',', '.'));
+                total += Number(valor_total.textContent.replace('.', '').replace('R$', '').replace(' ', '').replace(',', '.'));
                 console.log(total);
             });
             total_carrinho.textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });

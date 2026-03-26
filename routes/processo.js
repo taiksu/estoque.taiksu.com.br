@@ -13,4 +13,8 @@ router.get('/excluir/lote/:id', async (req, res) => {
     res.render('processo/lote-delete', { title: 'Excluir lote', loteId: req.params.id });
 });
 
+router.get('/retroagir/:id', async (req, res) => {
+    res.render('processo/retroagir', { title: 'Editar movimentação', movimentacaoId: req.params.id });
+});
+
 module.exports = router;

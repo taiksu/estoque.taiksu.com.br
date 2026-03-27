@@ -1,0 +1,51 @@
+<div id="conteiner-produtos" class="mt-8 w-full grid grid-cols-5 gap-4"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const fornecedorId = '<%- fornecedorId %>';
+        const container = document.getElementById('conteiner-produtos');
+        const response = await fetch(`https://catalogo.taiksu.com.br/api/fornecedor/${fornecedorId}`);
+        const produtos = await response.json();
+
+        async function renderizarProdutos() {
+            produtos.forEach(produto => {
+                const divProduto = document.createElement('div');
+                divProduto.className = 'flex flex-col ';
+                divProduto.innerHTML = `
+                            <div data-insumo-id="${produto.insumo_id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-3 hover:shadow-md transition-all duration-400">
+
+                                <div class="w-full flex flex-col items-center justify-between">
+                                    <div class="w-full flex items-center justify-center rounded-sm border border-gray-100 overflow-hidden">
+                                        <img class="insumo-foto object-contain h-32 w-full group-hover:scale-105 transition-scale duration-400" src="https://insumos.taiksu.com.br/${produto.foto}">
+                                    </div>
+                                    
+                                    <div class="w-full mt-2 flex flex-col gap-0">
+                                        <h3 class="mt-4 w-full insumo-nome md:text-sm text-md text-gray-600 font-medium">
+                                            ${produto.nome.length > 18 ? produto.nome.substring(0, 16) + '...' : produto.nome} 
+                                        </h3>
+                                    </div>
+                                    <div class="w-full text-green-600 font-semibold text-start">${Number(produto.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                                </div>
+
+
+                            </div>
+                `;
+                container.appendChild(divProduto);
+            });
+
+            // Se não houver produtos para o fornecedor
+            if (produtos.length === 0) {
+                container.classList.remove('grid');
+                container.innerHTML = `
+                    <div class="w-full bg-white border border-gray-200 rounded-xl p-32 flex flex-col items-center justify-center">
+                        <h3 class="text-gray-600 font-medium">Nenhum produto encontrado para este fornecedor</h3>
+                    </div>
+                `;
+            }
+        }
+
+        renderizarProdutos();
+
+
+    });
+</script>

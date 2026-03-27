@@ -23,7 +23,7 @@
             const card = document.createElement('div');
             card.classList.add('pedido-card');
             card.innerHTML = `
-                <a href="/pedidos/${pedido.id}" fornecedor-nome="${pedido.nome}" class="hover:shadow-lg transition-all duration-300 pedido-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl py-4 px-5">
+                <a href="/pedidos/${pedido.id}" fornecedor-nome="${pedido.nome}" class="hover:bg-gray-50 transition-all duration-300 pedido-card flex flex-row items-center justify-between border-b border-gray-200 py-4 px-5">
                     
                     <div class="flex flex-row gap-4 items-center">
                         <img class="h-11 w-11 rounded-full" src="https://insumos.taiksu.com.br/images/fornecedores/${pedido.foto_url}" alt="Pedido">
@@ -48,13 +48,20 @@
                 Object.keys(data).forEach(dia => {
                     loader.style.display = 'none';
                     const dia_container = document.createElement('div');
+                    const dias = document.createElement('div');
                     dia_container.classList.add('flex', 'flex-col', 'gap-3');
+                    dias.classList.add('rounded-lg', 'border', 'border-gray-200', 'bg-white');
                     dia_container.innerHTML = `<h4 class="text-gray-500 text-xs">${dia}</h4>`;
+                    dia_container.appendChild(dias);
                     data[dia].forEach(pedido => {
-                        dia_container.appendChild(createPedidoCard(pedido));
+                        dias.appendChild(createPedidoCard(pedido));
                     });
                     lista_pedidos.appendChild(dia_container);
                 });
+
+                if(Object.keys(data).length === 0) {
+                    lista_pedidos.innerHTML = '<div class="flex flex-row items-center justify-center bg-white p-32 rounded-xl border border-gray-200"><p class="text-gray-500 text-md">Nenhum pedido encontrado</p></div>';
+                }
             });
 
     });

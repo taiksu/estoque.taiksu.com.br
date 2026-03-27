@@ -17,15 +17,21 @@ if (place) {
         const filter = input.value.toLowerCase();
         const cards = document.querySelectorAll('.insumo-card');
         const fornecedores = document.getElementById('fornecedores-container');
+        const beneficios = document.getElementById('banner-beneficios');
+        const banners1 = document.getElementById('banners-1');
         const banner = document.getElementById('banner-01');
 
         // Oculta fornecedores e banner se digitar mais de 1 caractere
         if (filter.length > 1) {
             fornecedores.style.display = 'none';
             banner.style.display = 'none';
+            banners1.style.display = 'none';
+            beneficios.style.display = 'none';
         } else {
             fornecedores.style.display = 'flex';
             banner.style.display = 'flex';
+            banners1.style.display = 'grid';
+            beneficios.style.display = 'flex';
         }
 
         cards.forEach(card => {

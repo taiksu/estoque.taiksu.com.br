@@ -2,7 +2,7 @@
     
     <a id="carrinho-container" href="/comprar/carrinho" class="mb-2 px-4 py-1 hover:bg-green-50 rounded-full bg-white border border-gray-200 flex flex-row gap-2 items-center transition-colors duration-300">
         <img id="icone-carrinho" class="h-5 w-5" src="/images/icones/comprar.png" alt="">
-        <span id="quantidade-carrinho" class="text-gray-500 text-sm">Carrinho vazio</span>
+        <span id="quantidade-carrinho" class="hidden md:block text-gray-500 text-sm">0 itens</span>
     </a>
 
     <div id="wrapper-itens" class="scale-0 group-hover:scale-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 origin-top-right bg-white border border-gray-200 rounded-lg p-4 absolute top-full right-0 w-90">
@@ -46,7 +46,7 @@
                 }
 
                 itensCarrinho.innerHTML += `
-                        <div class="flex flex-row p-2 items-center justify-between border-b border-gray-100 rounded-lg last:border-0 py-3">
+                        <div class="transition-all duration-300 flex flex-row px-2 items-center justify-between border-b border-gray-100 rounded-lg last:border-0 py-3">
                             <div class="flex flex-row gap-2 items-center">
                                 <img src="${item.foto_url}" class="h-10 w-10 rounded-lg">
                                 <div class="flex flex-col items-start max-w-50">

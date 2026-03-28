@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title id="title-tag"><%= title %> - E-commerce Taiksu</title>
+        <meta name="theme-color" content="#2c8516ff" />
+        <link rel="stylesheet" href="/stylesheets/tailwind.css">
+        <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+    </head>
+
+    <%- include('../partials/headerloja') %>
+    <body class="min-h-screen mx-auto mt-28">
+        <main class="max-w-5xl mx-auto px-4 md:px-8 min-h-[calc(70vh)]">
+            <%- body %>
+        </main>
+    </body>
+    <%- include('../partials/footer') %>
+</html> 
+
+<!-- Bloqueia seleção de texto, mas preserva interação em elementos interativos -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Insere CSS que desativa seleção globalmente, mas reativa para elementos permitidos
+    const style = document.createElement("style");
+    style.innerHTML = `
+        /* Bloqueia seleção global */
+        * {
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+        /* Reativa seleção em elementos interativos ou marcados */
+        input, textarea, select, button, a, [contenteditable="true"], .allow-select, taiksu-chat-widget {
+            -webkit-user-select: auto !important;
+            -moz-user-select: auto !important;
+            -ms-user-select: auto !important;
+            user-select: auto !important;
+        }
+        /* também reativa para filhos destes elementos */
+        input *, textarea *, select *, button *, a *, [contenteditable="true"] * , .allow-select *, taiksu-chat-widget * {
+            -webkit-user-select: auto !important;
+            -moz-user-select: auto !important;
+            -ms-user-select: auto !important;
+            user-select: auto !important;
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Helper: retorna true se o alvo (ou algum ancestral) é permitido interagir normalmente
+    function isInteractive(el, event) {
+        if (!el) return false;
+
+        const selector = 'input, textarea, select, button, a, [contenteditable="true"], .allow-select, taiksu-chat-widget, iframe';
+        if (el.closest && el.closest(selector)) return true;
+
+        // Shadow DOM/Custom Elements: usa composedPath para detectar host do widget
+        if (event && typeof event.composedPath === "function") {
+            const path = event.composedPath();
+            for (const node of path) {
+                if (!node || !node.tagName) continue;
+                if (node.tagName === "TAIKSU-CHAT-WIDGET" || node.tagName === "IFRAME") return true;
+                if (node.classList && node.classList.contains("allow-select")) return true;
+                if (node.matches && node.matches(selector)) return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Bloqueia início de seleção por evento selectstart
+    document.addEventListener("selectstart", function (e) {
+        // permitir selectstart dentro de elementos interativos
+        if (isInteractive(e.target, e)) return;
+        e.preventDefault();
+        return false;
+    }, true);
+
+    // Evita que o arrastar com mouse (mousedown) crie seleção
+    document.addEventListener("mousedown", function (e) {
+        // Permite cliques normais em elementos interativos
+        if (isInteractive(e.target, e)) return;
+        // Bloqueia apenas se for tentativa de selecionar/arrastar
+        // Para evitar bloquear simples cliques (ex: em botões ou links), já usamos isInteractive.
+        e.preventDefault();
+    }, true);
+
+    // Permite teclado de navegação e input dentro de elementos interativos
+    document.addEventListener("keydown", function (e) {
+        // não interferir quando foco está em input/textarea/contenteditable
+        const active = document.activeElement;
+        if (isInteractive(active)) return;
+        // bloquear Shift+Arrow/Shift+Home/Shift+End que tentem selecionar fora de campos
+        if (e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "Home" || e.key === "End" || e.key === "ArrowUp" || e.key === "ArrowDown")) {
+            e.preventDefault();
+        }
+    }, true);
+});
+</script>

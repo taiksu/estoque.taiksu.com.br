@@ -1,12 +1,12 @@
 <div class="flex flex-row items-center justify-between">
-    <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Estoque'}) %>
-    <%- include('../components/buttons/minus', { icone: 'plus', link: '/comprar', id: 'btn-comprar', label: 'Novo pedido', tipo: 'hero'}) %>
+    <%- include('../../components/breadcrumb', { link: '/', paginaAnterior: 'Estoque'}) %>
+    <%- include('../../components/buttons/minus', { icone: 'plus', link: '/comprar', id: 'btn-comprar', label: 'Novo pedido', tipo: 'hero'}) %>
 </div>
 
-<%- include('../components/searchBox', { placeholder: 'Buscar pedido'}) %>
+<%- include('../../components/searchBox', { placeholder: 'Buscar pedido'}) %>
 
 <div id="lista-pedidos" class="flex flex-col gap-3 mt-5">
-    <%- include('../components/loader', { info: 'Carregando pedidos'}) %>
+    <%- include('../../components/loader', { info: 'Carregando pedidos'}) %>
 </div>
 
 <div class="mt-8 flex flex-row justify-center w-full flex flex-row items-center gap-3">

@@ -24,6 +24,7 @@ var historicoRouter = require('./routes/historico');
 var processoRouter = require('./routes/processo');
 var eventsRouter = require('./routes/events');
 var balancoRouter = require('./routes/balanco');
+var tabletRouter = require('./routes/tablet');
 
 var app = express();
 
@@ -80,7 +81,8 @@ app.set('trust proxy', trustProxy);
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.use(expressLayouts);
+app.use(expressLayouts,);
+app.set('layout', 'layouts/layout');
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -122,6 +124,7 @@ app.use('/pedidos', pedidosRouter);
 app.use('/historico', historicoRouter);
 app.use('/processo', processoRouter);
 app.use('/balanco', balancoRouter);
+app.use('/tablet', tabletRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

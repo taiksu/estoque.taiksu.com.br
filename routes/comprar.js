@@ -2,12 +2,18 @@ var express = require('express');
 var router = express.Router();
 const publishEvent = require('../client/publishEvent');
 
+// Define Layout da loja virtual
+router.use((req, res, next) => {
+    res.locals.layout = 'layouts/loja';
+    next();
+});
+
 router.get('/', async (req, res) => {
-    res.render('comprar', { title: 'Comprar', layout: 'layoutloja' });
+    res.render('comprar', { title: 'Encontre todos os insumos que sua unidade precisa', search: true });
 });
 
 router.get('/carrinho', async (req, res) => {
-    res.render('comprar/carrinho', { title: 'Carrinho', layout: 'layoutloja'});
+    res.render('comprar/carrinho', { title: 'Carrinho'});
 });
 
 router.get('/fornecedor/:id', async (req, res) => {
@@ -25,11 +31,23 @@ router.get('/fornecedor/:id', async (req, res) => {
         priority: 'low'
     })
 
-    res.render('comprar/fornecedor', { title: 'Fornecedor', layout: 'layoutloja', fornecedorId: id});
+    res.render('comprar/fornecedor', { title: 'Fornecedor', fornecedorId: id});
 });
 
 router.get('/termos', async (req, res) => {
-    res.render('comprar/termos', { title: 'Termos e Condições', layout: 'layoutloja'});
+    res.render('comprar/termos', { title: 'Termos e Condições'});
+});
+
+router.get('/favoritos', async (req, res) => {
+    res.render('comprar/favoritos', { title: 'Favoritos'});
+});
+
+router.get('/pedidos', async (req, res) => {
+    res.render('comprar/pedidos', { title: 'Pedidos' });
+});
+
+router.get('/pedidos/:id', async (req, res) => {
+    res.render('comprar/pedidos/show', { title: 'Pedido', pedidoId: req.params.id });
 });
 
 module.exports = router;

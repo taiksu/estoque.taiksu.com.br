@@ -5,7 +5,7 @@ if (place) {
 }
 %>
 
-<div id="searchbox-container" class="relative">
+<div id="searchbox-container" class="hidden md:block relative">
     <img src="https://login.taiksu.com.br/frontend/img/pesquisa.png" class="w-5 h-5 absolute inset-y-0 left-4 my-auto pointer-events-none">
     <input autofocus type="search" placeholder="<%= place %>" class="w-full duration-300 bg-white pl-10 p-2 outline-none border-1 border-green-600 hover:border-green-500 rounded-md" id="search" onkeyup="if (!window.__cfRLUnblockHandlers) return false; filtraInsumos()">
 </div>

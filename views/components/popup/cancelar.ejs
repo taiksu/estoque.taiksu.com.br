@@ -32,7 +32,7 @@
             if (response.ok) {
                 document.getElementById('toast-cancelar').classList.add('hidden');
                 alert('Pedido cancelado com sucesso!');
-                window.location.href = '/pedidos';
+                window.location.href = '/comprar/pedidos';
             }
         })
         .catch(error => {

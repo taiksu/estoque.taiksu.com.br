@@ -1,0 +1,71 @@
+<div class="w-full max-w-sm mx-auto">
+            <div id="loginContainer" class="w-full p-8 rounded-xl bg-white border border-gray-200">
+                <img src="https://login.taiksu.com.br/frontend/img/logo.png" alt="Logo Taiksu" class="h-6 mb-8">
+                
+                <div class="flex flex-col gap-6">
+                    <input id="pin" maxlength="4" type="password" readonly class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none">
+
+                    <div class="grid grid-cols-3 gap-4 mt-4">
+                        <button onclick="addNumber(1)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">1</button>
+                        <button onclick="addNumber(2)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">2</button>
+                        <button onclick="addNumber(3)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">3</button>
+                        <button onclick="addNumber(4)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">4</button>
+                        <button onclick="addNumber(5)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">5</button>
+                        <button onclick="addNumber(6)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">6</button>
+                        <button onclick="addNumber(7)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">7</button>
+                        <button onclick="addNumber(8)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">8</button>
+                        <button onclick="addNumber(9)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">9</button>
+                        <button onclick="addNumber(0)" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-4 rounded-full transition-all duration-300">0</button>
+                        <button onclick="deleteNumber()" class="col-span-2 bg-red-200 hover:bg-red-300 text-red-700 font-semibold py-4 rounded-full transition-all duration-300">Apagar</button>
+                    </div>
+                </div>
+            </div>
+</div>
+
+<script>
+    const container = document.getElementById('loginContainer');
+    const pin = document.getElementById('pin');
+    
+    // Verifica se o pin tem 4 dígitos
+    function listenInput4Digits() {
+        if (pin.value.length == 4) {
+            // Envia o PIN para o  back-end
+            fetch('/tablet/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pin: pin.value }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/tablet';
+                } else {
+                    pinErrado();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                pinErrado();
+            });
+        }
+    }
+    
+    function addNumber(number) {
+        pin.value += number;
+        listenInput4Digits();
+    }
+
+    function deleteNumber() {
+        pin.value = pin.value.slice(0, -1);
+    }
+
+    function pinErrado() {
+        pin.classList.add('border-red-500');
+        setTimeout(() => {
+            pin.classList.remove('border-red-500');
+            pin.value = '';
+        }, 300);
+    }
+</script>

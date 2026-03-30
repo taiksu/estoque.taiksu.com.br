@@ -110,6 +110,7 @@ app.use(
 // Sincroniza session no banco
 store.sync();
 
+app.use('/tablet', tabletRouter);
 app.use('/callback', callbackRouter);
 app.use('/events', eventsRouter);
 app.use('/api', apiRouter);
@@ -124,7 +125,6 @@ app.use('/pedidos', pedidosRouter);
 app.use('/historico', historicoRouter);
 app.use('/processo', processoRouter);
 app.use('/balanco', balancoRouter);
-app.use('/tablet', tabletRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

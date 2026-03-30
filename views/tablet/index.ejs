@@ -1,0 +1,285 @@
+<div class="flex flex-row items-center justify-between gap-4">
+    <%- include('../components/searchBoxTablet', { placeholder: 'Pesquisar insumo' }) %>
+    <a id="revisar-saida" href="/saida/manual/revisar" class="w-40 items-center flex text-nowrap flex-row justify-between pr-2 pl-4 py-2 gap-2 rounded-full bg-green-600 text-white font-medium transition-all duration-300">
+        Revisar
+        <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="w-7 h-7">
+    </a>
+</div>
+
+<div id="toast-sem-estoque" class="hidden z-20 bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center px-8 justify-center">
+    <div class="bg-white rounded-xl p-8 w-full max-w-md flex flex-col items-center gap-1 text-center border border-gray-200">
+        <div id="toast-content" class="flex flex-col gap-4">
+            <div class="flex flex-col items-center gap-2">
+                <img src="/images/icones/falha.png" class="h-18">
+                <h2 class="text-xl text-gray-700 font-semibold">Sem estoque</h2>
+            </div>
+            <p class="text-sm text-gray-500">Não há nenhum lote disponível<br> para realizar a retirada</p>
+        </div>
+    </div>
+    <div id="fechar-toast" class="cursor-pointer bg-white text-gray-500 text-sm px-3 py-1 rounded-full opacity-70 hover:opacity-80 transition-all duration-600 flex flex-row gap-1 items-center">
+        <img class="h-5 grayscale" src="/images/icones/falha.png">
+        Fechar janela
+    </div>
+</div>
+
+<div id="container-insumos" class="flex flex-col gap-3">
+    <!-- O conteúdo do container será adicionado dinamicamente -->
+</div>
+
+<div id="modal-adicionar-carrinho" class="hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center px-8 justify-center">
+    <div class="bg-white rounded-xl p-8 w-full max-w-sm border border-gray-200">
+        <div id="modal-content" class="flex flex-col gap-4">
+            <!-- O conteúdo do modal será adicionado dinamicamente -->
+        </div>
+    </div>
+    <div id="fechar-popup" class="cursor-pointer bg-white text-gray-500 text-sm px-3 py-1 rounded-full opacity-70 hover:opacity-80 transition-all duration-600 flex flex-row gap-1 items-center">
+        <img class="h-5 grayscale" src="/images/icones/falha.png">
+        Fechar janela
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+
+        //// Elementos do DOM
+        const container = document.getElementById('container-insumos');
+        const modal = document.getElementById('modal-adicionar-carrinho');
+        const modalContent = document.getElementById('modal-content');
+        const toastSemEstoque = document.getElementById('toast-sem-estoque');
+        const close = document.getElementById('fechar-popup');
+        const unidadeId = '8';
+
+        //// Busca os insumos na API
+        const response = await fetch('https://insumos.taiksu.com.br/insumos?visibilidade=estoque')
+        const categorias = await response.json();
+
+
+        //// Função para mostrar o toast
+        function mostrarToast() {
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 800);
+        }
+
+
+        //// Popula a lista de insumos
+        Object.keys(categorias).forEach(categoria => {
+            const divCategoria = document.createElement('div');
+            divCategoria.className = 'flex flex-col gap-1 my-4 categoria-insumos';
+            divCategoria.innerHTML = `
+                <h2 class="text-sm text-gray-500">${categoria}</h2>
+                <div class="flex flex-col gap-3">
+                    ${categorias[categoria].map(insumo => `
+                            <div id="card-insumo-${insumo.id}" data-insumo-id="${insumo.id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
+
+                                <div class="flex flex-row items-center gap-2">
+                                    <img class="insumo-foto md:h-12 md:w-12 h-10 w-10 rounded-md bg-white group-hover:scale-110 transition-all duration-400" 
+                                         src="https://insumos.taiksu.com.br/${insumo.foto_url}">
+                                    
+                                    <div class="flex flex-col gap-0">
+                                        <h3 class="insumo-nome md:text-md text-sm text-gray-600 font-medium">
+                                            ${insumo.nome}
+                                        </h3>
+                                        <p data-valor-maximo-${insumo.id}="${insumo.valor_maximo}" class="hidden">${insumo.valor_maximo}</p>
+                                        <p id="unidade-${insumo.id}" class="text-xs text-gray-400">${insumo.unidade_medida}</p>
+                                    </div>
+                                </div>
+
+                                <div id="adicionado-${insumo.id}" data-adicionado-id="${insumo.id}" class="hidden flex flex-row items-center gap-1 bg-green-50 rounded-full px-2 py-1">
+                                    <img src="https://estoque.taiksu.com.br/images/icones/certo.png" class="h-5 w-5">
+                                    <h3 class="text-sm font-medium text-green-700">Adicionado</h3>
+                                </div>
+                            </div>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(divCategoria);
+        });
+
+        // Busca a lista de entrada
+        const responseListaEntrada = await fetch(`https://estoque.taiksu.com.br/api/lista-saida?unidade_id=${unidadeId}`);
+        const dataListaEntrada = await responseListaEntrada.json();
+
+        if(responseListaEntrada.ok) {
+            const info_lista = dataListaEntrada.info_lista;
+            const insumos_saida = dataListaEntrada.insumos_saida;
+
+            // Mostra os insumos que já estão na lista de entrada
+            insumos_saida.forEach(insumoSaida => {
+                const flagAdicionado = document.getElementById('adicionado-' + insumoSaida.insumo_id);
+                flagAdicionado.classList.remove('hidden');
+            });
+        }
+
+
+        //// Interações para abrir o pop-up ao clicar no card do insumo
+        const insumos = document.querySelectorAll('.insumo-card');
+
+        insumos.forEach(insumo => {
+            insumo.addEventListener('click', async function() {
+                const insumoId = this.getAttribute('data-insumo-id');
+                const insumoNome = this.querySelector('.insumo-nome').textContent;
+                const insumoFoto = this.querySelector('.insumo-foto').src;
+                const valorMaximo = Number(document.querySelector('[data-valor-maximo-' + insumoId + ']').textContent);
+                const unidadeMedida = document.getElementById('unidade-' + insumoId).textContent;
+                let placeholderQuantidade = '1 uni';
+
+                const responseLote = await fetch(`https://estoque.taiksu.com.br/api/inventario/item/${unidadeId}/${insumoId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const dataLote = await responseLote.json();
+                const quantidadeEmEstoque = dataLote.quantidade;
+                const valorEmEstoque = dataLote.valor_total;
+
+                if (unidadeMedida == 'kg') {
+                    placeholderQuantidade = '10 kg';
+                }
+
+                // Verifica se há estoque
+                if (quantidadeEmEstoque == 0) {
+                    toastSemEstoque.classList.remove('hidden');
+                    setTimeout(() => {
+                        toastSemEstoque.classList.add('hidden');
+                    }, 2800);
+                    return;
+                }
+
+                // Abre o modal
+                modal.classList.remove('hidden');
+                modalContent.innerHTML = `
+                    <div class="flex flex-col gap-4">
+
+                        <div class="flex flex-row items-center gap-2 mb-5">
+                            <img src="${insumoFoto}" class="md:h-16 md:w-16 h-10 w-10 rounded-md bg-white border border-gray-100">
+                            <div class="flex flex-col gap-0 mt-1">
+                                <h2 class="text-sm text-gray-500">Removendo do estoque</h2>
+                                <h2 class="text-xl text-gray-700 font-semibold">${insumoNome}</h2>
+                            </div>
+                        </div>
+
+                        <div id="modal-content-quantidade" class="w-full flex flex-col items-start gap-1 mt-1">
+                            <div class="w-full flex flex-row items-center gap-4">
+
+                                <div class="w-full flex flex-col gap-1">
+                                    <h2 class="text-sm text-gray-600">Quantidade a ser removida</h2>
+                                    <input type="number" id="quantidade" class="w-full focus:outline-none p-2 border border-gray-200 rounded-md" placeholder="${placeholderQuantidade}">
+                                    <h2 class="text-sm mt-2 text-gray-500">Disponível em estoque: <span class="text-green-700">${quantidadeEmEstoque} ${unidadeMedida}</span></h2>
+                                </div>
+                            </div>
+                            <div class="w-full flex flex-col gap-1 mt-4 border-t border-gray-200 pt-4">
+                                <h2 class="text-sm text-gray-600">Restante em estoque</h2>
+                                <h2 id="restante" class="text-lg text-gray-700 font-semibold">--</h2>
+                            </div>
+                        </div>
+                        <button data-insumo-id="${insumoId}" id="adicionar-lista" class="mt-2 cursor-pointer w-full p-2 bg-green-600 hover:bg-green-700 transition-all duration-300 text-white rounded-full">Adicionar à lista</button>
+
+                    </div>
+                `;
+
+                // Observa entrada se é maior que quantidade em estoque
+                quantidade.addEventListener('input', function() {
+                    if(quantidade.value > quantidadeEmEstoque ) {
+                        quantidade.value = 0;
+                        return;
+                    }
+
+                    const restante = quantidadeEmEstoque - quantidade.value;
+                    if(unidadeMedida == 'kg') {
+                        document.getElementById('restante').textContent = restante.toFixed(3) + ' ' + unidadeMedida;
+                    } else {
+                        document.getElementById('restante').textContent = restante.toFixed(0) + ' ' + unidadeMedida;
+                    }
+
+                    if(unidadeMedida == 'kg') {
+                        if(Number(quantidade.value) < 0) {
+                            quantidade.value = 0;
+                            quantidade.dispatchEvent(new Event('input'));
+                        }
+                    } else {
+                        if(Number(quantidade.value) < 0) {
+                            quantidade.value = 0;
+                            quantidade.dispatchEvent(new Event('input'));
+                        }
+                    }
+                });
+
+                // Botão adicionar à lista
+                const adicionarListaButton = document.getElementById('adicionar-lista');
+                adicionarListaButton.addEventListener('click', async function() {
+                    const quantidade = document.getElementById('quantidade');
+                    const insumo_id = this.getAttribute('data-insumo-id');
+                    const flagAdicionado = document.getElementById('adicionado-' + insumoId);
+                    const responsavel_id = 0;
+                    const unidade_id = unidadeId;
+
+                    const response = await fetch('https://estoque.taiksu.com.br/api/lista-saida/add', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            insumo_id,
+                            quantidade: quantidade.value,
+                            unidade_id,
+                            responsavel_id
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if(response.ok) {
+                        // Atualiza a lista de retirada e fecha o modal
+                        modalContent.innerHTML = `
+                            <div class="flex flex-col items-center gap-2 py-24">
+                                <img src="https://estoque.taiksu.com.br/images/icones/certo.png" class="h-12 w-12">
+                                <h2 class="text-lg text-gray-600"><span class="font-semibold text-green-700">${insumoNome} </span> adicionado à lista de retirada.</h2>
+                            </div>
+                        `;
+                        flagAdicionado.classList.remove('hidden');
+                        setTimeout(() => {
+                            modal.classList.add('hidden');
+                            modalContent.innerHTML = '';
+                        }, 800);
+                    } else {
+                        alert('Falha ao adicionar item à lista de retirada, tente novamente.');
+                        throw new Error('Falha ao adicionar item à lista de retirada');
+                    }
+                });
+
+
+            });
+        });
+
+        //// Fecha no botão
+        close.addEventListener('click', (event) => {
+            if (event.target === close) {
+                modal.classList.add('hidden');
+                modalContent.innerHTML = '';
+            }
+        });
+
+        //// Fecha o pop-up ao clicar fora
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                modalContent.innerHTML = '';
+            }
+        });
+
+        //// Fecha com ESC
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                modal.classList.add('hidden');
+                modalContent.innerHTML = '';
+            }
+        });
+    });
+</script>

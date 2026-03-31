@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var { inventarioController, listaEntradaController, listaSaidaController, entradaController, loteController, saidaController } = require('../controllers');
-const validarQuantidadeRetirada = require('../middlewares/validarQuantidadeRetirada');
 
 
 // Inventário

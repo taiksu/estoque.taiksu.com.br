@@ -1,7 +1,7 @@
 <div class="w-full mb-32">
     <%- include('../components/toast', { id: 'toast', texto: 'Insumo removido do carrinho!', sucess: true }) %>
     <%- include('../components/toast', { id: 'toastfalha', texto: 'Falha ao enviar pedido, tente novamente!', sucess: false }) %>
-    <%- include('../components/toast', { id: 'toastcerto', texto: 'Carrinho enviado com sucesso!<br><span class="text-sm text-gray-500">Em breve você poderá acompanhar o pedido no histórico.</span><br><br><div class="w-full flex flex-row items-center justify-center gap-3"><a href="/" class="text-gray-600 text-md px-5 py-1 bg-gray-200 hover:bg-gray-300 rounded-full">Inventário</a><a href="/pedidos" class="text-white text-md px-5 py-1 bg-green-600 hover:bg-green-700 rounded-full">Ver pedidos</a></div>', sucess: true }) %>
+    <%- include('../components/toast', { id: 'toastcerto', texto: 'Carrinho enviado com sucesso!<br><span class="text-sm text-gray-500">Em breve você poderá acompanhar o pedido no histórico.</span><br><br><div class="w-full flex flex-row items-center justify-center gap-3"><a href="/" class="text-gray-600 text-md px-5 py-1 bg-gray-200 hover:bg-gray-300 rounded-full">Inventário</a><a href="/comprar/pedidos" class="text-white text-md px-5 py-1 bg-green-600 hover:bg-green-700 rounded-full">Ver pedidos</a></div>', sucess: true }) %>
 
     <div class="w-full flex flex-row items-center justify-between">
         <%- include('../components/breadcrumb', { link: '/comprar', paginaAnterior: 'Comprar'}) %>

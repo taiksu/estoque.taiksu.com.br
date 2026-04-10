@@ -5,6 +5,17 @@ const { entradaController, saidaController, loteController } = require('../contr
 async function actions(req, res) {
     const eventType = req.headers['event-type'];
 
+    // Movimentação de entrada - Legado
+    if (eventType == 101) {
+        entradaController.legado(req, res);
+    }
+
+    // Movimentação de saída - Legado
+    if (eventType == 102) {
+        saidaController.legado(req, res);
+    }
+    
+
     // Entrada cancelada - Remover lote restante
     if (eventType == 84) {
         loteController.desfazer(req, res);

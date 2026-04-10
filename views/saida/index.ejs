@@ -74,7 +74,7 @@
                 <h2 class="text-sm text-gray-500">${categoria}</h2>
                 <div class="flex flex-col gap-3">
                     ${categorias[categoria].map(insumo => `
-                            <div id="card-insumo-${insumo.id}" data-insumo-id="${insumo.id}" class="group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
+                            <div id="card-insumo-${insumo.id}" data-insumo-id="${insumo.id}" class="card-insumo group cursor-pointer insumo-card flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
 
                                 <div class="flex flex-row items-center gap-2">
                                     <img class="insumo-foto md:h-12 md:w-12 h-10 w-10 rounded-md bg-white group-hover:scale-110 transition-all duration-400" 
@@ -283,5 +283,37 @@
                 modalContent.innerHTML = '';
             }
         });
+
+        // Busca inventário
+        const responseInventario = await fetch(`https://estoque.taiksu.com.br/api/inventario/<%= unidade_id %>`);
+        const dataInventario = await responseInventario.json();
+        const itensDisponiveis = dataInventario.inventario.filter(item => item.quantidade > 0);
+        
+        // Seleciona todos os cards de insumos
+        const cardsInsumos = document.querySelectorAll('.card-insumo');
+        
+        // Itera sobre os cards e verifica se o insumo está disponível
+        cardsInsumos.forEach(card => {
+            const insumoId = card.getAttribute('data-insumo-id');
+            const insumoDisponivel = itensDisponiveis.find(item => item.id == insumoId);
+            console.log('Insumo disponível: ', insumoDisponivel);
+            
+            if(!insumoDisponivel) {
+                card.classList.add('hidden');
+            }
+
+            // Oculta categorias vazias
+            
+        });
+
+        // Oculta categorias vazias
+        const categoriasContainer = document.querySelectorAll('.categoria-insumos');
+        categoriasContainer.forEach(categoria => {
+            const insumosDaCategoria = categoria.querySelectorAll('.card-insumo:not(.hidden)');
+            if(insumosDaCategoria.length === 0) {
+                categoria.classList.add('hidden');
+            }
+        });
+        
     });
 </script>

@@ -108,3 +108,52 @@ exports.salmao = async (req, res) => {
         
     }
 };
+
+// Processa entrada legado
+exports.legado = async (req, res) => {
+    try {
+        const { produtos, unidade_id } = req.body;
+        const sortUUID = crypto.randomUUID();
+
+        produtos.forEach(async produto => {
+            const lote = await LoteInsumo.create({
+                insumo_id: produto.insumo_id,
+                quantidade: produto.quantidade,
+                quantidade_original: produto.quantidade,
+                valor_unitario: produto.preco_insumo,
+                valor_total: produto.preco_insumo * produto.quantidade,
+                fornecedor_id: 9,
+                unidade_id,
+                responsavel_id: 0,
+                grupo_id: sortUUID
+            });
+        });      
+        
+        // Padroniza o formato de produtos para enviar ao evento
+        const produtosFormatados = produtos.map(produto => ({
+            id: crypto.randomUUID(),
+            insumo_id: produto.insumo_id,
+            quantidade: produto.quantidade,
+            valor_unitario: produto.preco_insumo,
+            valor_total: produto.preco_insumo * produto.quantidade,
+            fornecedor_id: 9,
+            unidade_id,
+            responsavel_id: 0,
+            grupo_id: sortUUID
+        }));
+
+        // Publica evento - Movimentações escuta
+        publishEvent({
+            eventId: 10,
+            payload: {
+                lista_entrada: 'legado',
+                lotes_entrada: produtosFormatados,
+            },
+            userId: 0,
+            priority: 'urgent'
+        });
+
+    } catch (error) {
+        throw new Error("Erro ao processar entrada legado");
+    }
+}

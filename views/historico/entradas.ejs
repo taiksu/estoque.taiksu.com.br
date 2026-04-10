@@ -183,7 +183,7 @@
                     let visibilidade = 'block';
                     loteMovimentacao.classList.add('border', 'border-gray-200', 'rounded-md');
 
-                    let deleteLink = `/processo/desfazer/entrada/${id}`;
+                    let deleteLink = `/processo/desfazer/entrada/${lote.id}`;
 
                     // Se é salmão redireciona para o resíduos cancelar
                     if (lote.insumo_id == 159) {

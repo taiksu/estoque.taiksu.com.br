@@ -89,9 +89,14 @@
                                     </div>
                                 </div>
 
-                                <div id="adicionado-${insumo.id}" data-adicionado-id="${insumo.id}" class="hidden flex flex-row items-center gap-1 bg-green-50 rounded-full px-2 py-1">
-                                    <img src="https://estoque.taiksu.com.br/images/icones/certo.png" class="h-5 w-5">
-                                    <h3 class="text-sm font-medium text-green-700">Adicionado</h3>
+                                <div class="flex flex-row items-center gap-2">
+                                    <div id="adicionado-${insumo.id}" data-adicionado-id="${insumo.id}" class="hidden flex flex-row items-center gap-1 bg-green-50 rounded-full px-2 py-1">
+                                        <img src="https://estoque.taiksu.com.br/images/icones/certo.png" class="h-5 w-5">
+                                        <h3 class="text-sm font-medium text-green-700">Adicionado</h3>
+                                    </div>
+                                    <div id="quantidade-${insumo.id}" class="quantidade-atual group-hover:scale-110 transition-all duration-300 quantidade md:block text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
+                                            00
+                                    </div>
                                 </div>
                             </div>
                     `).join('')}
@@ -288,28 +293,30 @@
         const responseInventario = await fetch(`https://estoque.taiksu.com.br/api/inventario/<%= unidade_id %>`);
         const dataInventario = await responseInventario.json();
         const itensDisponiveis = dataInventario.inventario.filter(item => item.quantidade > 0);
+        console.log('itens disponiveis:', itensDisponiveis);
         
         // Seleciona todos os cards de insumos
         const cardsInsumos = document.querySelectorAll('.card-insumo');
+        const QuantidadeAtual = document.querySelectorAll('.quantidade-atual');
         
         // Itera sobre os cards e verifica se o insumo está disponível
         cardsInsumos.forEach(card => {
             const insumoId = card.getAttribute('data-insumo-id');
             const insumoDisponivel = itensDisponiveis.find(item => item.id == insumoId);
-            console.log('Insumo disponível: ', insumoDisponivel);
+            const quantidadeAtual = document.getElementById('quantidade-' + insumoId);
             
             if(!insumoDisponivel) {
-                card.classList.add('hidden');
+                card.remove();
+            } else {
+                quantidadeAtual.textContent = insumoDisponivel.quantidade + ' ' + insumoDisponivel.unidade_medida;
             }
-
-            // Oculta categorias vazias
             
         });
 
         // Oculta categorias vazias
         const categoriasContainer = document.querySelectorAll('.categoria-insumos');
         categoriasContainer.forEach(categoria => {
-            const insumosDaCategoria = categoria.querySelectorAll('.card-insumo:not(.hidden)');
+            const insumosDaCategoria = categoria.querySelectorAll('.card-insumo:not(.hidden)'); // Pega os cards que não estão ocultos
             if(insumosDaCategoria.length === 0) {
                 categoria.classList.add('hidden');
             }

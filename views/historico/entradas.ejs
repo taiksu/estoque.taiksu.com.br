@@ -98,9 +98,9 @@
                     <button class="${transparencia} cursor-pointer p-4" id="detalhes-movimentacao-${grupo[0].grupo_id}" data-movimentacao-id="${grupo[0].grupo_id}">
                         <div class="flex flex-row items-center justify-between mb-3">
                         <div class="flex flex-row items-center gap-2">
-                                <h1 class="font-semibold text-lg text-gray-600">${quantidade_itens}</h1>
+                                <h1 class="font-medium text-md text-gray-600">${quantidade_itens}</h1>
                                 •
-                                <h1 class="text-sm text-gray-500 mt-1">${itensConfirmados.reduce((acc, movimentacao) => acc + Number(movimentacao.valor_total), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h1>
+                                <h1 class="text-sm text-green-700 mt-1">${itensConfirmados.reduce((acc, movimentacao) => acc + Number(movimentacao.valor_total), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h1>
                         </div>
                         <div class="cursor-pointer flex flex-row items-center gap-2 rounded-full border border-green-600 bg-green-50 hover:bg-green-100 text-green-800 px-3 py-0.5 transition-color duration-300">
                             <img class="h-5 w-5" src="https://login.taiksu.com.br/applications/6967173ec2616.png">
@@ -115,6 +115,8 @@
                             <div class="flex flex-row items-center gap-2">
                                 <img data-user-id="${responsavelId}" class="h-5 w-5 rounded-full" src="">
                                 <span data-user-id="${responsavelId}" class="font-medium mt-0.5">Username</span>
+                                <span class="px-1">•</span>
+                                <h1 class="flex flex-row items-center gap-1 text-sm text-gray-500 mt-0.5">${grupo[0].origem == 'lista_manual' ? '<img class="h-5 w-5" src="/images/icones/manual.png"> Manual' : grupo[0].origem == 'pedido' ? '<img class="h-5 w-5" src="/images/icones/pedido.png"> Pedido' : grupo[0].origem == 'residuos' ? '<img class="h-5 w-5" src="https://login.taiksu.com.br/applications/699a309109846.png"> Resíduos' : 'Origem indefinida'}</h1>
                             </div>
                             <p class="text-gray-500">${new Date(grupo[0].data_movimentacao).toLocaleString('pt-BR', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).replace('.', '').replace(',',' às')}</p>
                         </div>

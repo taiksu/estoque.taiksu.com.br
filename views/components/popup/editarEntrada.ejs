@@ -12,18 +12,19 @@
                         <div id="modal-content-quantidade" class="w-full flex flex-col items-center gap-2">
                             <div class="w-full flex flex-row items-center gap-4 border-b border-gray-100 pb-5">
                                 <div class="w-full flex flex-col gap-0">
-                                    <label for="preco-edit" class="text-xs text-gray-500">Preço</label>
-                                    <input type="number" id="preco-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Preço">
+                                    <label for="quantidade-edit" class="text-xs text-gray-500">Quantidade</label>
+                                    <input type="number" id="quantidade-edit" class="w-full outline-none p-2 border border-gray-200  rounded-md" placeholder="Qtd.">
                                 </div>
                                 <div class="w-full flex flex-col gap-0">
-                                    <label for="quantidade-edit" class="text-xs text-gray-500">Quantidade</label>
-                                    <input type="number" id="quantidade-edit" class="w-full p-2 border border-gray-200 rounded-md" placeholder="Qtd.">
+                                    <label for="preco-edit" class="text-xs text-gray-500">Preço</label>
+                                    <input id="preco-edit" class="w-full outline-none p-2 border border-gray-200 rounded-md" placeholder="Preço">
                                 </div>
                             </div>
 
                             <div class="w-full flex flex-row items-center justify-between">
                                 <h1 class="text-md text-gray-700">Total</h1>
                                 <h1 id="total-item-edit" class="text-md text-green-600 font-semibold">R$ 0,00</h1>
+                                <span id="unidade-medida-edit" class="hidden"></span>
                             </div>
                         </div>
                         <div class="flex flex-row items-center gap-2 mt-4">
@@ -40,16 +41,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const precoEdit = document.getElementById('preco-edit');
     const quantidadeEdit = document.getElementById('quantidade-edit');
     const totalItemEdit = document.getElementById('total-item-edit');
+    const unidadeMedidaEdit = document.getElementById('unidade-medida-edit');
+
+    // Função formata o preço para decimal (Back-end)
+    function formatarPreco(preco) {
+        let formatado = preco.replace(',', '.');
+        formatado = formatado.replace('R$ ', '');
+        return formatado;
+    }
 
     precoEdit.addEventListener('input', () => {
-        totalItemEdit.textContent = (precoEdit.value * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        totalItemEdit.textContent = (formatarPreco(precoEdit.value) * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     });
 
     quantidadeEdit.addEventListener('input', () => {
-        totalItemEdit.textContent = (precoEdit.value * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        totalItemEdit.textContent = (formatarPreco(precoEdit.value) * quantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // Impede que a quantidade seja decimal se a unidade de medida for "un"
+        if(unidadeMedidaEdit.textContent === 'uni') {
+            quantidadeEdit.value = Number(quantidadeEdit.value).toFixed(0);
+        }
+
+        // Força quantidade maior que 0
+        if(quantidadeEdit.value < 0) {
+            quantidadeEdit.value = 0;
+        }
     });
 
-    // FECHAR E ABRIR O POPUP
+    // Arredonda 3 casas decimais se a unidade de medida for kg
+    quantidadeEdit.addEventListener('blur', function() {
+        if(unidadeMedidaEdit.textContent == 'kg') {
+            quantidadeEdit.value = Number(quantidadeEdit.value).toFixed(3);
+        }
+    });
+
+    // FECHAR O POPUP
     document.getElementById('cancelar-edicao').addEventListener('click', () => {
         document.getElementById('popup-editar-entrada').classList.add('hidden');
     });
@@ -57,6 +83,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // CONFIRMA EDIÇÃO
     document.getElementById('confirmar-edicao').addEventListener('click', () => {
         let idEntrada = document.getElementById('confirmar-edicao').dataset.insumoId;
+        console.log('preço', formatarPreco(precoEdit.value));
+        
+        // Impede valor zerado
+        if( formatarPreco(precoEdit.value) <= 0) {
+            alert('Preço inválido');
+            return;
+        }
+
         editarEntrada(idEntrada);
     });
 
@@ -78,16 +112,16 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify({
                 id,
-                preco: insumoPrecoEdit.value,
+                preco: formatarPreco(insumoPrecoEdit.value),
                 quantidade: insumoQuantidadeEdit.value
             })
         });
         const data = await response.json();
         if(data.success) {
             console.log(data);
-            document.getElementById(`preco-item-${id}`).textContent = Number(insumoPrecoEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById(`quantidade-item-${id}`).textContent = insumoQuantidadeEdit.value;
-            document.getElementById(`valor-total-${id}`).textContent = (insumoPrecoEdit.value * insumoQuantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById(`preco-item-${id}`).textContent = insumoPrecoEdit.value;
+            document.getElementById(`quantidade-item-${id}`).textContent = insumoQuantidadeEdit.value + ' ' + unidadeMedidaEdit.textContent;
+            document.getElementById(`valor-total-${id}`).textContent = (formatarPreco(insumoPrecoEdit.value) * insumoQuantidadeEdit.value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             totalEntrada.textContent = Number(data.total_lista).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             popupEditarEntrada.classList.add('hidden');
         } else {

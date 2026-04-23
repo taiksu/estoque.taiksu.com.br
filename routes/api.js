@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var { inventarioController, listaEntradaController, listaSaidaController, entradaController, loteController, saidaController } = require('../controllers');
+var { inventarioController, listaEntradaController, listaSaidaController, entradaController, entradaPedidoController, loteController, saidaController } = require('../controllers');
 
 
 // Inventário
@@ -16,6 +16,8 @@ router.post('/lista-entrada/add', listaEntradaController.add);
 router.delete('/lista-entrada/delete', listaEntradaController.delete);
 router.put('/lista-entrada/editar', listaEntradaController.editar);
 router.post('/entrada/manual', entradaController.manual);
+router.get('/entrada/pedido/:pedido', entradaPedidoController.show);
+router.post('/entrada/pedido', entradaPedidoController.entrada);
 
 // Saída
 router.get('/lista-saida', listaSaidaController.index);

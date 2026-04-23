@@ -1,0 +1,165 @@
+<div id="container-lista" class="flex flex-col gap-3 mt-4">
+    <%- include('../components/loader', { info: 'Carregando lista de entrada' }); %>
+</div>
+
+<%- include('../components/toast', { sucess: false, texto: 'Falha ao remover item da lista', id: 'falha-toast' }); %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        // ELEMENTOS DOM
+        const containerLista = document.getElementById('container-lista');
+        const dadosLista = document.getElementById('dados-lista');
+        const finalizarBalanco = document.getElementById('finalizar-balanco');
+        const loader = document.getElementById('loader');
+        const toastFalha = document.getElementById('falha-toast');
+        const unidade_id = '<%= unidade_id %>';
+
+        // LISTA DE ENTRADA API
+        const responseBalanco = await fetch('/balanco/itens').then(r => r.json());
+
+        if (responseBalanco) {
+            loader.remove();
+        }
+
+        if (!responseBalanco || Object.keys(responseBalanco).length === 0) {
+            containerLista.innerHTML = `
+                <div class="flex text-gray-500 flex-col items-center justify-center p-16 bg-white rounded-xl border border-gray-200">
+                    <img src="/images/icones/balanco.png" class="w-14 h-14 mb-5">
+                    <h2 class="text-xl font-semibold">Lista de balanço vazia</h2>
+                    <a class="text-white bg-green-600 px-5 shadow-lg hover:shadow-none py-1 rounded-full hover:bg-green-700 transition-all mt-5 duration-300" href="/balanco/lista">
+                        Montar lista
+                    </a>
+                </div>`;
+            return;
+        }
+        finalizarBalanco.classList.remove('hidden');
+
+
+// Iterando corretamente pelas categorias
+Object.entries(responseBalanco).forEach(([nomeCategoria, itens]) => {
+
+    // container da categoria
+    const categoriaDiv = document.createElement('div');
+    categoriaDiv.classList.add('flex', 'flex-col', 'gap-2', 'mb-3');
+
+    // label da categoria (topo esquerdo)
+    const label = document.createElement('h2');
+    label.classList.add('text-sm', 'text-gray-500');
+    label.innerText = nomeCategoria;
+
+    categoriaDiv.appendChild(label);
+
+    // 🔁 loop dos itens da categoria
+    itens.forEach(item => {
+
+        const div = document.createElement('div');
+
+        div.classList.add(
+            'flex', 'flex-row', 'items-center', 'justify-between',
+            'border', 'border-gray-200', 'bg-white',
+            'rounded-xl', 'p-3', 'transition-all', 'duration-300', 'group'
+        );
+
+        div.id = `item-${item.id}`;
+        let diferenca = item.diferenca;
+        let corDiferenca = 'text-red-500';
+
+        // Coloca sinal de positivo
+        if (!item.diferenca.includes('-')) {
+            diferenca = '+' + item.diferenca;
+            corDiferenca = 'text-green-600';
+        }
+
+        div.innerHTML = `
+            <div class="card w-full flex flex-row items-center gap-3">
+                <a class="shrink-0 mt-1" href="https://estoque.taiksu.com.br/inventario/${item.insumo_id}" target="_blank">
+                    <img src="${item.foto}" 
+                         class="h-16 w-16 group-hover:scale-103 transition-all duration-500 rounded-md border border-gray-200">
+                </a>
+                <div class="w-full flex flex-col">
+                    <div class="w-full flex flex-row items-center justify-between">
+                        <h2 class="text-md font-semibold text-gray-600">${item.nome}</h2>
+                        <div class="flex flex-row items-center gap-2">
+                            <div id="editar-${item.id}" class="flex flex-row items-center gap-1 text-sm cursor-pointer hover:text-gray-500 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-full py-1 px-4 border border-gray-100 transition-all duration-300">
+                                Editar
+                            </div>
+                            <div class="flex flex-row items-center gap-1 text-sm cursor-pointer hover:text-red-500 bg-red-50 text-red-600 hover:bg-red-100 rounded-full p-1 border border-gray-100 transition-all duration-300">
+                                <img id="delete-${item.id}" src="/images/icones/delete.png" class="w-5 h-5 opacity-90 group-hover:opacity-100 shrink-0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-row items-center gap-6">
+                        <div class="flex flex-col">
+                            <h4 class="text-sm text-gray-500">Antes</h4>
+                            <h4 class="text-xs text-gray-400">${item.quantidade_anterior}</h4>
+                        </div>
+                        <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="w-4 h-4 grayscale">
+                        <div class="flex flex-col">
+                            <h4 class="text-sm text-gray-600 font-medium">Nova quantidade</h4>
+                            <h4 class="text-xs text-gray-500 font-medium">${item.quantidade_atualizada}</h4>
+                        </div>
+                        <div class="text-gray-700 px-3 rounded-full bg-gray-100 font-bold"> = </div>
+                        <div class="flex flex-col">
+                            <h4 class="text-sm text-gray-600 font-medium">Diferença</h4>
+                            <h4 class="text-xs ${corDiferenca} font-medium">${diferenca}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        categoriaDiv.appendChild(div);
+    });
+
+    containerLista.appendChild(categoriaDiv);
+});
+
+        // FUNCTION - DELETE
+        async function deleteItem(id) {
+            console.log('Removendo item', id);
+            const item = document.getElementById(`item-${id}`);
+            const response = await fetch('/balanco/remover', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id
+                })
+            });
+            const data = await response.json();
+            
+            if(data.success == true) {
+                item.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => {
+                    item.remove();
+                }, 300);
+            } else {
+                toastFalha.classList.remove('hidden');
+                setTimeout(() => {
+                    toastFalha.classList.add('hidden');
+                }, 1200);
+            }
+        }
+
+
+        ///////  EVENTOS DE CLICK /////////
+
+        // EDITAR POPUP
+        document.addEventListener('click', (event) => {
+            if(event.target.id.startsWith('editar-')) {
+                alert('[EDITAR]: Esta funcionalidade está em desenvolvimento')
+            }
+        })
+
+        // DELETE
+        document.addEventListener('click', async (event) => {
+            if(event.target.id.startsWith('delete-')) {
+                const id = event.target.id.replace('delete-', '');
+                await deleteItem(id);
+            }
+        })
+        
+    });
+</script>

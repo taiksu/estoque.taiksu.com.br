@@ -32,7 +32,11 @@ if (data >= 6 && data < 12) {
         <img class="md:w-8 md:h-8 w-9 h-9 rounded-full shadow-xl" src="<%= userFoto %>">
         <h1 class="hidden md:block text-xl font-medium text-gray-600"><%= saudacao %>, <span class="text-green-700 font-semibold"> <%= userNome.split(' ')[0] %> </span></h1>
     </div>
-    <%- include('../buttons/indicadorAlerta') %>
+    <% if (listaPendente) { %>
+        <%- include('../buttons/indicadorBalanco') %>
+    <% } else { %>
+        <%- include('../buttons/indicadorAlerta') %>
+    <% } %>
 </div>
 
 <script>

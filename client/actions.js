@@ -1,21 +1,15 @@
 // Recebe o event-type e executa a ação correspondente
 // As actions seguem o padrão: evento recebido -> Controller responsável
-const { entradaController, saidaController, loteController } = require('../controllers');
+const { entradaController, saidaController, loteController, entradaPedidoController } = require('../controllers');
 
 async function actions(req, res) {
     const eventType = req.headers['event-type'];
 
-    // Movimentação de entrada - Legado
-    if (eventType == 101) {
-        entradaController.legado(req, res);
-    }
-
-    // Movimentação de saída - Legado
-    if (eventType == 102) {
-        saidaController.legado(req, res);
+    // Novo pedido - Criar lista de entrada
+    if (eventType == 15) {
+        entradaPedidoController.create(req, res);
     }
     
-
     // Entrada cancelada - Remover lote restante
     if (eventType == 84) {
         loteController.desfazer(req, res);

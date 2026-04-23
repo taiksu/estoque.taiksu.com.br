@@ -1,5 +1,6 @@
 const { ListaEntrada, InsumosEntrada, LoteInsumo, sequelize } = require('../models');
 const publishEvent = require('../client/publishEvent');
+const { validaLista } = require('../functions');
 
 
 exports.index = async (req, res) => {
@@ -10,19 +11,13 @@ exports.index = async (req, res) => {
         const info_lista = await ListaEntrada.findOne({
             where: {
                 status: 'pendente',
+                origem: 'manual',
                 unidade_id
             },
             attributes: ['id', 'unidade_id', 'status', 'responsavel_id']
         });
 
-        // Se não existir lista de entrada, retorna vazio
-        if (!info_lista) {
-            return res.status(200).json({
-                info_lista: null,
-                insumos_entrada: [],
-                message: 'Nenhuma lista de entrada encontrada'
-            });
-        }
+        validaLista(info_lista, res);
 
         // Busca os insumos da lista de entrada
         const insumos_entrada = await InsumosEntrada.findAll({
@@ -30,6 +25,7 @@ exports.index = async (req, res) => {
                 lista_entrada_id: info_lista.id
             }
         });
+        
 
         res.status(200).json({
             info_lista,
@@ -57,6 +53,7 @@ exports.add = async (req, res) => {
         await ListaEntrada.destroy({
             where: {
                 status: 'concluida',
+                origem: 'manual',
                 unidade_id
             }
         });
@@ -66,6 +63,7 @@ exports.add = async (req, res) => {
             [listaEntrada, created] = await ListaEntrada.findOrCreate({ 
                 where: { 
                     status: 'pendente',
+                    origem: 'manual',
                     unidade_id 
                 },
                 defaults: {

@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "tailwindcss -i ./public/stylesheets/style.css -o ./public/stylesheets/tailwind.css --watch"
+    "dev": "tailwindcss -i ./public/stylesheets/style.css -o ./public/stylesheets/tailwind.css --watch",
+    "importar:legado": "node scripts/importar-produtos-legado.js"
   },
   "dependencies": {
     "@tailwindcss/cli": "^4.2.0",

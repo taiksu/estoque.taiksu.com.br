@@ -50,7 +50,7 @@
                 info: listaInsumos.find(insumo => insumo.id === item.insumo_id),
                 fornecedor: fornecedor.nome
             }
-        })
+        }).sort((a, b) => a.info.nome.localeCompare(b.info.nome))
 
 
         ////// FUNCTIONS ////////
@@ -68,7 +68,7 @@
 
             const valorTotal = Number(item.preco) * Number(item.quantidade);
 
-            div.classList.add('flex', 'flex-row', 'items-center', 'justify-between', 'border', 'border-gray-200', 'bg-white', 'rounded-xl', 'p-4');
+            div.classList.add('flex', 'flex-row', 'items-center', 'justify-between', 'border', 'border-gray-200', 'bg-white', 'rounded-xl', 'p-4', 'transition-all', 'duration-600');
             div.id = `item-${item.id}`;
             div.innerHTML = `
                         <div class="flex flex-row items-center gap-2">
@@ -115,7 +115,11 @@
             
             if(data.success == true) {
                 totalEntrada.textContent = data.total_lista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                item.remove();
+
+                item.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => {
+                    item.remove();
+                }, 300);
             } else {
                 toastFalha.classList.remove('hidden');
                 setTimeout(() => {
@@ -138,17 +142,31 @@
                 const totalItemEdit = document.getElementById('total-item-edit');
                 const inputePreco = document.getElementById('preco-edit');
                 const id = event.target.id.replace('editar-', '');
+                const unidadeMedidaEdit = document.getElementById('unidade-medida-edit');
+                const unidadeMedida = document.getElementById(`quantidade-item-${id}`).textContent.split(' ')[1];
 
                 insumoId.dataset.insumoId = id;
                 console.log('ID do insumo populado no botão do popup:', insumoId.dataset.insumoId);
+                unidadeMedidaEdit.textContent = unidadeMedida;
                 insumoFoto.src = document.getElementById(`insumo-foto-${id}`).src;
                 insumoQuantidade.value = Number(document.getElementById(`quantidade-item-${id}`).textContent.replace(' ', '').replace('uni', '').replace('kg', ''));
                 totalItemEdit.textContent = document.getElementById(`valor-total-${id}`).textContent;
                 inputePreco.value = Number(document.getElementById(`preco-item-${id}`).textContent.replace('R$', '').replace(',', '.'));
                 console.log('preço obtido ao abrir popup:', inputePreco.value);
+                console.log('Unidade de medida:', unidadeMedidaEdit.textContent);
                 insumoNome.textContent = document.getElementById(`insumo-nome-${id}`).textContent.length > 20 ? document.getElementById(`insumo-nome-${id}`).textContent.slice(0, 18) + '...' : document.getElementById(`insumo-nome-${id}`).textContent;
 
                 popupEditarEntrada.classList.remove('hidden');
+
+                // AutoNumeric no input de preço
+                new AutoNumeric(inputePreco, {
+                    currencySymbol: 'R$ ',
+                    decimalCharacter: ',',
+                    decimalCharacterAlternative: '.',
+                    digitGroupSeparator: '.',
+                    decimalPlaces: 2,
+                    minimumValue: 0
+                });
             }
         })
 

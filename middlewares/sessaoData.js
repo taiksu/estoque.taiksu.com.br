@@ -1,4 +1,6 @@
-function sessaoData(req, res, next) {
+const { balancoController } = require('../controllers');
+
+async function sessaoData(req, res, next) {
     console.log('passou pelo sessaoData');
     res.locals.userFoto = req.session.foto || null;
     res.locals.userNome = req.session.name || null;
@@ -8,6 +10,7 @@ function sessaoData(req, res, next) {
     res.locals.userToken = req.session.token || null;
     res.locals.unidade_id = req.session.unidade_id || null;
     res.locals.userPin = req.session.pin || null;
+    res.locals.listaPendente = await balancoController.verificaListaPendente(req, res);
 
     if (req.session.id_user == null) {
         res.redirect('https://login.taiksu.com.br');

@@ -35,6 +35,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 'pendente',
       comment: 'concluida quando os produtos entraram no estoque'
+    },
+    origem: {
+      type: DataTypes.ENUM('manual', 'pedido'),
+      allowNull: true,
+      defaultValue: 'manual',
+      comment: 'origem dos produtos da lista',
+      after: 'status'
+    },
+    pedido_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+      comment: 'id do pedido que originou a lista',
+      after: 'origem'
     }
   }, {
     sequelize,

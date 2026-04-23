@@ -1,5 +1,5 @@
 const { ListaEntrada, InsumosEntrada, LoteInsumo, sequelize } = require('../models');
-const publishEvent = require('../client/publishEvent');
+const { publishEvent, confirmaProcesso } = require('../client');
 
 
 // Processa lista de entrada manual
@@ -77,6 +77,7 @@ exports.manual = async (req, res) => {
 exports.salmao = async (req, res) => {
     try {
         const { unidade_id, id, peso_limpo, responsavel_id, fornecedor, valor_caixa } = req.body;
+        const deliveryId = req.headers['delivery-id'];
 
         const valorKgRecalculado = Number(valor_caixa) / Number(peso_limpo)
 
@@ -92,10 +93,12 @@ exports.salmao = async (req, res) => {
                 responsavel_id,
                 grupo_id: id
         })
+
+        await confirmaProcesso(deliveryId);
         
 
         //evento 87
-        publishEvent({
+        await publishEvent({
             eventId: 87,
             payload: {
                 lote
@@ -108,52 +111,3 @@ exports.salmao = async (req, res) => {
         
     }
 };
-
-// Processa entrada legado
-exports.legado = async (req, res) => {
-    try {
-        const { produtos, unidade_id } = req.body;
-        const sortUUID = crypto.randomUUID();
-
-        produtos.forEach(async produto => {
-            const lote = await LoteInsumo.create({
-                insumo_id: produto.insumo_id,
-                quantidade: produto.quantidade,
-                quantidade_original: produto.quantidade,
-                valor_unitario: produto.preco_insumo,
-                valor_total: produto.preco_insumo * produto.quantidade,
-                fornecedor_id: 9,
-                unidade_id,
-                responsavel_id: 0,
-                grupo_id: sortUUID
-            });
-        });      
-        
-        // Padroniza o formato de produtos para enviar ao evento
-        const produtosFormatados = produtos.map(produto => ({
-            id: crypto.randomUUID(),
-            insumo_id: produto.insumo_id,
-            quantidade: produto.quantidade,
-            valor_unitario: produto.preco_insumo,
-            valor_total: produto.preco_insumo * produto.quantidade,
-            fornecedor_id: 9,
-            unidade_id,
-            responsavel_id: 0,
-            grupo_id: sortUUID
-        }));
-
-        // Publica evento - Movimentações escuta
-        publishEvent({
-            eventId: 10,
-            payload: {
-                lista_entrada: 'legado',
-                lotes_entrada: produtosFormatados,
-            },
-            userId: 0,
-            priority: 'urgent'
-        });
-
-    } catch (error) {
-        throw new Error("Erro ao processar entrada legado");
-    }
-}

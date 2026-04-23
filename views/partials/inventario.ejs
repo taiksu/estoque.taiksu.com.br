@@ -1,5 +1,6 @@
+<% if (!listaPendente) { %>
 <div id="inventario-container" class="flex flex-col gap-3 mt-4"></div>
-
+<% } %>
 <script>
 document.addEventListener("DOMContentLoaded", async function() {
     try {
@@ -71,8 +72,8 @@ document.addEventListener("DOMContentLoaded", async function() {
                                         </p>
                                     </div>
                                 </div>
-                                <div id="quantidade-${insumo.id}" data-valor="${quantidadeOriginal}" class="group-hover:scale-110 transition-all duration-300 quantidade md:block text-md font-semibold text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                                        ${quantidade} <span class="text-sm font-medium text-gray-500">${tipo}</span>
+                                <div id="quantidade-${insumo.id}" data-valor="${quantidadeOriginal}" class="group-hover:scale-110 transition-all duration-300 quantidade md:block text-sm font-medium text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
+                                        ${quantidade} ${tipo}
                                 </div>
 
                             </a>
@@ -83,37 +84,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
             container.appendChild(categoriaDiv);
         });
-
-        // Busca faturamento
-        const primeiroDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
-        const ultimoDiaMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().slice(0, 10);
-        const valorEstoque = Number(inventario.valor_total_estoque.toFixed(2));
-        const ResponseFaturamento = await fetch(`https://caixa.taiksu.com.br/api/faturamento?unidade=${unidadeId}&inicio=${primeiroDiaMes}&final=${ultimoDiaMes}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const ResponseSaidasEstoque = await fetch(`https://movimentacoes.taiksu.com.br/api/saidas?unidade=${unidadeId}&mes=${Number(primeiroDiaMes.split('-')[1])}&ano=${Number(primeiroDiaMes.split('-')[0])}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        let faturamento = await ResponseFaturamento.json();
-        faturamento = faturamento.faturamento
-        let saidasEstoque = await ResponseSaidasEstoque.json();
-        saidasEstoque = saidasEstoque.valor_total_saidas;
-        const indicadorIcone = document.getElementById("icone-alerta");
-
-        // Calcula o CMV
-        const cmv = (saidasEstoque / faturamento) * 100;
-        indicadorAlerta.textContent = cmv.toFixed(2) + " %";
-        indicadorAlerta.innerHTML = `<img class="w-5 h-5" src="/images/icones/certo.png" alt=""> CMV: ` + indicadorAlerta.textContent;
-        
-        console.log({faturamento, valorEstoque, saidasEstoque, cmv});
 
 
         // 🔹 Pega a quantidade de cada insumo

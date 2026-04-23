@@ -8,7 +8,6 @@
         <link rel="stylesheet" href="/stylesheets/tailwind.css?time=<%= new Date().getTime() %>">
         <script src="https://cdn.jsdelivr.net/npm/autonumeric@4.8.1"></script>
         <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
-        <script src="/javascripts/menu.js?time=<%= new Date().getTime() %>" defer></script>
     </head>
 
     <%- include('../partials/header') %>
@@ -16,13 +15,9 @@
         <a href="https://ajuda.taiksu.com.br/callback?token=<%= userToken %>&categoria=90">
             <img class="hidden w-full rounded-xl mb-5 border border-gray-200" src="/images/banners/lancamento.png" alt="">
         </a>
-        <div class="hidden flex flex-row items-center justify-start gap-4 bg-red-50 rounded-xl p-4 mb-5 border border-red-200">
-            <img src="/images/icones/alert.png" alt="Alerta" class="w-10 h-10">
-            <div class="flex flex-col">
-                <p class="text-sm text-gray-600">Você está <span class="font-semibold ">testando</span> uma nova versão.<br> O estoque real não será alterado.</p>
-            </div>
-        </div>
         <%- body %>
-         <%- include('../partials/menu') %>
+        <% if (!listaPendente) { %>
+            <%- include('../partials/menu') %>
+        <% } %>
     </body>
 </html> 

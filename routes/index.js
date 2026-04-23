@@ -11,4 +11,8 @@ router.get('/alertas/ok', function (req, res, next) {
   res.render('alertas/ok', { title: 'Tudo em dia' });
 });
 
+router.get('/baixo-estoque', function (req, res, next) {
+  res.render('alertas/baixo-estoque', { title: 'Baixo Estoque' });
+});
+
 module.exports = router;

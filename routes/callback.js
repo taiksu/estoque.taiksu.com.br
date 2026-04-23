@@ -33,8 +33,10 @@ router.get('/:page?', async (req, res) => {
     req.session.pin = userData.pin;
     req.session.save(); //Salva sessão
 
-    if(req.params.page) {
+    if(req.params.page && req.params.page != 'entrada') {
       res.redirect(`/${req.params.page}`);
+    } else if (req.params.page == 'entrada') {
+      res.redirect('/entrada/manual');
     } else {
       res.redirect('/');
     }

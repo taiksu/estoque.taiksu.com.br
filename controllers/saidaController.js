@@ -3,88 +3,19 @@ const publishEvent = require('../client/publishEvent');
 const confirmaProcesso = require('../client/confirmaProcesso');
 const { LoteInsumo, InsumoSaida, sequelize } = require('../models');
 const itensSaida = require('../functions/saida/itensSaida');
+const { limpaLoteAntigo, saidaFIFO } = require('../functions');
 const { Op } = require('sequelize');
 
 exports.saidaManual = async (req, res) => {
     try {
         console.log('Entrou no controller de saida manual');
         let lotesComValor = [];
-        const {itens_saida, lista_saida} = await itensSaida(req.session.unidade_id);
+        const unidadeId = req.session.unidade_id;
+        const responsavelId = req.session.id;
+        const {itens_saida, lista_saida} = await itensSaida(unidadeId);
 
         // Para cada item da lista busca os lotes e distribui a quantidade de forma FIFO
-        for (const item of itens_saida) {
-
-            // Busca os lotes validos do item a ser retirado
-            const lotes = await LoteInsumo.findAll({
-                where: {
-                    insumo_id: item.insumo_id,
-                    unidade_id: item.unidade_id,
-                    quantidade: {
-                        [Op.gt]: 0
-                    }
-                },
-                order: [
-                    ['data_entrada', 'ASC'] // Ordena os lotes por data de entrada (Mais antigo para mais recente)
-                ]
-            });
-
-            // Verifica se tem estoque suficiente
-            const totalEmEstoque = lotes.reduce((acc, lote) => acc + Number(lote.quantidade), 0);
-            console.log('Total em estoque', totalEmEstoque);
-            console.log('Quantidade retirada', item.quantidade);
-            console.log('tipo do totalEmEstoque', typeof totalEmEstoque);
-            console.log('tipo do quantidade_retirada', typeof item.quantidade);
-            let quantidadeRestante = Number(item.quantidade);
-
-            if(totalEmEstoque < Number(item.quantidade)) {
-                // Remove item da lista de saida
-                await InsumoSaida.destroy({
-                    where: {
-                        id: item.id
-                    }
-                });
-
-                // Retorna o erro para o front
-                console.log('Estoque insuficiente para a retirada');
-                return res.status(400).json({
-                    success: false,
-                    mensagem: "Estoque insuficiente para a retirada",
-                    motivo:'estoque-baixo',
-                    insumo_id: item.insumo_id,
-                    quantidade_retirada: item.quantidade,
-                    total_em_estoque: totalEmEstoque
-                });
-                
-                
-            // Se tiver estoque suficiente, distribui a quantidade da retirada entre os lotes    
-            } else {
-                for (const lote of lotes) {
-
-                    // Se ainda houver quantidade restante, retira a quantidade do próximo lote
-                    if (quantidadeRestante > 0) {
-                        
-                        const quantidadeRetirada = Math.min(quantidadeRestante, Number(lote.quantidade));
-                        quantidadeRestante -= quantidadeRetirada;
-
-
-                        lotesComValor.push({
-                            ...lote.dataValues,
-                            quantidade: quantidadeRetirada,
-                            valor_total: quantidadeRetirada * Number(lote.valor_unitario)
-                        })
-
-                        await LoteInsumo.update({
-                            quantidade: Number(lote.quantidade) - quantidadeRetirada,
-                            valor_total: Number(lote.valor_total) - quantidadeRetirada * Number(lote.valor_unitario)
-                        }, {
-                            where: {
-                                id: lote.id
-                            }
-                        });
-                    }
-                }
-            }
-        }
+        lotesComValor = await saidaFIFO(itens_saida, unidadeId, res);
 
         // Atualiza o status da lista para concluida
         await lista_saida.update({
@@ -100,6 +31,8 @@ exports.saidaManual = async (req, res) => {
             userId: lista_saida.responsavel_id,
             priority: 'urgent'
         });
+
+        await limpaLoteAntigo();
 
         res.json({
             success: true,
@@ -169,102 +102,4 @@ exports.desfazer = async (req, res) => {
         console.log(error);
         throw error;
     }
-};
-
-// Saída Legado
-exports.legado = async (req, res) => {
-    console.log('Entrou no saida legado')
-    try {
-        let lotesComValor = [];
-        const { produtos, unidade_id } = req.body;
-
-        // Para cada item da lista busca os lotes e distribui a quantidade de forma FIFO
-        for (const produto of produtos) {
-
-            // Busca os lotes validos do item a ser retirado
-            const lotes = await LoteInsumo.findAll({
-                where: {
-                    insumo_id: produto.insumo_id,
-                    unidade_id: unidade_id,
-                    quantidade: {
-                        [Op.gt]: 0
-                    }
-                },
-                order: [
-                    ['data_entrada', 'ASC'] // Ordena os lotes por data de entrada (Mais antigo para mais recente)
-                ]
-            });
-
-
-            // Verifica se tem estoque suficiente
-            // Soma todos os lotes
-            const totalEmEstoque = lotes.reduce((acc, lote) => acc + Number(lote.quantidade), 0);
-
-            console.log('Total em estoque', totalEmEstoque);
-            console.log('Quantidade retirada', produto.quantidade);
-            console.log('tipo do totalEmEstoque', typeof totalEmEstoque);
-            console.log('tipo do quantidade_retirada', typeof produto.quantidade);
-            let quantidadeRestante = Number(produto.quantidade);
-
-            // Se a soma dos lotes for menor que a quantidade a ser retirada, pula para o próximo item
-            if(totalEmEstoque < Number(produto.quantidade)) {
-                continue;
-            } else {
-                for (const lote of lotes) {
-
-                    // Se ainda houver quantidade restante, retira a quantidade do próximo lote
-                    if (quantidadeRestante > 0) {
-                        
-                        const quantidadeRetirada = Math.min(quantidadeRestante, Number(lote.quantidade));
-                        quantidadeRestante -= quantidadeRetirada;
-
-
-                        lotesComValor.push({
-                            ...lote.dataValues,
-                            quantidade: quantidadeRetirada,
-                            valor_total: quantidadeRetirada * Number(lote.valor_unitario)
-                        })
-
-                        await LoteInsumo.update({
-                            quantidade: Number(lote.quantidade) - quantidadeRetirada,
-                            valor_total: Number(lote.valor_total) - quantidadeRetirada * Number(lote.valor_unitario)
-                        }, {
-                            where: {
-                                id: lote.id
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        // 
-
-        await publishEvent({
-            eventId: 11,
-            payload: {
-                lista_saida: {
-                    id: crypto.randomUUID(),
-                    responsavel_id: 0,
-                    createdAt: new Date()
-                },
-                itens_saida: lotesComValor
-            },
-            userId: 0,
-            priority: 'urgent'
-        });
-
-        res.json({
-            success: true,
-            mensagem: "Saída manual realizada com sucesso"
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            mensagem: "Erro ao realizar saída manual",
-            error: error.message
-        });
-    }
-
 };

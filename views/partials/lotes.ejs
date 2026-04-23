@@ -21,11 +21,12 @@
                     <h1 id="unidade-medida-<%= lote.id%>" class="hidden"><% if(insumo.unidade_medida === 'kg') { %>kg<% } else {%>uni<% } %></h1>
                     <h3 class="hidden" id="responsavel-<%= lote.id%>"><%= lote.responsavel_id %></h3>
                     <div class="flex flex-col mt-1">
-                        <p id="quantidade-atual-insumo" class="text-gray-600 text-md font-semibold"><% if(insumo.unidade_medida === 'kg') { %> <%= lote.quantidade.replace('.', ',') %> kg <% } else { %> <%= Number(lote.quantidade).toFixed(0) %> uni <% } %></p>
+                        <p id="quantidade-atual-insumo-<%= lote.id%>" class="text-gray-600 text-md font-semibold"><% if(insumo.unidade_medida === 'kg') { %> <%= lote.quantidade.replace('.', ',') %> kg <% } else { %> <%= Number(lote.quantidade).toFixed(0) %> uni <% } %></p>
                         <p class="text-gray-400 text-sm"><%= Number(lote.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %> /<% if(insumo.unidade_medida === 'kg') { %>kg <% } else { %>un. <% } %></p>
                     </div>
                   </div>
                   <div class="flex flex-row gap-6 items-center">
+                     <p id="valor-unitario-lote-<%= lote.id %>" class="hidden"><%= Number(lote.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></p>
                     <p id="preco-fornecedor-#" class="text-gray-400 font-normal"><%= Number(lote.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></p>
                     <img id="editar-preco-fornecedor-#" src="https://login.taiksu.com.br/frontend/img/seta.png" class=" h-6 cursor-pointer group-hover:scale-110 transition-all duration-300">
                   </div>
@@ -70,6 +71,7 @@
         const fornecedorPopup = document.getElementById('fornecedor-popup');
         const dataEntradaLote = document.getElementById('data-entrada-lote');
         const quantidadeOriginalPopup = document.getElementById('quantidade-original-popup');
+        const quantidadePrecoLote = document.getElementById('quantidade-preco-lote');
         const responsavelPopup = document.getElementById('responsavel-entrada');
         const responsavelFoto = document.getElementById('responsavel-popup');
         const btnDeleteLote = document.getElementById('btn-excluir-lote');
@@ -98,6 +100,8 @@
             btnDeleteLote.href = '/processo/excluir/lote/' + lote.id;
             const unidadeMedida = document.getElementById('unidade-medida-' + lote.id).textContent
             const quantidadeOriginal = document.getElementById('quantidade-original-' + lote.id).textContent;
+            const quantidadeAtual = document.getElementById('quantidade-atual-insumo-' + lote.id).textContent;
+            const valorUnitario = document.getElementById('valor-unitario-lote-' + lote.id).textContent;
             const responsavel = document.getElementById('responsavel-' + lote.id);
             const responsavelId = responsavel.textContent;
 
@@ -126,6 +130,7 @@
             console.log('Quantidade formatadada:', quantidadeFormatada)
             quantidadeOriginalPopup.textContent = quantidadeFormatada;
             responsavelPopup.textContent = dataResponsavel.name.split(' ', 1);
+            quantidadePrecoLote.textContent = quantidadeAtual + ' x ' + valorUnitario;
             const fornecedorId = document.getElementById('nome-fornecedor-' + lote.id).textContent;
             const fornecedor = fornecedores.find(fornecedor => fornecedor.id == fornecedorId);
             responsavelFoto.src = 'https://login.taiksu.com.br/frontend/profiles/' + dataResponsavel.profile_photo_path;

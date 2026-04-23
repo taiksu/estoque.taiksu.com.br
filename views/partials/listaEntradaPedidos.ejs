@@ -1,0 +1,49 @@
+<% if(listasPedidos.length == 0) { %>
+    <div class="flex flex-col gap-1 items-center justify-center rounded-xl border border-gray-200 p-10 bg-white">
+        <img src="/images/icones/pacote.png" class="w-16 h-16 mb-2">
+        <h3 class="text-xl font-semibold text-gray-600">Não há pedidos pendentes para dar entrada</h3>
+        <p class="text-sm text-gray-500 text-center">Quando houver pedidos pendentes eles aparecerão aqui<br> para você dar entrada no estoque de forma rápida</p>
+    </div>
+<% } else { %>
+    <div class="flex flex-col gap-3">
+    <% listasPedidos.forEach(pedido => { %>
+        <a id="<%= pedido.pedido_id %>" href="/entrada/pedido/<%= pedido.pedido_id %>" class="group fornecedor flex flex-row items-center justify-between border border-gray-200 rounded-xl px-6 py-5 bg-white">
+            <div class="flex flex-row items-center gap-4">
+                <img src="/images/icones/pacote.png" class="w-10 h-10 p-0.5 rounded-lg bg-gray-100 group-hover:bg-green-100 transition-colors duration-200">
+                <div>
+                    <h1 id="fornecedor_<%= pedido.pedido_id %>" class="font-medium text-sm text-gray-500"> </h1>
+                    <div class="flex flex-row items-center gap-1 text-xs text-gray-400">
+                        <p id="total_<%= pedido.pedido_id %>"> </p> ∙ <p id="itens_<%= pedido.pedido_id %>"> </p>
+                    </div>
+                </div>
+            </div>
+            <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="w-5 h-5">
+        </a>
+    <% }) %>
+    </div>
+<% } %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const pedidos = document.querySelectorAll('.fornecedor');
+        
+        pedidos.forEach(async pedido => {
+            const id = pedido.id;
+            const total = document.getElementById(`total_${id}`);
+            const itens = document.getElementById(`itens_${id}`);
+            const fornecedor = document.getElementById(`fornecedor_${id}`);
+
+            const dados_pedido = await fetch(`https://pedidos.taiksu.com.br/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            }).then(res => res.json());
+
+            fornecedor.textContent = dados_pedido.fornecedor.nome;
+            total.textContent = Number(dados_pedido.pedido.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            itens.textContent = dados_pedido.pedido.ItensPedidos.length + ' itens';
+        })
+    })
+</script>

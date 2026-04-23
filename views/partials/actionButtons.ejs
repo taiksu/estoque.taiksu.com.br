@@ -11,6 +11,16 @@
     }
 </style>
 
+<% if (listaPendente) { %>
+    <div id="lista-pendente-container" class="flex flex-col gap-2 border border-gray-200 px-6 py-10 text-center rounded-xl mt-6 bg-white">
+        <h2 class="text-xl font-semibold text-gray-700">Balanço em andamento</h2>
+        <p class="text-sm text-gray-500">Existe uma lista de balanço em andamento.<br>Continue ou descarte a lista atual.</p>
+        <div class="w-full flex flex-row items-center justify-center gap-2 mt-3">
+            <button onclick="if(confirm('Tem certeza que deseja descartar a lista de balanço?')) descartarListaBalanco()"  class="cursor-pointer bg-gray-200 hover:bg-gray-300 transition-colors duration-300 text-gray-600 px-10 py-2 rounded-full">Descartar</button>
+            <a href="/balanco/lista" class="bg-green-600 hover:bg-green-700 transition-colors duration-300 text-white px-10 py-2 rounded-full">Continuar balanço</a>
+        </div>
+    </div>
+<% } else { %>
 <div class="w-full flex flex-row items-center justify-between my-6 md:px-0 px-2">
 
     <div class="menu-card flex flex-col items-center gap-2 group">
@@ -20,10 +30,10 @@
         <p class="text-gray-500 group-hover:text-gray-700 md:text-sm text-xs font-medium">Comprar</p>
     </div>
 
-    <div class="menu-card flex flex-col items-center gap-2 group">
-        <a href="/balanco" class="bg-white md:p-8 p-4 rounded-full border border-gray-200 hover:shadow-lg transition-shadow duration-300">
-            <img class="md:h-9 md:w-9 h-7 w-7 opacity-90 group-hover:opacity-100 transition-all duration-300" src="/images/icones/balanco.png">
-        </a>
+    <div class="menu-card flex flex-col items-center gap-2">
+        <div class="bg-white md:p-8 p-4 rounded-full border border-gray-200 opacity-50">
+            <img class="md:h-9 md:w-9 h-7 w-7 opacity-50 group-hover:opacity-100 transition-all duration-300" src="/images/icones/balanco.png">
+        </div>
         <p class="text-gray-500 group-hover:text-gray-700 md:text-sm text-xs font-medium">Balanço</p>
     </div>
 
@@ -49,11 +59,40 @@
     </div>
 
 </div>
+<% } %>
 
 <script>
+    async function descartarListaBalanco() {
+        const response = await fetch('/balanco/descartar', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            window.location.href = '/';
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
 
-        const cards = document.querySelectorAll(".menu-card");
+    const cards = document.querySelectorAll(".menu-card");
+    const abrirMenu = document.getElementById('abrir-menu');
+    const revisarBalanco = document.getElementById('revisar-balanco');
+    const listaPendente = document.getElementById('lista-pendente-container');
+
+    function trocaBotao() {
+        if (abrirMenu) {
+            abrirMenu.remove();
+        }
+    }
+
+    if (listaPendente) {
+        trocaBotao();
+    }
 
         setTimeout(() => {  
             cards.forEach((card, index) => {

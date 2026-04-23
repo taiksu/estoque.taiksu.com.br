@@ -1,6 +1,6 @@
 <div class="flex flex-row items-center justify-between">
     <%- include('../components/breadcrumb', { link: '/balanco', paginaAnterior: 'Balanço'}) %>
-    <a id="revisar-balanco" href="/balanco/revisar" class="flex flex-row gap-2 items-center rounded-full bg-white border border-gray-200 pl-4 pr-2 py-1 text-gray-600 font-medium shadow-xl hover:shadow-none transition-all duration-300">
+    <a id="revisar-balanco" href="/balanco/revisar" class="flex flex-row gap-2 items-center rounded-full bg-white border border-gray-200 pl-4 pr-2 py-1 text-gray-600 font-medium shadow-lg hover:shadow-none transition-all duration-300">
         Revisar balanço
         <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="w-5 h-5">
     </a>
@@ -28,10 +28,17 @@ document.addEventListener("DOMContentLoaded", async function() {
     const modalContent = document.getElementById("modal-content");
     const fecharPopup = document.getElementById("fechar-popup");
     const modal = document.getElementById("modal-adicionar-lista-balanco");
+    const abrirMenu = document.getElementById('abrir-menu');
+
+    function trocaBotao() {
+        if (abrirMenu) {
+            abrirMenu.remove();
+        }
+    }
+
     try {
         const response = await fetch("https://estoque.taiksu.com.br/api/inventario/<%= unidade_id %>");
         const unidadeId = <%= unidade_id %>;
-        const indicadorAlerta = document.getElementById("indicador-alerta");
 
         if (!response.ok) {
             alert("Não foi possível carregar o inventário.");
@@ -40,6 +47,7 @@ document.addEventListener("DOMContentLoaded", async function() {
 
         const inventario = await response.json();
         const container = document.getElementById("inventario-container");
+        trocaBotao();
 
         // 🔹 Agrupa por categoria
         const categorias = {};
@@ -62,6 +70,11 @@ document.addEventListener("DOMContentLoaded", async function() {
                     <div class="flex flex-col gap-3">
                     ${categorias[categoria].map(insumo => {
 
+                        // Não renderiza insumos com quantidade 0
+                        if (insumo.quantidade === 0) {
+                            return;
+                        }
+
                         let quantidade = insumo.quantidade || 0;
                         const quantidadeOriginal = quantidade;
                         const tipo = insumo.unidade_medida;
@@ -75,8 +88,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                         }
 
                         return `
-                            <div id="card-${insumo.id}" 
-                               class="group insumo-card cursor-pointer flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
+                            <div id="card-${insumo.id}" class="group insumo-card cursor-pointer flex flex-row items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-400">
 
                                 <div class="flex flex-row items-center gap-2">
                                     <img id="insumo-foto-${insumo.id}" class="md:h-12 md:w-12 h-10 w-10 rounded-md bg-white group-hover:scale-105 transition-all duration-400" 
@@ -93,7 +105,7 @@ document.addEventListener("DOMContentLoaded", async function() {
                                 </div>
                                 <div class="flex flex-row items-center gap-2">
                                     <div id="quantidade-${insumo.id}" data-valor="${quantidadeOriginal}" class="group-hover:scale-110 transition-all duration-300 quantidade md:block text-md font-semibold text-gray-600 bg-gray-50 px-3 py-1 rounded-full">
-                                            ${quantidade} <span class="text-sm font-medium text-gray-500">${tipo}</span>
+                                            <span id="quantidade-valor-${insumo.id}">${quantidade}</span> <span class="text-sm font-medium">${tipo}</span>
                                     </div>
                                     <h2 id="quantidade-modal-${insumo.id}" class="hidden">${quantidade}</h2>
                                     <h4 id="unidade-medida-${insumo.id}" class="hidden">${tipo}</h4>
@@ -119,6 +131,9 @@ document.addEventListener("DOMContentLoaded", async function() {
                 const insumoNome = document.getElementById(`insumo-nome-${insumoId}`).textContent;
                 const quantidade = document.getElementById(`quantidade-modal-${insumoId}`).textContent;
                 const unidadeMedida = document.getElementById(`unidade-medida-${insumoId}`).textContent;
+                const quantidadeContainer = document.getElementById(`quantidade-${insumoId}`);
+                const quantidadeValor = document.getElementById(`quantidade-valor-${insumoId}`);
+
                 let type = 'type="text"'
                 if (unidadeMedida === 'kg') {
                     labelQuantidade = 'Pesado';
@@ -180,18 +195,43 @@ document.addEventListener("DOMContentLoaded", async function() {
 
                         <hr class="border-gray-100 my-2">
 
-                        <button data-insumo-id="${insumoId}" id="adicionar-carrinho" class="mt-2 cursor-pointer w-full p-2 bg-green-600 hover:bg-green-700 transition-all duration-300 text-white rounded-full">Ajustar estoque</button>
-
+                        <button data-insumo-id="${insumoId}" id="adicionar-insumo" class="mt-2 cursor-pointer w-full p-2 bg-green-600 hover:bg-green-700 transition-all duration-300 text-white rounded-full">Ajustar estoque</button>
                     </div>
                 `;
                 
-                //Validações
+                // Elementos
                 const quantidadeInput = document.getElementById('quantidade-popup');
                 const diferenca = document.getElementById('preco-diferenca');
                 const quantidadeSistema = Number(document.getElementById('quantidade-sistema-popup').textContent.replace(',', '.'));
                 const quantidadeSistemaFixo = document.getElementById('quantidade-sistema-fixo');
                 const quantidadeContabilizadoFixo = document.getElementById('quantidade-contabilizado-fixo');
                 const modalDiferenca = document.getElementById('modal-content-diferenca');
+                const adicionarInsumo = document.getElementById('adicionar-insumo');
+
+                adicionarInsumo.addEventListener('click', async function() {
+                    const responseAdicionar = await fetch('/balanco/adicionar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            insumo_id: insumoId,
+                            quantidade_atual: quantidadeInput.value.replace(',', '.').replace(' kg', ''),
+                        }),
+                    });
+                    console.log('insumo_id:', insumoId, 'quantidade_atual:', quantidadeInput.value);
+                    const dataAdicionar = await responseAdicionar.json();
+                    if(dataAdicionar.success) {
+                        quantidadeContainer.classList.remove('bg-gray-50');
+                        quantidadeContainer.classList.add('bg-green-600');
+                        quantidadeContainer.classList.add('text-white');
+                        quantidadeValor.textContent = quantidadeInput.value.replace(' kg', '');
+                        modalContent.innerHTML = '<div class="flex flex-col items-center gap-2"><img src="/images/icones/certo.png" class="h-8 w-8"><h2 class="text-lg text-green-700 font-semibold">Insumo adicionado à lista de balanço</h2></div>';
+                        setTimeout(() => {
+                            modalBalanco.classList.add('hidden');
+                        }, 700);
+                    }
+                });
 
                 
                 if( unidadeMedida == 'kg') {
@@ -203,9 +243,13 @@ document.addEventListener("DOMContentLoaded", async function() {
                     currencySymbolPlacement: 's', // 'p' = prefixo, 's' = sufixo
                     decimalPlaces: 3, // 3 casas decimais para kg
                     minimumValue: '0',
-                    maximumValue: quantidadeSistema + 3,
                     emptyInputBehavior: 'zero'
                 });
+                } else {
+                    // Remove ponto se for unitário
+                    quantidadeInput.addEventListener('input', function() {
+                        this.value = this.value.replace('.', '');
+                    });
                 }
 
                 quantidadeInput.focus();

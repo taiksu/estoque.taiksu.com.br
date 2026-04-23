@@ -1,16 +1,7 @@
 <header id="header" class="fixed top-0 left-0 w-full z-30 flex items-center justify-between py-5 px-8 bg-white shadow-xs">
     <div class="flex flex-row gap-3 items-center">
           <a href="https://login.taiksu.com.br"><img src="https://login.taiksu.com.br/frontend/img/menu_service.png" class="h-6"></a>
-          <% if(userGrupo == 5) { %>
           <a href="/"><img src="https://login.taiksu.com.br/frontend/img/logo.png" class="h-6"></a>
-          <% } else { %>
-            <img onclick="history.back()" src="https://login.taiksu.com.br/frontend/img/logo.png" class="h-6 cursor-pointer">
-          <% } %>
         </div>
-        <% if(userGrupo == 5) { %>
-        <button id="abrir-menu"><img src="https://vistoria.taiksu.com.br/assets/menu-icon.png" class="w-10 h-10 cursor-pointer"></button>
-        <% } else { %>
-          <img id="foto-usuario" src="<%= userFoto %>" class="w-9 h-9 rounded-full">
-        <% } %>
-
+    <button id="abrir-menu"><img src="https://vistoria.taiksu.com.br/assets/menu-icon.png" class="w-10 h-10 cursor-pointer"></button>
 </header> 

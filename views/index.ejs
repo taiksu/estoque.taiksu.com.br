@@ -26,7 +26,9 @@
 <%- include('components/cards/totalEstoque', { value: 'R$ 00.000,00' }) %>
 <%- include('partials/actionButtons') %>
 <div id="conteiner-2">
+<% if (!listaPendente) { %>
 <%- include('components/searchBox', { placeholder: 'Pesquisar insumo' }) %>
+<% } %>
 <%- include('partials/inventario') %>
 </div>
 

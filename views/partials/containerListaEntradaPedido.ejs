@@ -1,0 +1,179 @@
+<div id="container-lista" class="flex flex-col gap-3 mt-4">
+    <%- include('../components/loader', { info: 'Carregando lista de entrada' }); %>
+</div>
+
+<%- include('../components/toast', { sucess: false, texto: 'Falha ao remover item da lista', id: 'falha-toast' }); %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        // ELEMENTOS DOM
+        const containerLista = document.getElementById('container-lista');
+        const dadosLista = document.getElementById('dados-lista');
+        const finalizarEntrada = document.getElementById('finalizar-entrada');
+        const termosEntrada = document.getElementById('termos-entrada');
+        const totalEntrada = document.getElementById('total-entrada');
+        const loader = document.getElementById('loader');
+        const toastFalha = document.getElementById('falha-toast');
+        const pedido_id = '<%= pedidoId %>';
+
+        // INSUMOS API
+        const responseInsumos = await fetch('https://insumos.taiksu.com.br/insumos').then(response => response.json())
+
+        // LISTA DE ENTRADA DE PEDIDO API
+        const responseEntrada = await fetch(`/api/entrada/pedido/${pedido_id}`).then(response => response.json())
+
+        if(responseEntrada) {
+            loader.remove();
+        } 
+        if (responseEntrada.insumos_entrada.length == 0) {
+            dadosLista.remove();
+            termosEntrada.remove();
+            containerLista.innerHTML = '<div class="flex text-gray-500 flex-col items-center justify-center p-16 bg-white rounded-xl border border-gray-200"><img src="/images/icones/manual.png" class="w-14 h-14 mb-5"><h2 class="text-xl font-semibold">Lista de entrada vazia</h2><a class="text-white bg-green-600 px-5 shadow-lg hover:shadow-none py-1 rounded-full hover:bg-green-700 transition-all mt-5 duration-300" href="/entrada/manual">Criar lista manual</a></div>';
+        }
+
+
+        // Pega somente os insumos dentro das categorias - FlatMap
+        const listaInsumos = Object.values(responseInsumos).flat();
+
+        // Pega só o array de insumos dentro da lista de entrada
+        const listaEntrada = responseEntrada.insumos_entrada;
+
+        // Junta a lista de entrada com os insumos
+        const listaEntradaCompleta = listaEntrada.map(item => {
+            return {
+                ...item,
+                info: listaInsumos.find(insumo => insumo.id === item.insumo_id),
+            }
+        }).sort((a, b) => a.info.nome.localeCompare(b.info.nome))
+
+
+        ////// FUNCTIONS ////////
+
+        // FUNCTION - RENDERIZA LISTA
+        listaEntradaCompleta.forEach(item => {
+            const div = document.createElement('div');
+            
+            let quantidadeFormadata;
+            if(item.info.unidade_medida == 'uni') {
+                quantidadeFormadata = Number(item.quantidade).toFixed(0) + ' ' + item.info.unidade_medida;
+            } else {
+                quantidadeFormadata = Number(item.quantidade).toFixed(3) + ' ' + item.info.unidade_medida;
+            }
+
+            const valorTotal = Number(item.preco) * Number(item.quantidade);
+
+            div.classList.add('flex', 'flex-row', 'items-center', 'justify-between', 'border', 'border-gray-200', 'bg-white', 'rounded-xl', 'p-4', 'transition-all', 'duration-600');
+            div.id = `item-${item.id}`;
+            div.innerHTML = `
+                        <div class="flex flex-row items-center gap-2">
+                            <a href="/inventario/${item.info.id}">
+                                <img id="insumo-foto-${item.id}" src="https://insumos.taiksu.com.br${item.info.foto_url}" class="h-12 w-12 rounded-md bg-white border border-gray-50">
+                            </a>
+                            <div class="flex flex-col gap-0 mt-1">
+                                <h2 id="insumo-nome-${item.id}" class=" text-gray-700 font-semibold">${item.info.nome.length > 26 ? item.info.nome.slice(0, 24) + '...' : item.info.nome}</h2>
+                                <h2 class="text-sm text-gray-500">
+                                    <span id="quantidade-item-${item.id}">${quantidadeFormadata}</span> x 
+                                    <span class="text-green-700 font-medium" id="preco-item-${item.id}">${Number(item.preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                </h2>
+                            </div>
+                        </div>
+                        <div class="flex flex-row items-center gap-4 justify-between">
+                            <h2 id="valor-total-${item.id}" class="text-end font-semibold text-sm text-green-700">${valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h2>
+                            <button id="editar-${item.id}" class="cursor-pointer bg-gray-200 text-gray-600 px-4 py-1 rounded-full text-sm hover:bg-gray-300 transition-colors duration-300">Editar</button>
+                            <img id="delete-${item.id}" src="/images/icones/delete.png" class="w-8 h-8 cursor-pointer group bg-red-50 hover:bg-red-100 rounded-full p-1.5">
+                        </div>
+            `;
+            containerLista.appendChild(div);
+        })
+
+        // FUNNCTION - ATUALIZAR TOTAL
+        async function atualizarTotal() {
+            const somaTotais = listaEntradaCompleta.reduce((total, item) => total + Number(item.preco) * Number(item.quantidade), 0);
+            totalEntrada.textContent = somaTotais.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // FUNCTION - DELETE
+        async function deleteItem(id) {
+            console.log('Removendo item', id);
+            const item = document.getElementById(`item-${id}`);
+            const response = await fetch('/api/lista-entrada/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id
+                })
+            });
+            const data = await response.json();
+            
+            if(data.success == true) {
+                totalEntrada.textContent = data.total_lista.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                item.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => {
+                    item.remove();
+                }, 300);
+            } else {
+                toastFalha.classList.remove('hidden');
+                setTimeout(() => {
+                    toastFalha.classList.add('hidden');
+                }, 1200);
+            }
+        }
+
+
+        ///////  EVENTOS DE CLICK /////////
+
+        // EDITAR POPUP
+        document.addEventListener('click', (event) => {
+            if(event.target.id.startsWith('editar-')) {
+                const popupEditarEntrada = document.getElementById('popup-editar-entrada');
+                const insumoFoto = document.getElementById('insumo-foto-edit');
+                const insumoNome = document.getElementById('insumo-nome-edit');
+                const insumoQuantidade = document.getElementById('quantidade-edit');
+                const insumoId = document.getElementById('confirmar-edicao');
+                const totalItemEdit = document.getElementById('total-item-edit');
+                const inputePreco = document.getElementById('preco-edit');
+                const id = event.target.id.replace('editar-', '');
+                const unidadeMedidaEdit = document.getElementById('unidade-medida-edit');
+                const unidadeMedida = document.getElementById(`quantidade-item-${id}`).textContent.split(' ')[1];
+
+                insumoId.dataset.insumoId = id;
+                console.log('ID do insumo populado no botão do popup:', insumoId.dataset.insumoId);
+                unidadeMedidaEdit.textContent = unidadeMedida;
+                insumoFoto.src = document.getElementById(`insumo-foto-${id}`).src;
+                insumoQuantidade.value = Number(document.getElementById(`quantidade-item-${id}`).textContent.replace(' ', '').replace('uni', '').replace('kg', ''));
+                totalItemEdit.textContent = document.getElementById(`valor-total-${id}`).textContent;
+                inputePreco.value = Number(document.getElementById(`preco-item-${id}`).textContent.replace('R$', '').replace(',', '.'));
+                console.log('preço obtido ao abrir popup:', inputePreco.value);
+                console.log('Unidade de medida:', unidadeMedidaEdit.textContent);
+                insumoNome.textContent = document.getElementById(`insumo-nome-${id}`).textContent.length > 20 ? document.getElementById(`insumo-nome-${id}`).textContent.slice(0, 18) + '...' : document.getElementById(`insumo-nome-${id}`).textContent;
+
+                popupEditarEntrada.classList.remove('hidden');
+
+                // AutoNumeric no input de preço
+                new AutoNumeric(inputePreco, {
+                    currencySymbol: 'R$ ',
+                    decimalCharacter: ',',
+                    decimalCharacterAlternative: '.',
+                    digitGroupSeparator: '.',
+                    decimalPlaces: 2,
+                    minimumValue: 0
+                });
+            }
+        })
+
+        // DELETE
+        document.addEventListener('click', async (event) => {
+            if(event.target.id.startsWith('delete-')) {
+                const id = event.target.id.replace('delete-', '');
+                await deleteItem(id);
+            }
+        })
+        
+
+        atualizarTotal();
+    });
+</script>

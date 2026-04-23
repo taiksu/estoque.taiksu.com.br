@@ -1,5 +1,6 @@
 const { InsumoSaida, sequelize, ListaSaida } = require('../models');
 const publishEvent = require('../client/publishEvent');
+const { validaLista } = require('../functions');
 
 // Adiciona um item à lista de saída
 exports.add = async (req, res) => {
@@ -99,14 +100,7 @@ exports.index = async (req, res) => {
             attributes: ['id', 'unidade_id', 'status', 'responsavel_id']
         });
 
-        // Se não existir lista de entrada, retorna vazio
-        if (!info_lista) {
-            return res.status(200).json({
-                info_lista: null,
-                insumos_saida: [],
-                message: 'Nenhuma lista de saída encontrada'
-            });
-        }
+        validaLista(info_lista, res);
 
         // Busca os insumos da lista de entrada
         const insumos_saida = await InsumoSaida.findAll({

@@ -1,7 +1,9 @@
 const { LoteInsumo, sequelize } = require('../../models');
 const { Op } = require('sequelize');
+const { v4: uuidv4 } = require('uuid');
 
 async function atualizaInsumosEntrada(insumos_entrada, unidadeId) {
+    let itens_entrada = [];
 
     for (const insumo of insumos_entrada) {
         console.log('[atualizaInsumosEntrada] Substituindo quantidade por', insumo.quantidade_atualizada, 'no insumo', insumo.insumo_id);
@@ -42,12 +44,21 @@ async function atualizaInsumosEntrada(insumos_entrada, unidadeId) {
                 }
             });
 
+            itens_entrada.push({
+                id: uuidv4(),
+                grupo_id: insumo.grupo_id,
+                insumo_id: insumo.insumo_id,
+                quantidade: Number(diferenca), // Quantidade que foi adicionada ao lote
+                valor_total: Number(diferenca) * Number(loteAtualizado.valor_unitario),
+                valor_unitario: Number(loteAtualizado.valor_unitario),
+                unidade_id: unidadeId
+            })
 
             console.log('[LoteAtualizado Entrada]: ', loteAtualizado);
         }
-        
-    
     }
+
+    return itens_entrada;
 };
 
 module.exports = atualizaInsumosEntrada;

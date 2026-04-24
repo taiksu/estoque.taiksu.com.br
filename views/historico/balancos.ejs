@@ -1,0 +1,9 @@
+<div class="flex flex-row items-center justify-between">
+    <%- include('../components/breadcrumb', { link: '/historico', paginaAnterior: 'Histórico'}) %>
+</div>
+
+<div id="lista-balancos" class="flex flex-col gap-3 w-full mt-5">
+    <% listaBalancos.forEach(item => { %>
+        <%- include('../components/cards/balancoCard', { balanco: item }) %>
+    <% }) %>
+</div>

@@ -35,10 +35,15 @@ exports.excluir = async (req, res) => {
         publishEvent({
             eventId: 88,
             payload: {
+                lote_id: id,
+                unidade_id: req.session.unidade_id,
+                responsavel_id: responsavel_cancelamento,
+                data_movimentacao: new Date(),
+                insumo_id: lote.insumo_id,
+                quantidade: lote.quantidade,
+                valor_unitario: lote.valor_unitario,
+                valor_total: lote.valor_total,
                 motivo,
-                lote,
-                responsavel_cancelamento,
-                id
             },
             userId: req.session.id_user,
             priority: 'high'

@@ -1,0 +1,14 @@
+<a href="/historico/balancos/<%= balanco.id %>" class="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-xl transition-shadow duration-300 group cursor-pointer">
+    <div class="flex flex-row items-center justify-between">
+        <div class="flex flex-row items-center gap-2">
+            <img src="/images/icones/balanco.png" class="opacity-90 h-5 group-hover:scale-110 transition-scale duration-300" />
+            <h1 class="text-sm text-gray-600 font-semibold"><%= Number(balanco.total_anterior).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></h1>
+            •
+            <h1 class="text-sm text-green-700"><%= Number(balanco.total_atualizado).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></h1>
+        </div>
+        <div class="flex flex-row items-center gap-4">
+            <p class="text-gray-500 text-sm"><%= new Date(balanco.efetuado_em).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }).replace(',', ' às ').replace('.', '') %></p>
+            <img class="h-5 w-5" src="https://login.taiksu.com.br/frontend/img/seta.png">
+        </div>
+    </div>
+</a>

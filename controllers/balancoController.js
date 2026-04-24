@@ -228,7 +228,6 @@ exports.listaItensBalanco = async (req, res) => {
     res.status(200).json(listaAgrupada);
 }
 
-
 // Processa balanço
 exports.processar = async (req, res) => {
     const unidadeId = req.session.unidade_id;
@@ -243,7 +242,7 @@ exports.processar = async (req, res) => {
     const { insumos_entrada, insumos_saida } = await diferencasInsumos(insumos_balanco, lotesAgrupados);
 
     // Efetua movimentações de entrada e de saída
-    await atualizaInsumosEntrada(insumos_entrada, unidadeId);
+    const itens_entrada = await atualizaInsumosEntrada(insumos_entrada, unidadeId);
     const itens_saida = await atualizaInsumosSaida({itens: insumos_saida, listaId: lista.id, responsavelId, unidadeId});
 
     // Debita lotes com base na saída FIFO
@@ -260,5 +259,109 @@ exports.processar = async (req, res) => {
         status: 'processado'
     });
     
+    const lista_saida = {
+        id: lista.id,
+        status: 'concluida',
+        responsavel_id: responsavelId,
+        unidade_id: unidadeId,
+        efetuado_em: lista.efetuado_em,
+    }
+
+    await publishEvent({
+        eventId: 14,
+        payload: {
+            lista_saida,
+            itens_saida: lotesComValor,
+            itens_entrada
+        },
+        userId: responsavelId,
+        priority: 'urgent'
+    });
+    
     return res.status(200).json({ success: true });
+};
+
+// Histórico de balanços
+exports.historico = async (req, res, next) => {
+    const unidadeId = req.session.unidade_id;
+    const listaBalancos = await ListaBalanco.findAll({
+        where: {
+            unidade_id: unidadeId,
+            status: 'processado'
+        },
+        attributes: ['id', 'efetuado_em', 'total_atualizado', 'total_anterior'],
+        limit: 20,
+        order: [
+            ['efetuado_em', 'DESC']
+        ]
+    });
+    
+    res.locals.listaBalancos = listaBalancos;
+    next();
+};
+
+exports.detalhesBalanco = async (req, res, next) => {
+    const { id } = req.params;
+    const unidadeId = req.session.unidade_id;
+    const balanco = await ListaBalanco.findOne({
+        where: {
+            id: id,
+            unidade_id: unidadeId
+        },
+        include: [
+            {
+                model: InsumoBalanco,
+                attributes: ['id', 'insumo_id', 'quantidade_atualizada', 'quantidade_anterior', 'unidade_id']
+            }
+        ]
+    });
+
+    // Busca insumos
+    const response = await fetch('https://insumos.taiksu.com.br/insumos');
+    const categorias = await response.json();
+    const insumos = Object.values(categorias).flat();
+
+    const balancoComInsumos = balanco.InsumoBalancos.map(item => {
+        const insumo = insumos.find(insumo => insumo.id === item.insumo_id);
+        let diferenca = Number(item.quantidade_atualizada) - Number(item.quantidade_anterior);
+        let quantidadeAnteriorFormatada;
+        let quantidadeAtualizadaFormatada;
+        let diferencaFormatada;
+        let corDiferenca;
+
+        if (diferenca > 0) {
+            corDiferenca = 'text-green-700';
+        } else if (diferenca < 0) {
+            corDiferenca = 'text-red-700';
+        } else {
+            corDiferenca = 'text-gray-500';
+        }
+
+        if (insumo.unidade_medida === 'kg') {
+            diferencaFormatada = Math.abs(Number(diferenca)).toFixed(3) + ' kg';
+            quantidadeAnteriorFormatada = item.quantidade_anterior ? Number(item.quantidade_anterior).toFixed(3) + ' kg' : '0.000 kg';
+            quantidadeAtualizadaFormatada = Number(item.quantidade_atualizada).toFixed(3) + ' kg';
+        } else {
+            diferencaFormatada = Math.abs(Number(diferenca)).toFixed(0) + ' uni';
+            quantidadeAnteriorFormatada = Number(item.quantidade_anterior).toFixed(0) + ' uni';
+            quantidadeAtualizadaFormatada = Number(item.quantidade_atualizada).toFixed(0) + ' uni';
+        }
+        
+        return {
+            ...item,
+            id: item.insumo_id,
+            nome: insumo.nome,
+            foto: 'https://insumos.taiksu.com.br' + insumo.foto_url,
+            categoria: insumo.categoria.nome,
+            unidade_medida: insumo.unidade_medida,
+            quantidade_anterior: quantidadeAnteriorFormatada,
+            quantidade_atualizada: quantidadeAtualizadaFormatada,
+            diferenca: diferencaFormatada,
+            cor: corDiferenca
+        }
+    });
+    
+    res.locals.balanco = balanco;
+    res.locals.insumos = balancoComInsumos.sort((a, b) => a.nome.localeCompare(b.nome));
+    next();
 };

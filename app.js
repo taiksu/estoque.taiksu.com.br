@@ -98,7 +98,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: { 
-      maxAge: sessionCookieMaxAge,
+      maxAge: 24 * 60 * 60 * 1000, // 1 dia em milissegundos
       httpOnly: sessionCookieHttpOnly,
       secure: sessionCookieSecure,
       sameSite: sessionCookieSameSite

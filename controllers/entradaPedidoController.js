@@ -61,6 +61,13 @@ exports.create = async (req, res, next) => {
             });
 
             itens_pedido.forEach(item => {
+
+                // Ignora salmão caixa
+                if (item.insumo_id == 157 || item.insumo_id == 158) {
+                    console.log('Ignorando salmão caixa na criação de lista de entrada de pedido');
+                    return;
+                }
+
                 InsumosEntrada.create({
                     lista_entrada_id: lista_entrada.id,
                     insumo_id: item.insumo_id,

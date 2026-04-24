@@ -1,0 +1,67 @@
+<div class="flex flex-row items-center justify-between">
+    <%- include('../components/breadcrumb', { link: '/historico', paginaAnterior: 'Balanços'}) %>
+    <button class="botao px-4 py-0.5 rounded-full text-sm font-medium bg-white border border-gray-200 text-gray-700 cursor-pointer" id="btn-imprimir">Imprimir</button>
+</div>
+
+<div id="info-balanco" class="flex flex-col p-6 border border-gray-200 bg-white rounded-xl my-3">
+    <div class="flex flex-col">
+        <div class="space-y-2">
+            <div class="flex flex-row items-center justify-between">
+            <div>
+                <span class="font-medium text-gray-700">Data:</span>
+                <span id="info-data" class="text-sm text-gray-500"><%= new Date(balanco.efetuado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) %></span>
+            </div>
+                <div class="flex flex-row items-center gap-2">
+                    <img src="" alt="" class="rounded-full w-6 h-6 bg-gray-500">
+                    <span class="font-medium text-sm text-gray-600">Nome Responsável</span>
+                </div>
+            </div>
+
+                <div id="info-diferenca" class="mt-4 pt-4 flex flex-col gap-3 border-t border-gray-200">
+                    <div class="flex flex-row items-center justify-between">
+                        <span class="font-medium text-gray-700">Total anterior:</span>
+                        <span id="info-total-anterior" class="text-sm text-gray-500"><%= Number(balanco.total_anterior).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></span>
+                    </div>
+                    <div class="flex flex-row items-center justify-between">
+                        <span class="font-medium text-gray-700">Total atualizado:</span>
+                        <span id="info-total-atualizado" class="text-sm text-green-700 font-semibold"><%= Number(balanco.total_atualizado).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) %></span>
+                    </div>
+                </div>
+            </div>
+    </div>
+</div>
+
+<div id="itens-balanco" class="flex flex-col p-2 border border-gray-200 bg-white rounded-xl">
+<% insumos.forEach((insumo, index) => { %>
+    <a href="/inventario/<%= insumo.id %>" class="w-full grid grid-cols-8 gap-16 hover:bg-gray-50 p-4 rounded-md">
+        <div class="col-span-5 flex flex-col">
+            <div class="w-full flex flex-row items-center gap-3">
+                <img src="<%= insumo.foto %>" alt="" class="w-12 h-12 bg-gray-400 border border-gray-200 rounded-md">
+                <div class="flex flex-col">
+                    <span class="font-medium text-gray-600"><%= insumo.nome %></span>
+                    <span class="text-sm font-semibold <%= insumo.cor %>"><%= insumo.diferenca %></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-3 grid grid-cols-3 items-center">
+            <span class="text-sm text-gray-400 text-start"><%= insumo.quantidade_anterior %></span>
+            <img src="https://login.taiksu.com.br/frontend/img/seta.png" alt="" class="w-4 h-4 justify-self-center">
+            <span class="text-sm text-gray-500 text-end"><%= insumo.quantidade_atualizada %></span>
+        </div>
+    </a>
+    <% if (insumo !== insumos[insumos.length - 1]) { %>
+        <hr class="border-gray-100">
+    <% } %>
+<% })%>
+</div>
+
+<p class="text-xs text-gray-400 mt-2 text-end">ID da movimentação: <%=balanco.id%></p>
+
+<script>
+    const botaoImprimir = document.getElementById('btn-imprimir');
+    botaoImprimir.addEventListener('click', () => {
+        const id = '<%- balanco.id %>';
+        window.print();
+    });
+</script>
+    

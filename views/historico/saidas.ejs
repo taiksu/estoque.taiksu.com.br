@@ -93,6 +93,26 @@
                     transparencia = 'opacity-50';
                 }
 
+                let icone, label;
+                switch(grupo[0].origem) {
+                    case 'balanco':
+                        icone = '/images/icones/balanco.png'
+                        label = 'Balanco'
+                        break;
+                    case 'pedido':
+                        icone = '/images/icones/pacote.png'
+                        label = 'Pedido'
+                        break;
+                    case 'lista_manual':
+                        icone = '/images/icones/manual.png'
+                        label = 'Manual'
+                        break;
+                    default:
+                        icone = 'https://dre.taiksu.com.br/images/icones/ajuda.png'
+                        label = 'Indefinida'
+                        break;
+                }
+
                 item.classList.add('border', 'bg-white', 'hover:shadow-lg', 'transition-shadow', 'duration-300', 'border-gray-200', 'rounded-xl', 'flex', 'flex-col', 'gap-3');
                 item.innerHTML = `
                     <button class="${transparencia} cursor-pointer p-4" id="detalhes-movimentacao-${grupo[0].grupo_id}" data-movimentacao-id="${grupo[0].grupo_id}">
@@ -100,11 +120,11 @@
                         <div class="flex flex-row items-center gap-2">
                                 <h1 class="font-medium text-md text-gray-600">${quantidade_itens}</h1>
                                 •
-                                <h1 class="text-sm text-green-700 mt-1">${itensConfirmados.reduce((acc, movimentacao) => acc + Number(movimentacao.valor_total), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h1>
+                                <h1 class="text-sm text-red-700 mt-1">${itensConfirmados.reduce((acc, movimentacao) => acc + Number(movimentacao.valor_total), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</h1>
                         </div>
                         <div class="cursor-pointer flex flex-row items-center gap-2 rounded-full border border-green-600 bg-green-50 hover:bg-green-100 text-green-800 px-3 py-0.5 transition-color duration-300">
                             <img class="h-5 w-5" src="https://login.taiksu.com.br/applications/6967173ec2616.png">
-                            <h4>
+                            <h4 class="text-sm">
                                 Detalhes
                             </h4>
                         </div>
@@ -116,7 +136,7 @@
                                 <img data-user-id="${responsavelId}" class="h-5 w-5 rounded-full" src="">
                                 <span data-user-id="${responsavelId}" class="font-medium mt-0.5">Username</span>
                                 <span class="px-1">•</span>
-                                <h1 class="flex flex-row items-center gap-1 text-sm text-gray-500 mt-0.5">${grupo[0].origem == 'lista_manual' ? '<img class="h-5 w-5" src="/images/icones/manual.png"> Manual' : grupo[0].origem == 'pedido' ? '<img class="h-5 w-5" src="/images/icones/pedido.png"> Pedido' : 'Origem indefinida'}</h1>
+                                <h1 class="flex flex-row items-center gap-1 text-sm text-gray-500 mt-0.5"><img class="h-5 w-5" src="${icone}"> ${label}</h1>
                             </div>
                             <p class="text-gray-500">${new Date(grupo[0].data_movimentacao).toLocaleString('pt-BR', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).replace('.', '').replace(',',' às')}</p>
                         </div>

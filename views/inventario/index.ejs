@@ -65,11 +65,78 @@
     </div>
 </div>
 
-
 <%- include('../partials/lotes', { lotes: lotes }) %>
+
+<div class="w-full flex flex-col gap-1 mt-5">
+    <div class="w-full flex flex-col items-start justify-between">
+        <h1 class="text-sm text-gray-500">Movimentações</h1>
+        <div id="movimentacoes" class="overflow-y-auto max-h-[320px] flex flex-col w-full bg-white p-1 rounded-lg border border-gray-200"></div>
+    </div>
+</div>
 
 
 <a href="https://ajuda.taiksu.com.br/artigos/fc913aba-9431-499e-bb5e-3667bc5cb7cb" target="_blank" class="mt-8 w-full flex flex-row items-center gap-3">
   <img src="/images/icones/alert.png" class="w-7 h-7">
   <p class="text-xs text-gray-500">Alterações em lotes impactam apenas movimentações futuras.<br> O histórico e o CMV já registrados não são recalculados.</p>
 </a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const unidade_id = '<%= unidade_id %>';
+        const insumo_id = '<%= insumo.id %>';
+        const container = document.getElementById('movimentacoes');
+
+        const response = await fetch('https://movimentacoes.taiksu.com.br/api/insumo?unidade_id=' + unidade_id + '&insumo_id=' + insumo_id, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+
+        const movimentacoes = await response.json();
+
+        movimentacoes.forEach(movimentacao => {
+            let icone;
+            let cor;
+            let label = '';
+            let transparencia = 'opacity-100';
+            let text;
+
+            if (movimentacao.tipo == 'entrada') {
+                icone = '/images/icones/entrada.png';
+                cor = 'bg-green-100';
+                text = 'text-green-800'
+            } else if (movimentacao.tipo == 'saida') {
+                icone = '/images/icones/saida.png';
+                cor = 'bg-orange-100';
+                text = 'text-orange-800'
+            } else if (movimentacao.tipo == 'exclusao_lote') {
+                icone = 'https://estoque.taiksu.com.br/images/icones/delete.png';
+                cor = 'bg-red-200';
+                text = 'text-red-800'
+            }
+
+            if (movimentacao.status == 'cancelada') {
+                cor = 'bg-white border border-gray-200';
+                label = 'cancelada';
+                transparencia = 'opacity-60';
+
+            }
+            
+          const div = document.createElement('div');
+          div.className = `${transparencia} border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-all duration-200 text-sm px-6 py-3 grid grid-cols-4 items-center text-gray-600 justify-between`;
+          div.innerHTML = `
+            <div class="col-span-3 flex flex-row items-center gap-4">
+                <img class="w-8 h-8 p-1 rounded-full ${cor}" src="${icone}"> 
+                <div class="flex flex-col">
+                    <span class="text-md font-medium text-gray-700">Movimento ${movimentacao.tipo} ${label}</span>
+                    <span class="text-sm ${text}">${Number(movimentacao.quantidade).toLocaleString('pt-BR')} x ${Number(movimentacao.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>
+            </div>
+            <span class="text-end text-gray-400">${new Date(movimentacao.data_movimentacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', ' às ')}</span> 
+          `
+          container.appendChild(div);
+        })
+
+    })
+</script>

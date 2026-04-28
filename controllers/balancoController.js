@@ -1,6 +1,6 @@
 const { sequelize, ListaBalanco, InsumoBalanco } = require('../models');
 const publishEvent = require('../client/publishEvent');
-const { valorTotalEstoque, listaBalanco, diferencasInsumos, atualizaInsumosEntrada, atualizaInsumosSaida, saidaFIFO } = require('../functions');
+const { valorTotalEstoque, listaBalanco, diferencasInsumos, getInsumos, atualizaInsumosEntrada, atualizaInsumosSaida, saidaFIFO } = require('../functions');
 
 // Verifica se existe uma lista de balanço pendente
 exports.verificaListaPendente = async (req, res, next) => {
@@ -183,11 +183,8 @@ exports.listaItensBalanco = async (req, res) => {
     }
     
     // Busca insumos
-    const response = await fetch('https://insumos.taiksu.com.br/insumos');
-    const categorias = await response.json();
-    const insumos = Object.values(categorias).flat();
+    const insumos = await getInsumos();
     
-
     // Junta informações de insumos e lotes com lista de balanço
     listaBalancoCompleta = lista.InsumoBalancos.map(item => {
         const insumo = insumos.find(insumo => insumo.id === item.insumo_id);

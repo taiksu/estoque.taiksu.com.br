@@ -6,4 +6,12 @@
     <% listaBalancos.forEach(item => { %>
         <%- include('../components/cards/balancoCard', { balanco: item }) %>
     <% }) %>
+    <% if (listaBalancos.length === 0) { %>
+        <div class="bg-white rounded-xl border border-gray-200 p-10 flex flex-col items-center gap-3">
+            <img class="w-16 h-16" src="/images/icones/balanco.png">
+            <h1 class="text-lg font-semibold text-gray-600 text-center">
+                Nenhum balanço encontrado
+            </h1>
+        </div>
+    <% } %>
 </div>

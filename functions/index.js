@@ -8,5 +8,6 @@ module.exports = {
     lotesValidos: require('../functions/saida/lotesValidos'),
     atualizaInsumosEntrada: require('../functions/balanco/atualizaInsumosEntrada'),
     atualizaInsumosSaida: require('../functions/balanco/atualizaInsumosSaida'),
-    saidaFIFO: require('../functions/saida/saidaFIFO')
+    saidaFIFO: require('../functions/saida/saidaFIFO'),
+    getInsumos: require('../functions/getInsumos')
 }

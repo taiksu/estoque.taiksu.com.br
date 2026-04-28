@@ -2,3 +2,26 @@
 <%- include('../components/breadcrumb', { link: '/', paginaAnterior: 'Inventário'}) %>
 </div>
 
+<div class="flex flex-col gap-1 border border-gray-200 rounded-xl bg-white p-8 my-4">
+    <h1 class="text-5xl font-bold text-gray-600"><%= quantidadeItensBaixoEstoque %> itens</h1>
+    <p class="text-sm text-gray-400">Abaixo do mínimo</p>
+</div>
+
+<div class="flex flex-col gap-1">
+    <h2 class="text-gray-500 text-sm mt-2 mr-1">Lista de itens</h2>
+    <% itensBaixoEstoque.forEach(item => { %>
+        <a href="/inventario/<%= item.id %>" class="hover:shadow-xl transition-shadow duration-300 flex flex-row justify-between items-center rounded-xl bg-white p-4 border border-gray-200">
+            <div class="flex flex-row items-center gap-2">
+                <img src="<%= item.foto_url %>" class="w-12 h-12 rounded-md border border-gray-100">
+                <div class="flex flex-col">
+                    <h2 class="text-sm font-medium text-gray-600"><%= item.nome %></h2>
+                    <p class="text-xs text-gray-500"><%= item.marca %></p>
+                </div>
+            </div>
+            <div class="flex flex-row items-center gap-4">
+                <p class="text-md text-gray-500"><%= item.quantidade_minima %> <%= item.unidade_medida %></p>
+                <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="w-4 h-4">
+            </div>
+        </a>
+    <% }) %>
+</div>

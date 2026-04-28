@@ -1,8 +1,65 @@
 const { LoteInsumo, QuantidadeMinima, Sequelize } = require('../models');
 const publishEvent = require('../client/publishEvent');
-const { valorTotalEstoque } = require('../functions');
+const { valorTotalEstoque, getInsumos } = require('../functions');
 const axios = require('axios');
 const { Op } = require('sequelize');
+
+// Retorna insumos com baixa quantidade
+exports.baixoEstoque = async (req, res, next) => {
+    try {
+        const unidadeId = req.session.unidade_id;
+        const { valor_total_estoque, lotesAgrupados } = await valorTotalEstoque(unidadeId);
+        const insumosBaixoEstoque = [];
+        const insumos = await getInsumos();
+        
+        const quantidadesMinimas = await QuantidadeMinima.findAll({
+            where: {
+                unidade_id: unidadeId
+            },
+            attributes: ['insumo_id', 'quantidade', 'unidade_id']
+        });
+
+        const quantidadesMinimasMap = {};
+        quantidadesMinimas.forEach(quantidadeMinima => {
+            quantidadesMinimasMap[quantidadeMinima.insumo_id] = quantidadeMinima.quantidade;
+        });
+        
+        for (let insumo of lotesAgrupados) {
+            let quantidadeMinima = quantidadesMinimasMap[insumo.insumo_id];
+            const insumoInfo = insumos.find(i => i.id == insumo.insumo_id);
+            
+            if (quantidadeMinima == null || quantidadeMinima == 0) {
+                continue;
+            }
+
+            if (insumo.quantidade_total <= quantidadeMinima) {
+
+                let quantidadeMinimaFormatada = quantidadeMinima;
+
+                if (insumoInfo.unidade_medida == 'uni') {
+                    quantidadeMinimaFormatada = Number(quantidadeMinima).toFixed(0);
+                }
+
+                insumosBaixoEstoque.push({
+                    id: insumo.insumo_id,
+                    quantidade_total: insumo.quantidade_total,
+                    quantidade_minima: quantidadeMinimaFormatada,
+                    nome: insumoInfo.nome,
+                    unidade_medida: insumoInfo.unidade_medida,
+                    foto_url: 'https://insumos.taiksu.com.br' + insumoInfo.foto_url,
+                    marca: insumoInfo.marca.nome
+                });
+            }
+        }
+
+        res.locals.quantidadeItensBaixoEstoque = insumosBaixoEstoque.length;
+        res.locals.itensBaixoEstoque = insumosBaixoEstoque;
+        next();
+
+    } catch (err) {
+        throw new Error(err)
+    }
+};
 
 
 // Retorna lotes no inventário da loja

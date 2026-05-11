@@ -207,6 +207,7 @@
             // POPUP DETALHES (DECLAREI DEPOIS, MAS FUNCTION SOBE NO ESCOPO -  HOISTING)
             async function abrirDetalhesMovimentacao(id) {
                 const editarButton = document.getElementById('editar-data-movimentacao');
+                editarButton.href = `/processo/retroagir/${id}`;
                 lotesContainer.innerHTML = '';
                 const idGrupo = document.getElementById('id-grupo');
                 idGrupo.textContent = id;

@@ -35,6 +35,7 @@
     
     desfazer.addEventListener('click', () => {
         pinModal.classList.remove('hidden');
+        pinInput.focus();
     });
 
     desfazer.addEventListener('click', () => {
@@ -67,7 +68,7 @@
             .then(data => {
                 if (data.success) {
                     alert(data.message);
-                    window.location.href = '/historico/entradas';
+                    window.location.href = 'https://estoque.taiksu.com.br/historico/entradas';
                 }
             })
             .catch(error => console.error('Error:', error));

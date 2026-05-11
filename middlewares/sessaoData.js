@@ -15,9 +15,7 @@ async function sessaoData(req, res, next) {
     if (req.session.id_user == null) {
         res.redirect('https://login.taiksu.com.br/?redirect_uri=https%3A%2F%2Festoque.taiksu.com.br%2Fcallback');
     };
-
-    // Verifica se existe lista de balanço pendente
-    res.locals.listaPendente = await balancoController.verificaListaPendente(req, res);
+    
     next();
 };
 

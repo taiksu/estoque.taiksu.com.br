@@ -232,6 +232,9 @@ exports.processar = async (req, res) => {
     const { lotesAgrupados } = await valorTotalEstoque(unidadeId);
     const lista = await listaBalanco(unidadeId, res);
 
+    // Obtem saldo em estoque antes de executar o balanço
+    const { valor_total_estoque: saldoAnterior } = await valorTotalEstoque(unidadeId);
+
     // Recebe lista de quantidade atualizada de cada insumo
     const insumos_balanco = lista.InsumoBalancos;
 
@@ -262,14 +265,19 @@ exports.processar = async (req, res) => {
         responsavel_id: responsavelId,
         unidade_id: unidadeId,
         efetuado_em: lista.efetuado_em,
+        saldo_total_atual: Number(valor_total_estoque).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+        saldo_total_anterior: Number(saldoAnterior).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
     }
+
+    const quantidade_itens = Number(insumos_entrada.length) + Number(insumos_saida.length);
 
     await publishEvent({
         eventId: 14,
         payload: {
             lista_saida,
             itens_saida: lotesComValor,
-            itens_entrada
+            itens_entrada,
+            quantidade_itens
         },
         userId: responsavelId,
         priority: 'urgent'

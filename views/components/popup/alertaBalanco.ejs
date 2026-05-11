@@ -1,0 +1,29 @@
+<div id="toast-balanco" class="z-50 hidden bg-black/20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex items-center justify-center">
+    <div class="w-full max-w-md flex flex-col items-center gap-8 py-20 px-14 bg-white rounded-xl">
+        <img src="/images/icones/balanco.png" class="h-12 w-12">
+        <h2 class="text-md text-center text-gray-600">Ainda não foi realizado o balanço mensal,<br> para garantir a integridade do seu estoque, recomendamos realizá-lo o quanto antes.</h2>
+        <div class="w-full items-center justify-center flex flex-row items-center gap-2">
+            <button id="fechar-balanco" class="cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-600 px-6 py-2 rounded-full w-full">Fechar</button>
+            <button id="confirmar-balanco" class="cursor-pointer bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full w-full">Realizar balanço</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        abrirBalanco();
+    });
+
+    document.getElementById('fechar-balanco').addEventListener('click', function() {
+        document.getElementById('toast-balanco').classList.add('hidden');
+    });
+
+    document.getElementById('confirmar-balanco').addEventListener('click', function() {
+        document.getElementById('toast-balanco').classList.add('hidden');
+    });
+
+    function abrirBalanco() {
+        document.getElementById('toast-balanco').classList.remove('hidden');
+    }
+
+</script>

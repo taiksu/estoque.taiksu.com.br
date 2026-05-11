@@ -7,15 +7,33 @@
 <aside id="menu-lateral" class="fixed top-0 right-0 w-80 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-700 ease-in-out z-50 overflow-y-auto">
 
   <!-- Cabeçalho do Menu -->
-  <a id="link-conta" href="https://login.taiksu.com.br/perfil" class="flex flex-row gap-2 items-center px-6 h-[73px] border-b border-gray-200 bg-white text-white">
-  <img id="foto-usuario" src="<%= userFoto %>" class="w-9 h-9 rounded-full">
-  <div class="flex flex-col gap-0">
-    <h2 id="nome-usuario" class="text-md font-semibold text-green-700"><%= userNome %></h2>
-    <h3 id="nome-unidade" class="text-sm font-medium text-zinc-500"><%= userCidade %></h3>
-  </div>
-  <button id="fechar-menu" class="absolute top-5 right-5"></button>
-</a>
+  <div class="z-20 relative flex flex-row justify-between items-center px-6 h-[73px] border-b border-gray-200 bg-white text-white">
+    <a class="flex flex-row gap-2 items-center" href="https://login.taiksu.com.br/perfil">
+    <img id="foto-usuario" src="<%= userFoto %>" class="w-9 h-9 rounded-full">
+    <div class="flex flex-col gap-0">
+      <h2 id="nome-usuario" class="text-md font-semibold text-green-700"><%= userNome %></h2>
+      <h3 id="nome-unidade" class="text-sm font-medium text-zinc-500"><%= userCidade %></h3>
+    </div>
+    </a>
 
+    <% if(userGrupo == 5 || userGrupo == 2) { %>
+    <div id="altera-unidade" class="group cursor-pointer bg-green-50 hover:bg-green-100 rounded-full p-0.5 transition-color duration-300">
+      <img src="https://caixa.taiksu.com.br/images/icons/change.png" class="h-5 group-hover:rotate-180 transition-transform duration-500" />
+    </div>
+    <% } %>
+
+    <button id="fechar-menu" class="absolute top-5 right-5"></button>
+  </div>
+
+  <div id="container-troca" class="px-6 hidden translate-y-[-20%] transition-all duration-500 ease-in-out bg-white rounded-lg p-6 w-full max-w-sm flex flex-col gap-4">
+    <div class="flex flex-row items-center gap-3">
+      <img src="https://login.taiksu.com.br/applications/69039305523f9.png" class="h-8">
+      <h3 class="text-md font-semibold text-gray-600">Selecione uma unidade</h3>
+    </div>
+    <div id="lista-unidades" class="flex flex-col"></div>
+  </div>
+
+<div id="menu-itens" class="transition-all duration-500">
 <div class="divide-y divide-gray-200">
     <a href="/" class="restrito flex items-center text-gray-600 justify-between px-6 py-6 bg-white hover:bg-gray-50 hover:text-green-600 transition">
       <div class="flex items-center gap-3">
@@ -67,4 +85,82 @@
       <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="h-6" />
     </a>
 </div>
+</div>
 </aside>
+
+<% if(userGrupo == 5 || userGrupo == 2) { %>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function(){
+      const abrirTrocaUnidade = document.getElementById('altera-unidade');
+      const listaUnidades = document.getElementById('lista-unidades');
+      const containerTroca = document.getElementById('container-troca');
+      const menuItens = document.getElementById('menu-itens');
+
+      // Abrir e fechar popup
+      abrirTrocaUnidade.addEventListener('click', () => {
+
+        if(containerTroca.classList.contains('hidden')){
+          containerTroca.classList.toggle('hidden');
+          setTimeout(() => {
+            containerTroca.classList.toggle('translate-y-[-20%]');
+          }, 100);
+          menuItens.classList.add('translate-y-10');
+          setTimeout(() => {
+            menuItens.classList.add('opacity-0');
+          }, 300);
+        } else {
+          containerTroca.classList.toggle('translate-y-[-20%]');
+          setTimeout(() => {
+            containerTroca.classList.toggle('hidden');
+          }, 100);
+          menuItens.classList.remove('opacity-0');
+          setTimeout(() => {
+            menuItens.classList.remove('translate-y-10');
+          }, 300);
+        }
+
+      });
+
+      // Obtem lista de unidades
+      const unidades = await fetch('https://login.taiksu.com.br/api/infor-unidades/').then(response => response.json()).then(data => data);
+
+      // Popula unidades no menu
+      unidades.forEach(unidade => {
+        listaUnidades.innerHTML += `
+          <div data-unidade="${unidade.id}" class="unidade-card cursor-pointer group flex items-center text-gray-500 justify-between py-4 border-b border-gray-200 last:border-b-0 bg-white hover:text-green-600 transition-color">
+              <span class="font-medium">${unidade.cidade}</span>
+            <img src="https://login.taiksu.com.br/frontend/img/seta.png" class="h-5 opacity-50 group-hover:opacity-100" />
+          </div>
+        `;
+      });
+
+      // Adiciona POST em cada card de unidade
+      const unidadesCards = document.querySelectorAll('.unidade-card');
+
+      unidadesCards.forEach(unidade => {
+        unidade.addEventListener('click', async () => {
+          const unidadeId = unidade.getAttribute('data-unidade');
+
+          const responseSSO = await fetch('https://login.taiksu.com.br/api/user/switch-unidade', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer <%= userToken %>'
+            },
+            body: JSON.stringify({
+              unidade_id: unidadeId
+            })
+          })
+
+          if (responseSSO.ok) {
+            window.location.href = 'https://login.taiksu.com.br/?redirect_uri=https%3A%2F%2Festoque.taiksu.com.br%2Fcallback';
+          } else {
+            alert('Erro ao alterar unidade');
+          }
+        });
+      });
+
+
+    });
+  </script>
+<%}%>

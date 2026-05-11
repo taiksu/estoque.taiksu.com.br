@@ -1,4 +1,4 @@
-<%- include('../components/breadcrumb', { link: '/historico/entradas', paginaAnterior: 'Entradas'}) %>
+<%- include('../components/breadcrumb', { link: '/historico', paginaAnterior: 'Histórico'}) %>
 <%- include('../components/popup/pinModal') %>
 
 <div class="flex flex-col gap-4 mt-5">
@@ -52,7 +52,7 @@
             .then(data => {
                 if (data.success) {
                     alert(data.message);
-                    window.location.href = '/';
+                    window.location.href = '/historico';
                 }
             })
             .catch(error => console.error('Error:', error));

@@ -131,7 +131,8 @@ exports.entrada = async (req, res, next) => {
         
         const lista_entrada = await ListaEntrada.findOne({
             where: {
-                pedido_id
+                pedido_id,
+                origem: 'pedido'
             },
             include: [
                 {

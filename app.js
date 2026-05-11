@@ -10,6 +10,7 @@ var SequelizeStore = require('connect-session-sequelize')(session.Store);
 var { Sequelize } = require('sequelize');
 var expressLayouts = require('express-ejs-layouts');
 var sessaoData = require('./middlewares/sessaoData');
+var balancoMensal = require('./middlewares/balancoMensal');
 
 var indexRouter = require('./routes/index');
 var eventsRouter = require('./routes/events');
@@ -114,7 +115,7 @@ app.use('/callback', callbackRouter);
 app.use('/events', eventsRouter);
 app.use('/api', apiRouter);
 
-app.use(sessaoData);
+app.use(sessaoData, balancoMensal);
 app.use('/', indexRouter);
 app.use('/inventario', inventarioRouter);
 app.use('/comprar', comprarRouter);

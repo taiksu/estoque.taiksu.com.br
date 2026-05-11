@@ -1,20 +1,25 @@
 const { ListaEntrada, InsumosEntrada, LoteInsumo, sequelize } = require('../models');
 const { publishEvent, confirmaProcesso } = require('../client');
+const userData = require('../functions/userData');
 
 
 // Processa lista de entrada manual
 exports.manual = async (req, res) => {
     try {
         const { unidade_id } = req.body;
+        const userId = req.session.id_user;
         let listaEntradaAtualizada;
         let lotesEntrada;
+        const userDados = await userData(userId, req.session.token);
+        console.log('Dados do usuário: ', userDados);
 
         await sequelize.transaction(async (t) => {
             // Busca a lista de entrada
             const listaEntrada = await ListaEntrada.findOne({
                 where: {
                     unidade_id,
-                    status: 'pendente'
+                    status: 'pendente',
+                    origem: 'manual'
                 },
                 attributes: ['id', 'unidade_id', 'status', 'responsavel_id']
             }, { transaction: t });
@@ -59,7 +64,7 @@ exports.manual = async (req, res) => {
             eventId: 10,
             payload: {
                 lista_entrada: listaEntradaAtualizada,
-                lotes_entrada: lotesEntrada,
+                lotes_entrada: lotesEntrada
             },
             userId: req.session.id_user,
             priority: 'urgent'

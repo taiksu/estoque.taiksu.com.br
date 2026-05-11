@@ -95,6 +95,10 @@
 
                 let icone, label;
                 switch(grupo[0].origem) {
+                    case 'residuos':
+                        icone = 'https://login.taiksu.com.br/applications/699a309109846.png'
+                        label = 'Residuos'
+                        break;
                     case 'balanco':
                         icone = '/images/icones/balanco.png'
                         label = 'Balanco'
@@ -207,6 +211,7 @@ for (const id of userIds) {
             // POPUP DETALHES (DECLAREI DEPOIS, MAS FUNCTION SOBE NO ESCOPO -  HOISTING)
             async function abrirDetalhesMovimentacao(id) {
                 const editarButton = document.getElementById('editar-data-movimentacao');
+                editarButton.href = `/processo/retroagir/${id}`;
                 lotesContainer.innerHTML = '';
                 const idGrupo = document.getElementById('id-grupo');
                 idGrupo.textContent = id;

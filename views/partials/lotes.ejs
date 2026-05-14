@@ -38,15 +38,8 @@
 
 <% if (lotesAcabados.length > 0) { %>
 <div class="w-full flex flex-col gap-1 mt-6">
-
-    <div class="flex flex-row items-center justify-between mb-1 mt-2">
-        <button id="open-history" class="flex flex-row gap-2 items-center px-2 py-0.5 rounded-full bg-gray-600 hover:bg-gray-700 transition-all duration-300 text-white text-sm cursor-pointer">
-          <img src="https://img.icons8.com/material-outlined/24/visible--v1.png" alt="visible--v1" class="w-4 h-4 invert"/>
-          Histórico de lotes
-        </button>
-    </div>
-
-    <div id="history-lotes" class="hidden overflow-y-scroll max-h-[340px] w-full border border-gray-200 rounded-lg p-1 bg-white transition-all duration-400">
+<h1 class="text-sm text-gray-500">Lotes finalizados</h1>
+    <div id="history-lotes" class="overflow-y-scroll max-h-[340px] w-full border border-gray-200 rounded-lg p-1 bg-white transition-all duration-400">
     <% lotesAcabados.forEach(lote => { %>
                 <div class="opacity-70 bg-white px-6 border-b border-gray-200 flex flex-row justify-between items-center py-3 last:border-none">
                   <div class="flex flex-row gap-2 items-center">
@@ -81,12 +74,7 @@
         const responsavelPopup = document.getElementById('responsavel-entrada');
         const responsavelFoto = document.getElementById('responsavel-popup');
         const btnDeleteLote = document.getElementById('btn-excluir-lote');
-        const openHistory = document.getElementById('open-history');
-        const historyLotes = document.getElementById('history-lotes');
 
-        openHistory.addEventListener('click', () => {
-          historyLotes.classList.toggle('hidden');
-        });
 
         // Busca fornecedores na API
         const response = await fetch('https://insumos.taiksu.com.br/fornecedores');

@@ -123,6 +123,7 @@
 
                 // Abre o modal
                 modal.classList.remove('hidden');
+                
                 modalContent.innerHTML = `
                     <div class="flex flex-col gap-4">
 
@@ -196,6 +197,17 @@
                     option.value = fornecedor.id;
                     option.text = fornecedor.nome;
                     fornecedorSelect.appendChild(option);
+                });
+
+                // Seleciona fornecedor salvo no local storage
+                const fornecedorSalvo = localStorage.getItem('fornecedor');
+                if(fornecedorSalvo) {
+                    fornecedorSelect.value = fornecedorSalvo;
+                }
+
+                // Salva fornecedor
+                fornecedorSelect.addEventListener('change', function() {
+                    localStorage.setItem('fornecedor', this.value);
                 });
 
                 // Calcula o preço total
@@ -275,7 +287,6 @@
                         flagAdicionado.classList.remove('hidden');
                         setTimeout(() => {
                             modal.classList.add('hidden');
-                            modalContent.innerHTML = '';
                         }, 800);
                     } else {
                         alert('Falha ao adicionar item à lista de entrada, tente novamente.');

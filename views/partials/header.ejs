@@ -1,7 +1,36 @@
 <header id="header" class="fixed top-0 left-0 w-full z-30 flex items-center justify-between py-5 px-8 bg-white shadow-xs">
     <div class="flex flex-row gap-3 items-center">
-          <a href="https://login.taiksu.com.br"><img src="https://login.taiksu.com.br/frontend/img/menu_service.png" class="h-6"></a>
-          <a href="/"><img src="https://login.taiksu.com.br/frontend/img/logo.png" class="h-6"></a>
-        </div>
+        <% if (userToken) { %>
+        <div id="taiksu-sw-mount" class="flex items-center w-6 h-6"></div>
+        <% } else { %>
+        <a href="https://login.taiksu.com.br/">
+            <img src="https://login.taiksu.com.br/frontend/img/menu_service.png" class="w-6 shrink-0 brightness-30 cursor-pointer" />
+        </a>
+        <% } %>
+        <a href="/">
+            <img src="https://login.taiksu.com.br/frontend/img/logo.png" class="h-6 cursor-pointer" />
+        </a>
+    </div>
     <button id="abrir-menu"><img src="https://vistoria.taiksu.com.br/assets/menu-icon.png" class="w-10 h-10 cursor-pointer"></button>
 </header> 
+
+
+<!-- Taiksu Menu -->
+  <% if (userToken) { %>
+  <script>
+    window.SSOWidget = {
+      token: '<%= userToken %>',
+      apiUrl: 'https://login.taiksu.com.br',
+      target: '_self'
+    };
+  </script>
+  <script src="https://login.taiksu.com.br/widget/app-switcher.js"></script>
+  <script>
+    (function mountSSOBtn() {
+      var mount = document.getElementById('taiksu-sw-mount');
+      var btn   = document.getElementById('taiksu-sw-btn');
+      if (mount && btn) { mount.appendChild(btn); return; }
+      setTimeout(mountSSOBtn, 50);
+    })();
+  </script>
+  <% } %>

@@ -3,6 +3,21 @@
 <%- include('../partials/configInsumo') %>
 </div>
 
+<div id="fundo-modal" class="hidden bg-black/20 z-20 backdrop-blur-sm fixed top-0 left-0 w-full h-full flex flex-col gap-4 items-center px-8 justify-center">
+
+    <div id="modal-movimentacao" class="scale-0 transition-all duration-400 ease-in-out w-full max-w-sm bg-white rounded-xl p-8 border border-gray-200">
+        <div class="flex flex-row items-center justify-between mb-8">
+            <h2 id="titulo-movimentacao" class="text-xl font-medium">Movimentação</h2>
+            <a id="btn-fechar-movimentacao" href="" class="flex flex-row items-center gap-2 rounded-full border border-gray-200 bg-white hover:bg-gray-100 text-gray-600 px-3 py-0.5 transition-color duration-300 cursor-pointer">
+                <img class="h-5 w-5" src="/images/icones/delete.png">
+                    Excluir lote
+                </a>
+            </a>
+        </div>
+    </div>
+
+</div>
+
 
 <div class="mt-4 w-full flex flex-row justify-between items-center gap-4 border border-gray-200 rounded-xl p-6 bg-white">
     <div class="flex flex-row gap-4 items-center">
@@ -108,6 +123,18 @@
         const saidasQtd = document.getElementById('saidas');
         const valorEntradas = document.getElementById('valor-entradas');
         const valorSaidas = document.getElementById('valor-saidas');
+        const fundoModal = document.getElementById('fundo-modal');
+        const modal = document.getElementById('modal-movimentacao');
+
+        fundoModal.addEventListener('click', (e) => {
+            if(e.target === fundoModal){
+                modal.classList.remove('scale-100');
+                modal.classList.add('scale-0');
+                setTimeout(() => {
+                    fundoModal.classList.add('hidden');
+                }, 400);
+            }
+        });
 
         let entradasValor = 0;
         let saidasValor = 0;
@@ -159,13 +186,17 @@
             }
             
           const div = document.createElement('div');
-          div.className = `${transparencia} border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-all duration-200 text-sm px-6 py-3 grid grid-cols-4 items-center text-gray-600 justify-between`;
+          div.dataset.movimentacaoId = movimentacao.id;
+          div.className = `${transparencia} movimentacao-card border-b border-gray-200 hover:bg-gray-50 cursor-pointer transition-all duration-200 text-sm px-6 py-3 grid grid-cols-4 items-center text-gray-600 justify-between`;
           div.innerHTML = `
             <div class="col-span-3 flex flex-row items-center gap-4">
-                <img class="w-8 h-8 p-1 rounded-full ${cor}" src="${icone}"> 
+                <img id="icon-movimentacao-${movimentacao.id}" class="${cor} w-8 h-8 p-1 rounded-full" src="${icone}"> 
                 <div class="flex flex-col">
+                    <div id="movimento-tipo-${movimentacao.id}" class="hidden">${movimentacao.tipo}</div>
+                    <div id="movimento-status-${movimentacao.id}" class="hidden">${movimentacao.status}</div>
+                    <div id="movimento-grupo-${movimentacao.id}" class="hidden">${movimentacao.grupo_id}</div>
                     <span class="text-md font-medium text-gray-700">Movimento ${movimentacao.tipo} ${label}</span>
-                    <span class="text-sm ${text}">${Number(movimentacao.quantidade).toLocaleString('pt-BR')} x ${Number(movimentacao.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span id="movimento-valor-${movimentacao.id}" class="text-sm ${text}">${Number(movimentacao.quantidade).toLocaleString('pt-BR')} x ${Number(movimentacao.valor_unitario).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
             </div>
             <span class="text-end text-gray-400">${new Date(movimentacao.data_movimentacao).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', ' às ')}</span> 
@@ -177,6 +208,63 @@
         saidasQtd.textContent = saidas.length;
         valorEntradas.textContent = entradasValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         valorSaidas.textContent = saidasValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // Adiciona evento de clique para abrir o popup
+        document.querySelectorAll('.movimentacao-card').forEach(card => {
+            const iconCard = document.getElementById(`icon-movimentacao-${card.dataset.movimentacaoId}`);
+            const tipoMovimentacao = document.getElementById(`movimento-tipo-${card.dataset.movimentacaoId}`);
+            const statusMovimentacao = document.getElementById(`movimento-status-${card.dataset.movimentacaoId}`);
+            const movimentoValor = document.getElementById(`movimento-valor-${card.dataset.movimentacaoId}`);
+            const movimentoGrupo = document.getElementById(`movimento-grupo-${card.dataset.movimentacaoId}`);
+
+            card.addEventListener('click', () => {
+                // Abre o modal
+                const modal = document.getElementById('modal-movimentacao');
+                const fundoModal = document.getElementById('fundo-modal');
+                fundoModal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('scale-0');
+                    modal.classList.add('scale-100');
+                }, 100);
+
+                modal.innerHTML = '';
+                
+                modal.innerHTML = `
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-row items-center gap-2 mb-2">
+                            <img src="${iconCard.src}" class="${iconCard.classList[0]} h-12 w-12 p-2 rounded-full">
+                            <div class="flex flex-col gap-0">
+                                <h1 class="text-md font-medium">Detalhes da ${tipoMovimentacao.textContent}</h1>
+                                <span class="text-sm text-gray-600">${statusMovimentacao.textContent.charAt(0).toUpperCase() + statusMovimentacao.textContent.slice(1)}</span>
+                            </div>
+                        </div>
+                        <hr class="border border-gray-100 w-full mb-2">
+                        <div class="flex flex-row items-center gap-2">
+                            <span class="text-sm text-gray-500">Data</span>
+                            <span class="text-sm">${card.querySelector('.text-end').textContent}</span>
+                        </div>
+                        <div class="flex flex-row items-center gap-2">
+                            <span class="text-sm text-gray-500">Quantidade</span>
+                            <span class="text-sm">${card.querySelector('.text-gray-700').textContent}</span>
+                        </div>
+                        <div class="flex flex-row items-center gap-2">
+                            <span class="text-sm text-gray-500">Valor</span>
+                            <span class="text-sm">${movimentoValor.textContent}</span>
+                        </div>
+                        <div class="flex flex-col bg-gray-50/80 rounded-md p-2 gap-2">
+                            <div class="flex flex-row items-center gap-2 text-gray-500">
+                                <span class="font-semibold text-xs">ID:</span>
+                                <span class="text-xs">${card.dataset.movimentacaoId}</span>
+                            </div>
+                            <div class="flex flex-row items-center gap-2 text-gray-500">
+                                <span class="font-semibold text-xs">Grupo ID:</span>
+                                <span class="text-xs">${movimentoGrupo.textContent}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        });
         
 
     })
